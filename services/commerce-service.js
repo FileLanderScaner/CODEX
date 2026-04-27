@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { getApiUrl } from '../lib/config';
 import { normalizeProduct } from './price-service';
 import { getAuthHeaders } from './account-service';
 
@@ -28,7 +29,7 @@ export async function trackProductClick(link, source = 'result') {
   }
 
   const authHeaders = await getAuthHeaders();
-  await fetch('/api/product-click', {
+  await fetch(getApiUrl('/api/product-click'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
