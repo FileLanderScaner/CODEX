@@ -1,0 +1,26 @@
+{
+  "name": "ahorroya",
+  "version": "1.0.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "npx expo start",
+    "android": "npx expo start --android",
+    "ios": "npx expo start --ios",
+    "web": "npx expo start --web",
+    "build": "npx expo export --platform web"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~5.0.5",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "^2.104.1",
+    "expo": "~53.0.10",
+    "expo-status-bar": "~2.2.3",
+    "qrcode": "^1.5.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.3",
+    "react-native-url-polyfill": "^3.0.0",
+    "react-native-web": "^0.20.0"
+  }
+}
