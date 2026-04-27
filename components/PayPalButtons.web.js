@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
-import { config, hasPayPalConfig } from '../lib/config';
+import { config, getApiUrl, hasPayPalConfig } from '../lib/config';
 
 export default function PayPalButtons({ accessToken, onStatus }) {
   const containerRef = useRef(null);
@@ -32,7 +32,7 @@ export default function PayPalButtons({ accessToken, onStatus }) {
     window.paypal.Buttons({
       createOrder: async () => {
         onStatus('Creando orden...');
-        const response = await fetch(`${config.apiBaseUrl}/api/paypal/create-order`, {
+        const response = await fetch(getApiUrl('/api/paypal/create-order'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: accessToken ? `Bearer ${accessToken}` : '' },
           body: JSON.stringify({
@@ -49,7 +49,7 @@ export default function PayPalButtons({ accessToken, onStatus }) {
       },
       onApprove: async (data) => {
         onStatus('Confirmando pago...');
-        const response = await fetch(`${config.apiBaseUrl}/api/paypal/capture-order`, {
+        const response = await fetch(getApiUrl('/api/paypal/capture-order'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: accessToken ? `Bearer ${accessToken}` : '' },
           body: JSON.stringify({ orderId: data.orderID }),
