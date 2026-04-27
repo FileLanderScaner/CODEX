@@ -1,0 +1,30 @@
+# Expo
+.expo/
+.expo-shared/
+dist/
+
+# Node
+node_modules/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Development
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Metro
+.metro-health-check*
+.vercel
