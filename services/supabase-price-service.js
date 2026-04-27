@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { getApiUrl } from '../lib/config';
 import { formatProductName, normalizeProduct } from './price-service';
 import { getAuthHeaders } from './account-service';
 
@@ -42,7 +43,7 @@ export async function loadCloudPrices() {
 export async function addCloudPrice(price) {
   const product = normalizeProduct(price.product);
   const authHeaders = await getAuthHeaders();
-  const response = await fetch('/api/prices', {
+  const response = await fetch(getApiUrl('/api/prices'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
@@ -71,7 +72,7 @@ export async function addCloudShare(price, channel = 'share') {
   }
 
   const authHeaders = await getAuthHeaders();
-  await fetch('/api/shares', {
+  await fetch(getApiUrl('/api/shares'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
@@ -88,7 +89,7 @@ export async function addCloudReport(price, reason = 'Precio incorrecto') {
   }
 
   const authHeaders = await getAuthHeaders();
-  await fetch('/api/reports', {
+  await fetch(getApiUrl('/api/reports'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
