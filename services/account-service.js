@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { config } from '../lib/config';
+import { getApiUrl, getAppUrl } from '../lib/config';
 import { normalizeProduct } from './price-service';
 
 export async function getSessionUser() {
@@ -41,7 +41,7 @@ export async function signInWithProvider(provider) {
     return;
   }
 
-  const redirectTo = config.appUrl || config.apiBaseUrl || (typeof window !== 'undefined' ? window.location.origin : undefined);
+  const redirectTo = getAppUrl() || undefined;
   await supabase.auth.signInWithOAuth({
     provider,
     options: {
@@ -193,8 +193,7 @@ export async function checkPremiumStatus(user) {
   }
 
   const headers = await getAuthHeaders();
-  const baseUrl = typeof window !== 'undefined' ? '' : (config.apiBaseUrl || '');
-  const response = await fetch(`${baseUrl}/api/me`, {
+  const response = await fetch(getApiUrl('/api/me'), {
     method: 'GET',
     headers,
   }).catch(() => null);
