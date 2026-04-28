@@ -1,5 +1,7 @@
 import { getApiUrl, getAppUrl } from '../lib/config';
 
+const MONTEVIDEO_LAUNCH_STORES = new Set(['disco', 'tiendainglesa', 'devoto', 'tata']);
+
 export const normalizeProduct = (value) =>
   String(value || '')
     .trim()
@@ -7,6 +9,17 @@ export const normalizeProduct = (value) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s+/g, ' ');
+
+export const normalizeStoreKey = (value) =>
+  normalizeProduct(value).replace(/[^a-z0-9]/g, '');
+
+export function isMontevideoLaunchStore(store) {
+  return MONTEVIDEO_LAUNCH_STORES.has(normalizeStoreKey(store));
+}
+
+export function filterMontevideoLaunchPrices(prices = []) {
+  return getAllPrices(prices).filter((price) => isMontevideoLaunchStore(price.store));
+}
 
 export const formatProductName = (value) =>
   normalizeProduct(value)
@@ -16,12 +29,12 @@ export const formatProductName = (value) =>
     .join(' ');
 
 export function mapObservation(row) {
-  const normalized = normalizeProduct(row.normalized_product || row.product_name || row.product || row.products?.name);
+  const normalized = normalizeProduct(row.normalized_product || row.normalizedProduct || row.product_name || row.product || row.products?.name);
   return {
     id: row.id,
     product: normalized,
     normalizedProduct: normalized,
-    displayName: row.product_name || row.display_name || row.products?.name || formatProductName(normalized),
+    displayName: row.product_name || row.display_name || row.displayName || row.products?.name || formatProductName(normalized),
     brand: row.products?.brands?.name || row.raw_payload?.brand || row.brand || '',
     category: row.products?.categories?.name || row.category || 'Supermercado',
     unit: row.unit || 'unidad',
@@ -40,7 +53,7 @@ export function mapObservation(row) {
 
 export async function fetchOfficialPrices(params = {}) {
   const query = new URLSearchParams();
-  Object.entries({ country: 'UY', region: 'Montevideo', limit: 100, ...params }).forEach(([key, value]) => {
+  Object.entries({ country: 'UY', limit: 100, ...params }).forEach(([key, value]) => {
     if (value !== undefined && value !== null && String(value).trim() !== '') query.set(key, String(value));
   });
 
@@ -73,7 +86,7 @@ export function searchPrices(query, prices = [], filters = {}) {
     .filter((item) => {
       const haystack = normalizeProduct(`${item.product} ${item.displayName} ${item.store} ${item.neighborhood} ${item.brand}`);
       const matchesQuery = haystack.includes(normalizedQuery);
-      const matchesNeighborhood = !filters.neighborhood || filters.neighborhood === 'Todos' || item.neighborhood === filters.neighborhood;
+      const matchesNeighborhood = !filters.neighborhood || filters.neighborhood === 'Todos' || normalizeProduct(item.neighborhood) === normalizeProduct(filters.neighborhood);
       return matchesQuery && matchesNeighborhood;
     })
     .sort((a, b) => Number(a.price) - Number(b.price));
@@ -104,15 +117,14 @@ export function getSavingsText(prices) {
 export function buildShareText(prices) {
   const sorted = getAllPrices(prices).sort((a, b) => Number(a.price) - Number(b.price));
   const cheapest = sorted[0];
-  const mostExpensive = sorted[sorted.length - 1];
   if (!cheapest) return `Estoy buscando ahorros reales con AhorroYA: ${getAppUrl()}`;
 
   const difference = getSavingsOpportunity(sorted);
   const product = cheapest.displayName || formatProductName(cheapest.product);
-  const comparison = mostExpensive && mostExpensive.id !== cheapest.id ? ` vs ${mostExpensive.store}` : '';
   const baseUrl = String(getAppUrl() || '').replace(/\/+$/, '');
   const productUrl = `${baseUrl}/app/buscar?q=${encodeURIComponent(cheapest.product)}`;
-  return `Estoy ahorrando $${difference} en ${product} en ${cheapest.store}${comparison} usando AhorroYA: ${productUrl}`;
+  const store = cheapest.store || 'Montevideo';
+  return `Estoy ahorrando $${difference} en ${product} en ${store} usando AhorroYA 👉 ${productUrl}`;
 }
 
 export function getPriceStats(prices) {
@@ -153,4 +165,41 @@ export function getPopularDeals(prices = []) {
     .filter((deal) => deal.cheapest && deal.expensive && deal.observations >= 2 && deal.savings > 0)
     .sort((a, b) => b.savings - a.savings)
     .slice(0, 8);
+}
+
+export function buildWhatsAppUrl(prices) {
+  return `https://wa.me/?text=${encodeURIComponent(buildShareText(prices))}`;
+}
+
+export function buildMontevideoGrowthContent(prices = []) {
+  const deals = getPopularDeals(filterMontevideoLaunchPrices(prices)).slice(0, 5);
+  return deals.map((deal, index) => {
+    const product = deal.cheapest?.displayName || formatProductName(deal.product);
+    const cheapestStore = deal.cheapest?.store || 'Montevideo';
+    const expensiveStore = deal.expensive?.store || 'otro supermercado';
+    const savings = Number(deal.savings || 0);
+    const shareText = buildShareText([deal.cheapest, deal.expensive].filter(Boolean));
+    const hooks = [
+      `Donde esta mas barato hoy en Montevideo: ${product}`,
+      `No compres ${product} sin comparar ${cheapestStore} vs ${expensiveStore}`,
+      `Ahorra $${savings} en 10 segundos con ${product}`,
+      `Montevideo: este producto cambia $${savings} entre supermercados`,
+      `El precio mas bajo que encontramos hoy: ${product} en ${cheapestStore}`,
+    ];
+    return {
+      id: `montevideo-content-${deal.product}-${index}`,
+      product,
+      hook: hooks[index % hooks.length],
+      whatsappText: shareText,
+      tiktokScript: [
+        `Plano 1 (0-3s): mostra ${product} y texto: "${hooks[index % hooks.length]}".`,
+        `Plano 2 (3-12s): compara ${cheapestStore} a $${Number(deal.cheapest?.price || 0)} contra ${expensiveStore} a $${Number(deal.expensive?.price || 0)}.`,
+        `Plano 3 (12-20s): remata con "Estoy ahorrando $${savings} en Montevideo usando AhorroYA".`,
+        'Cierre (20-25s): abrir la app y buscar el producto.',
+      ].join(' '),
+      savings,
+      cheapestStore,
+      expensiveStore,
+    };
+  });
 }

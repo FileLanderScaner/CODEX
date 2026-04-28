@@ -26,7 +26,13 @@ import {
   upsertProfile,
 } from '../services/account-service';
 import { loadProductLinks } from '../services/commerce-service';
-import { getPopularDeals, normalizeProduct, searchPrices } from '../services/price-service';
+import {
+  buildShareText,
+  filterMontevideoLaunchPrices,
+  getPopularDeals,
+  normalizeProduct,
+  searchPrices,
+} from '../services/price-service';
 import { addCloudPrice, addCloudReport, addCloudShare, loadCloudPrices } from '../services/supabase-price-service';
 import { trackEvent } from '../services/tracking-service';
 import {
@@ -85,10 +91,11 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     ]).then(([storedFavorites, storedHistory, storedPoints, storedAlerts, storedCloudPrices]) => {
       setFavorites(storedFavorites);
       setHistory(storedHistory);
-      setCloudPrices(storedCloudPrices);
+      const launchPrices = filterMontevideoLaunchPrices(storedCloudPrices);
+      setCloudPrices(launchPrices);
       setPoints(storedPoints);
       setAlerts(storedAlerts);
-      setCloudStatus(`Supabase activo: ${storedCloudPrices.length} observaciones reales`);
+      setCloudStatus(`Supabase activo: ${launchPrices.length} precios reales en Disco, Tienda Inglesa, Devoto y Ta-Ta`);
       setPricesLoading(false);
     }).catch((error) => {
       setCloudStatus(error.message || 'No pudimos cargar precios reales');
@@ -169,10 +176,20 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
   const allCommunityPrices = useMemo(() => [...cloudPrices], [cloudPrices]);
   const deals = useMemo(() => getPopularDeals(allCommunityPrices), [allCommunityPrices]);
+  const socialProof = useMemo(() => ({
+    prices: allCommunityPrices.length,
+    savings: deals.length,
+    stores: new Set(allCommunityPrices.map((item) => item.store)).size,
+  }), [allCommunityPrices, deals]);
   const popularProducts = useMemo(
     () => deals.map((deal) => deal.product).concat(allCommunityPrices.map((price) => price.product)).filter(Boolean).filter((product, index, list) => list.indexOf(product) === index).slice(0, 8),
     [allCommunityPrices, deals],
   );
+
+  useEffect(() => {
+    if (!searchedQuery || !allCommunityPrices.length) return;
+    setResults(searchPrices(searchedQuery, allCommunityPrices, { neighborhood: selectedNeighborhood }));
+  }, [allCommunityPrices, searchedQuery, selectedNeighborhood]);
 
   const runSearch = async (value = query, neighborhood = selectedNeighborhood) => {
     const nextQuery = normalizeProduct(value);
@@ -232,6 +249,15 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     }, context.savings || null).catch(() => null);
     setPoints(nextPoints);
     setFeedback('+1 punto por compartir. Gracias por sumar a la comunidad.');
+  };
+
+  const shareDealOnWhatsApp = async (deal) => {
+    if (!deal?.cheapest) return;
+    const comparison = [deal.cheapest, deal.expensive].filter(Boolean);
+    const message = buildShareText(comparison);
+    const url = message.match(/https?:\/\/\S+/)?.[0] || '';
+    await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(message)}`);
+    await handleSharePoints(deal.cheapest, 'whatsapp', { savings: deal.savings, url });
   };
 
   const handleReportPrice = async (price) => {
@@ -369,7 +395,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
   const renderHome = () => {
     const topDeal = deals[0] || null;
-    const stores = Array.from(new Set(allCommunityPrices.map((item) => item.store))).slice(0, 2);
+    const stores = Array.from(new Set(allCommunityPrices.map((item) => item.store))).slice(0, 4);
     const featured = deals.slice(0, 3);
 
     return (
@@ -382,7 +408,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
         <View style={styles.hero}>
           <Text selectable style={styles.brand}>AhorroYA</Text>
-          <Text selectable style={styles.heroSubtitle}>Encontra el precio mas barato cerca tuyo en segundos.</Text>
+          <Text selectable style={styles.heroSubtitle}>Montevideo: compara Disco, Tienda Inglesa, Devoto y Ta-Ta en menos de 30 segundos.</Text>
         </View>
 
         <SearchBar
@@ -392,8 +418,23 @@ export default function PriceSearchScreen({ nav, activeTab }) {
           onPressBarcode={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : Alert.alert('Escanear', 'Proximo paso: escaneo por codigo de barras.')}
         />
 
+        <SurfaceCard style={styles.localProofCard}>
+          <View style={styles.proofMetric}>
+            <Text selectable style={styles.proofValue}>{socialProof.prices}</Text>
+            <Text selectable style={styles.proofLabel}>precios reales</Text>
+          </View>
+          <View style={styles.proofMetric}>
+            <Text selectable style={styles.proofValue}>{socialProof.savings}</Text>
+            <Text selectable style={styles.proofLabel}>ahorros detectados</Text>
+          </View>
+          <View style={styles.proofMetric}>
+            <Text selectable style={styles.proofValue}>{socialProof.stores}</Text>
+            <Text selectable style={styles.proofLabel}>supermercados</Text>
+          </View>
+        </SurfaceCard>
+
         <View style={{ gap: 10 }}>
-          <Text selectable style={styles.sectionTitle}>Busqueda rapida</Text>
+          <Text selectable style={styles.sectionTitle}>Busca rapido en Montevideo</Text>
           {popularProducts.length ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
               {popularProducts.map((product) => (
@@ -412,13 +453,18 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         <View style={{ gap: 10 }}>
           <Text selectable style={styles.sectionTitle}>Ahorro del dia</Text>
           {topDeal ? (
-            <OfferOfDayCard
-              title={String(topDeal.product).replace(/\b\w/g, (c) => c.toUpperCase())}
-              price={`$${Number(topDeal.cheapest?.price || 0)}`}
-              oldPrice={`$${Number(topDeal.expensive?.price || 0)}`}
-              subtitle={`Ahorro real $${topDeal.savings} en ${topDeal.cheapest?.store}`}
-              onPress={() => runSearch(topDeal.product)}
-            />
+            <View style={{ gap: 10 }}>
+              <OfferOfDayCard
+                title={String(topDeal.product).replace(/\b\w/g, (c) => c.toUpperCase())}
+                price={`$${Number(topDeal.cheapest?.price || 0)}`}
+                oldPrice={`$${Number(topDeal.expensive?.price || 0)}`}
+                subtitle={`Ahorro real $${topDeal.savings} en ${topDeal.cheapest?.store}`}
+                onPress={() => runSearch(topDeal.product)}
+              />
+              <Pressable accessibilityRole="button" onPress={() => shareDealOnWhatsApp(topDeal)} style={styles.whatsHomeBtn}>
+                <Text style={styles.whatsHomeBtnText}>Compartir por WhatsApp</Text>
+              </Pressable>
+            </View>
           ) : (
             <SurfaceCard>
               <Text selectable style={styles.emptyTitle}>Todavia no hay ahorro comparable.</Text>
@@ -429,12 +475,12 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
         <View style={{ gap: 10 }}>
           <View style={styles.rowBetween}>
-            <Text selectable style={styles.sectionTitle}>Supermercados cercanos</Text>
+            <Text selectable style={styles.sectionTitle}>Supermercados foco</Text>
             <Pressable accessibilityRole="button" onPress={() => Platform.OS === 'web' ? nav?.navigate?.('/app/supermercados') : Alert.alert('Mapa', 'Proximo paso: mapa de sucursales.')}>
               <Text style={styles.link}>Ver mapa</Text>
             </Pressable>
           </View>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={styles.storeGrid}>
             {stores.length ? stores.map((store) => (
               <SupermarketMiniCard key={store} name={store} distanceLabel="Montevideo" onPress={() => runSearch(query || popularProducts[0] || '')} />
             )) : (
@@ -466,6 +512,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
             )}
           </View>
         </View>
+
       </View>
     );
   };
@@ -706,7 +753,10 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         <Pressable
           accessibilityRole="button"
           onPress={async () => {
-            const message = 'AhorroYA te muestra el precio mas barato en segundos. Probalala: https://project-6vgnm.vercel.app';
+            const deal = deals[0];
+            const message = deal?.cheapest
+              ? buildShareText([deal.cheapest, deal.expensive].filter(Boolean))
+              : 'Estoy buscando ahorros reales con AhorroYA 👉 https://codex-kohl-mu.vercel.app/app';
             try {
               await Share.share({ message });
             } catch (_e) {
@@ -851,7 +901,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
             <Text selectable style={styles.pageTitle}>Configuracion</Text>
             <Text selectable style={styles.pageSubtitle}>Elegimos barrio para ordenar resultados.</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-              {['Todos', 'Centro', 'Cordón', 'Pocitos', 'Carrasco'].map((name) => (
+              {['Todos', 'Centro', 'Cordon', 'Pocitos', 'Carrasco'].map((name) => (
                 <Chip key={name} label={name} active={selectedNeighborhood === name} onPress={() => handleNeighborhood(name)} />
               ))}
             </View>
@@ -933,6 +983,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
+  },
+  localProofCard: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingVertical: 12,
+  },
+  proofMetric: {
+    flex: 1,
+    gap: 4,
+  },
+  proofValue: {
+    color: ui.colors.text,
+    fontSize: 22,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+  },
+  proofLabel: {
+    color: '#667085',
+    fontSize: 11,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  whatsHomeBtn: {
+    minHeight: 48,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.primaryInk,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+  },
+  whatsHomeBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  storeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
   link: {

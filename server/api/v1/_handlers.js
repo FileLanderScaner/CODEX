@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { readEnv } from '../../../lib/env.js';
 import { createPayPalSubscription } from '../paypal/_utils.js';
 import {
   buildPageMeta,
@@ -108,6 +109,14 @@ function normalizeLegacyText(value) {
 
 function legacySlug(value) {
   return normalizeLegacyText(value || 'general').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'general';
+}
+
+function normalizeStoreKey(value) {
+  return normalizeLegacyText(value).replace(/[^a-z0-9]/g, '');
+}
+
+function isMontevideoLaunchStore(value) {
+  return new Set(['disco', 'tiendainglesa', 'devoto', 'tata']).has(normalizeStoreKey(value));
 }
 
 function legacyCountryAllowed(query) {
@@ -241,6 +250,88 @@ async function legacyCategoriesList(query) {
     });
   }
   return paginateDerived([...seen.values()], query);
+}
+
+function growthRow(row) {
+  return {
+    id: row.id,
+    product: row.normalized_product || normalizeLegacyText(row.product_name || row.product || row.products?.name),
+    productName: row.product_name || row.display_name || row.products?.name || row.product,
+    store: row.store_name || row.stores?.name || row.store,
+    region: row.region_name || row.regions?.name || row.neighborhood || 'Montevideo',
+    price: Number(row.price),
+    currency: row.currency || 'UYU',
+    observedAt: row.observed_at || row.created_at,
+  };
+}
+
+async function readMontevideoLaunchPrices() {
+  const query = { country: 'UY', limit: 100, offset: 0 };
+  let rows;
+  try {
+    ({ data: rows } = await supabaseRestWithMeta(buildPricesPath(query)));
+  } catch (error) {
+    if (!isMissingRelationError(error)) throw error;
+    ({ data: rows } = await legacyPricesList(query));
+  }
+  return rows.map(growthRow).filter((row) => row.id && row.product && row.store && Number.isFinite(row.price) && isMontevideoLaunchStore(row.store));
+}
+
+function buildGrowthDeals(rows) {
+  const grouped = rows.reduce((acc, row) => {
+    if (!acc[row.product]) acc[row.product] = [];
+    acc[row.product].push(row);
+    return acc;
+  }, {});
+
+  return Object.values(grouped)
+    .map((productRows) => {
+      const sorted = [...productRows].sort((a, b) => Number(a.price) - Number(b.price));
+      const cheapest = sorted[0];
+      const expensive = sorted[sorted.length - 1];
+      return {
+        product: cheapest?.productName || cheapest?.product,
+        cheapest,
+        expensive,
+        savings: cheapest && expensive && cheapest.id !== expensive.id ? Math.max(0, Math.round(Number(expensive.price) - Number(cheapest.price))) : 0,
+        observations: sorted.length,
+      };
+    })
+    .filter((deal) => deal.observations >= 2 && deal.savings > 0)
+    .sort((a, b) => b.savings - a.savings)
+    .slice(0, 5);
+}
+
+function shareTextForGrowth(deal) {
+  const baseUrl = (readEnv().APP_URL || 'https://codex-kohl-mu.vercel.app').replace(/\/+$/, '');
+  const productUrl = `${baseUrl}/app/buscar?q=${encodeURIComponent(deal.cheapest.product)}`;
+  return `Estoy ahorrando $${deal.savings} en ${deal.product} en ${deal.cheapest.store} usando AhorroYA 👉 ${productUrl}`;
+}
+
+function scriptForDeal(deal, index) {
+  const hooks = [
+    `Donde esta mas barato hoy en Montevideo: ${deal.product}`,
+    `No compres ${deal.product} en ${deal.expensive.store} sin mirar ${deal.cheapest.store}`,
+    `Ahorra $${deal.savings} en 10 segundos con ${deal.product}`,
+    `Montevideo: ${deal.product} cambia $${deal.savings} segun el super`,
+    `El precio mas bajo de hoy: ${deal.product} en ${deal.cheapest.store}`,
+  ];
+  const hook = hooks[index % hooks.length];
+  return {
+    hook,
+    whatsapp_text: shareTextForGrowth(deal),
+    tiktok_script: `0-3s: ${hook}. 3-12s: mostrar ${deal.cheapest.store} a $${deal.cheapest.price} y ${deal.expensive.store} a $${deal.expensive.price}. 12-20s: decir "Estoy ahorrando $${deal.savings} usando AhorroYA". 20-25s: cerrar con buscar ${deal.cheapest.product} en la app.`,
+    product: deal.product,
+    cheapest_store: deal.cheapest.store,
+    expensive_store: deal.expensive.store,
+    savings: deal.savings,
+  };
+}
+
+async function countEventsToday(eventName) {
+  const today = new Date().toISOString().slice(0, 10);
+  const path = `monetization_events?select=id&event_name=eq.${encodeFilterValue(eventName)}&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&limit=1`;
+  return supabaseRestWithMeta(path).then(({ total }) => total || 0).catch(() => 0);
 }
 
 function buildProductsPath(query) {
@@ -401,6 +492,31 @@ export function categoriesList(req, res) {
       ({ data, total } = await legacyCategoriesList(query));
     }
     json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
+  });
+}
+
+export function montevideoGrowthContent(req, res) {
+  return runEndpoint(req, res, ['GET'], 'growth-content', async (_req, _res, reqId) => {
+    const rows = await readMontevideoLaunchPrices();
+    const deals = buildGrowthDeals(rows);
+    const [searchesToday, sharesToday, whatsappClicksToday] = await Promise.all([
+      countEventsToday('search_product'),
+      countEventsToday('share'),
+      countEventsToday('click_whatsapp'),
+    ]);
+    json(res, 200, {
+      city: 'Montevideo',
+      supermarkets: ['Disco', 'Tienda Inglesa', 'Devoto', 'Ta-Ta'],
+      generated_at: new Date().toISOString(),
+      social_proof: {
+        prices_active: rows.length,
+        savings_detected: deals.length,
+        searches_today: searchesToday,
+        shares_today: sharesToday,
+        whatsapp_clicks_today: whatsappClicksToday,
+      },
+      data: deals.map(scriptForDeal),
+    }, reqId);
   });
 }
 

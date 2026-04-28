@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { buildShareText, fetchOfficialPrices, getPopularDeals, searchPrices } from '../../services/price-service.js';
+import { buildMontevideoGrowthContent, buildShareText, fetchOfficialPrices, filterMontevideoLaunchPrices, getPopularDeals, searchPrices } from '../../services/price-service.js';
 
 describe('price service real data mapping', () => {
   afterEach(() => {
@@ -43,6 +43,24 @@ describe('price service real data mapping', () => {
 
     expect(searchPrices('aceite', prices)).toHaveLength(2);
     expect(getPopularDeals(prices)[0].savings).toBe(20);
-    expect(buildShareText(prices)).toContain('Estoy ahorrando $20 en Aceite');
+    expect(buildShareText(prices)).toBe('Estoy ahorrando $20 en Aceite en Tienda Inglesa usando AhorroYA 👉 /app/buscar?q=aceite');
+  });
+
+  it('generates Montevideo launch content only from target supermarkets', () => {
+    const prices = [
+      { id: '1', product: 'leche', displayName: 'Leche entera 1L', store: 'Disco', neighborhood: 'Centro', price: 58, status: 'approved' },
+      { id: '2', product: 'leche', displayName: 'Leche entera 1L', store: 'Devoto', neighborhood: 'Pocitos', price: 54, status: 'approved' },
+      { id: '3', product: 'leche', displayName: 'Leche entera 1L', store: 'Geant', neighborhood: 'Roosevelt', price: 49, status: 'approved' },
+    ];
+
+    expect(filterMontevideoLaunchPrices(prices).map((row) => row.store)).toEqual(['Disco', 'Devoto']);
+    const content = buildMontevideoGrowthContent(prices);
+    expect(content[0]).toMatchObject({
+      product: 'Leche entera 1L',
+      cheapestStore: 'Devoto',
+      expensiveStore: 'Disco',
+      savings: 4,
+    });
+    expect(content[0].whatsappText).toContain('usando AhorroYA 👉');
   });
 });

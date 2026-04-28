@@ -102,7 +102,7 @@ export default function ResultsScreen({
         <View style={{ gap: 10 }}>
           <Text selectable style={styles.filterLabel}>Barrio</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {['Todos', 'Centro', 'Cordón', 'Pocitos', 'Carrasco'].map((name) => (
+            {['Todos', 'Centro', 'Cordon', 'Pocitos', 'Carrasco'].map((name) => (
               <Chip
                 key={name}
                 label={name}

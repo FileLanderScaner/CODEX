@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import BottomNav from './BottomNav';
 import { ui } from '../../lib/ui';
+import LandingScreen from '../../screens/LandingScreen';
 import PriceSearchScreen from '../../screens/PriceSearchScreen';
-import { replaceWeb, useWebLocation } from '../../lib/navigation';
+import { useWebLocation } from '../../lib/navigation';
 
 const TABS = [
   { key: 'home', label: 'Inicio', icon: 'home' },
@@ -16,17 +17,6 @@ const TABS = [
 export default function AppShell() {
   const webLocation = useWebLocation();
   const [tab, setTab] = useState('home');
-
-  useEffect(() => {
-    if (Platform.OS !== 'web') {
-      return;
-    }
-
-    const path = webLocation.path || '/app';
-    if (path === '/' || path === '') {
-      replaceWeb('/app');
-    }
-  }, [webLocation.path]);
 
   useEffect(() => {
     if (Platform.OS !== 'web') {
@@ -72,6 +62,19 @@ export default function AppShell() {
     }),
     [tab, webLocation],
   );
+
+  if (Platform.OS === 'web' && (webLocation.path === '/' || webLocation.path === '')) {
+    return (
+      <View style={styles.root}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <LandingScreen onOpenApp={() => webLocation.navigate('/app')} />
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
