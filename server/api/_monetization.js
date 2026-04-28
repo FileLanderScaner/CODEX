@@ -1,4 +1,4 @@
-import { supabaseRest } from './supabase/_utils.js';
+import { normalizeProduct, supabaseRest } from './supabase/_utils.js';
 
 function isMissingColumnError(error) {
   const message = String(error?.message || '');
@@ -9,6 +9,34 @@ async function tryInsertEvent(body) {
   return supabaseRest('monetization_events', {
     method: 'POST',
     body: JSON.stringify(body),
+  });
+}
+
+async function insertSharesAnalyticsFallback({ userId, eventName, metadata }) {
+  const product = normalizeProduct(metadata.product || metadata.search_query || metadata.query || eventName);
+  const baseBody = {
+    user_id: userId,
+    product,
+    channel: eventName,
+  };
+
+  try {
+    return await supabaseRest('shares', {
+      method: 'POST',
+      body: JSON.stringify(baseBody),
+    });
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+  }
+
+  return supabaseRest('shares', {
+    method: 'POST',
+    body: JSON.stringify({
+      product,
+      channel: eventName,
+    }),
   });
 }
 
@@ -44,5 +72,9 @@ export async function insertMonetizationEvent({ userId = null, eventName, amount
     }
   }
 
-  throw lastError || new Error('Could not save monetization event');
+  try {
+    return await insertSharesAnalyticsFallback({ userId, eventName, metadata: compactMetadata });
+  } catch (fallbackError) {
+    throw fallbackError || lastError || new Error('Could not save monetization event');
+  }
 }

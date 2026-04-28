@@ -347,7 +347,15 @@ async function countEventsToday(eventName) {
   }
 
   const legacyPath = `monetization_events?select=id&event_type=eq.${encodeFilterValue(eventName)}&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&limit=1`;
-  return supabaseRestWithMeta(legacyPath).then(({ total }) => total || 0).catch(() => 0);
+  try {
+    const { total } = await supabaseRestWithMeta(legacyPath);
+    return total || 0;
+  } catch (error) {
+    if (!isMissingColumnError(error)) return 0;
+  }
+
+  const sharesPath = `shares?select=id&channel=eq.${encodeFilterValue(eventName)}&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&limit=1`;
+  return supabaseRestWithMeta(sharesPath).then(({ total }) => total || 0).catch(() => 0);
 }
 
 async function readGrowthEventsToday() {
@@ -386,6 +394,18 @@ async function readGrowthEventsToday() {
 
   const legacyMinimalPath = `monetization_events?select=event_type,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
   return supabaseRest(legacyMinimalPath).then((rows) => rows.map(normalizeGrowthEvent)).catch(() => []);
+}
+
+async function readShareFallbackEventsToday() {
+  const today = new Date().toISOString().slice(0, 10);
+  const path = `shares?select=channel,product,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
+  return supabaseRest(path)
+    .then((rows) => rows.map((row) => ({
+      event_name: row.channel,
+      metadata: { product: row.product, analytics_fallback: 'shares' },
+      created_at: row.created_at,
+    })))
+    .catch(() => []);
 }
 
 function eventMetadata(row) {
@@ -628,10 +648,11 @@ export function montevideoGrowthContent(req, res) {
 
 export function montevideoGrowthMetrics(req, res) {
   return runEndpoint(req, res, ['GET'], 'growth-metrics', async (_req, _res, reqId) => {
-    const [rows, events] = await Promise.all([
+    const [rows, storedEvents] = await Promise.all([
       readMontevideoLaunchPrices(),
       readGrowthEventsToday(),
     ]);
+    const events = storedEvents.length ? storedEvents : await readShareFallbackEventsToday();
     const deals = buildGrowthDeals(rows);
     const counts = events.reduce((acc, event) => {
       const key = event.event_name || 'unknown';

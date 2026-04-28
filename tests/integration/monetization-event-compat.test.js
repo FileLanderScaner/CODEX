@@ -110,4 +110,29 @@ describe('monetization event schema compatibility', () => {
       event_name: 'share_click',
     });
   });
+
+  it('persists analytics in shares when monetization_events has no compatible event column', async () => {
+    global.fetch = vi.fn((url, options) => {
+      const target = String(url);
+      const body = JSON.parse(options.body);
+      if (target.includes('/monetization_events')) {
+        return Promise.resolve(jsonResponse({ message: 'Could not find the event column of monetization_events in the schema cache' }, 400));
+      }
+      return Promise.resolve(jsonResponse([{ id: 'share-evt-1', ...body }]));
+    });
+
+    const { insertMonetizationEvent } = await import('../../server/api/_monetization.js');
+    const rows = await insertMonetizationEvent({
+      eventName: 'share_click',
+      amount: 8,
+      currency: 'UYU',
+      metadata: { product: 'leche', source: 'whatsapp' },
+    });
+
+    expect(global.fetch.mock.calls.at(-1)[0]).toContain('/shares');
+    expect(rows[0]).toMatchObject({
+      product: 'leche',
+      channel: 'share_click',
+    });
+  });
 });
