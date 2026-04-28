@@ -410,6 +410,18 @@ async function readShareFallbackEventsToday() {
     if (!isMissingColumnError(error)) return [];
   }
 
+  const normalizedPath = `shares?select=channel,normalized_product,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
+  try {
+    const rows = await supabaseRest(normalizedPath);
+    return rows.map((row) => ({
+      event_name: row.channel,
+      metadata: { product: row.normalized_product, analytics_fallback: 'shares' },
+      created_at: row.created_at,
+    }));
+  } catch (error) {
+    if (!isMissingColumnError(error)) return [];
+  }
+
   const minimalPath = `shares?select=channel,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
   return supabaseRest(minimalPath)
     .then((rows) => rows.map((row) => ({

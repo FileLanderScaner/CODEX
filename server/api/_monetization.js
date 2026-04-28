@@ -17,6 +17,8 @@ async function insertSharesAnalyticsFallback({ userId, eventName, metadata }) {
   const variants = [
     { user_id: userId, product, channel: eventName },
     { product, channel: eventName },
+    { user_id: userId, normalized_product: product, channel: eventName },
+    { normalized_product: product, channel: eventName },
     { user_id: userId, channel: eventName },
     { channel: eventName },
   ];
