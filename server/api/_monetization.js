@@ -20,58 +20,29 @@ export async function insertMonetizationEvent({ userId = null, eventName, amount
     amount: normalizedAmount,
     currency: normalizedCurrency,
   };
+  const variants = [
+    { user_id: userId, event_name: eventName, amount: normalizedAmount, currency: normalizedCurrency, metadata },
+    { user_id: userId, event_name: eventName, metadata: compactMetadata },
+    { event_name: eventName, metadata: compactMetadata },
+    { user_id: userId, event_name: eventName },
+    { event_name: eventName },
+    { user_id: userId, event_type: eventName, metadata: compactMetadata },
+    { event_type: eventName, metadata: compactMetadata },
+    { user_id: userId, event_type: eventName },
+    { event_type: eventName },
+  ];
 
-  try {
-    return await tryInsertEvent({
-      user_id: userId,
-      event_name: eventName,
-      amount: normalizedAmount,
-      currency: normalizedCurrency,
-      metadata,
-    });
-  } catch (error) {
-    if (!isMissingColumnError(error)) {
-      throw error;
+  let lastError = null;
+  for (const body of variants) {
+    try {
+      return await tryInsertEvent(body);
+    } catch (error) {
+      lastError = error;
+      if (!isMissingColumnError(error)) {
+        throw error;
+      }
     }
   }
 
-  try {
-    return await tryInsertEvent({
-      user_id: userId,
-      event_name: eventName,
-      metadata: compactMetadata,
-    });
-  } catch (error) {
-    if (!isMissingColumnError(error)) {
-      throw error;
-    }
-  }
-
-  try {
-    return await tryInsertEvent({
-      event_name: eventName,
-      metadata: compactMetadata,
-    });
-  } catch (error) {
-    if (!isMissingColumnError(error)) {
-      throw error;
-    }
-  }
-
-  try {
-    return await tryInsertEvent({
-      user_id: userId,
-      event_type: eventName,
-      metadata: compactMetadata,
-    });
-  } catch (error) {
-    if (!isMissingColumnError(error)) {
-      throw error;
-    }
-  }
-
-  return tryInsertEvent({
-    event_type: eventName,
-    metadata: compactMetadata,
-  });
+  throw lastError || new Error('Could not save monetization event');
 }

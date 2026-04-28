@@ -368,8 +368,24 @@ async function readGrowthEventsToday() {
     if (!isMissingColumnError(error)) return [];
   }
 
+  const minimalPath = `monetization_events?select=event_name,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
+  try {
+    const rows = await supabaseRest(minimalPath);
+    return rows.map(normalizeGrowthEvent);
+  } catch (error) {
+    if (!isMissingColumnError(error)) return [];
+  }
+
   const legacyPath = `monetization_events?select=event_type,metadata,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
-  return supabaseRest(legacyPath).then((rows) => rows.map(normalizeGrowthEvent)).catch(() => []);
+  try {
+    const rows = await supabaseRest(legacyPath);
+    return rows.map(normalizeGrowthEvent);
+  } catch (error) {
+    if (!isMissingColumnError(error)) return [];
+  }
+
+  const legacyMinimalPath = `monetization_events?select=event_type,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
+  return supabaseRest(legacyMinimalPath).then((rows) => rows.map(normalizeGrowthEvent)).catch(() => []);
 }
 
 function eventMetadata(row) {
