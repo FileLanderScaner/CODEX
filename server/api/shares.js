@@ -3,6 +3,7 @@ import { getUserFromAccessToken } from './supabase/_auth.js';
 import { ALLOWED_ORIGINS, normalizeProduct, supabaseRest } from './supabase/_utils.js';
 import { getBearerToken } from './_security.js';
 import { z } from 'zod';
+import { insertMonetizationEvent } from './_monetization.js';
 
 const shareSchema = z.object({
   priceId: z.string().uuid().optional().nullable(),
@@ -51,15 +52,12 @@ export default async function handler(req, res) {
       }),
     });
 
-    await supabaseRest('monetization_events', {
-      method: 'POST',
-      body: JSON.stringify({
-        user_id: user?.id || null,
-        event_name: body.channel === 'whatsapp' ? 'click_whatsapp' : 'share',
-        amount: body.savings ?? null,
-        currency: 'UYU',
-        metadata: { product, priceId: body.priceId || null, url: body.url || null },
-      }),
+    await insertMonetizationEvent({
+      userId: user?.id || null,
+      eventName: body.channel === 'whatsapp' ? 'click_whatsapp' : 'share',
+      amount: body.savings ?? null,
+      currency: 'UYU',
+      metadata: { product, priceId: body.priceId || null, url: body.url || null },
     }).catch(() => null);
 
     res.status(200).json(rows?.[0] || null);

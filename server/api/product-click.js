@@ -1,6 +1,7 @@
 import { enforceOrigin, handleOptions, rateLimit, setCors } from './_security.js';
 import { ALLOWED_ORIGINS, normalizeProduct, supabaseRest } from './supabase/_utils.js';
 import { z } from 'zod';
+import { insertMonetizationEvent } from './_monetization.js';
 
 const clickSchema = z.object({
   productLinkId: z.string().uuid().optional().nullable(),
@@ -43,18 +44,15 @@ export default async function handler(req, res) {
       }),
     });
 
-    await supabaseRest('monetization_events', {
-      method: 'POST',
-      body: JSON.stringify({
-        event_name: 'share',
-        amount: null,
-        currency: 'UYU',
-        metadata: {
-          product,
-          productLinkId: body.productLinkId || null,
-          source: body.source,
-        },
-      }),
+    await insertMonetizationEvent({
+      eventName: 'share',
+      amount: null,
+      currency: 'UYU',
+      metadata: {
+        product,
+        productLinkId: body.productLinkId || null,
+        source: body.source,
+      },
     }).catch(() => null);
 
     res.status(200).json(rows?.[0] || null);

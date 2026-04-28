@@ -339,13 +339,29 @@ function scriptForDeal(deal, index) {
 async function countEventsToday(eventName) {
   const today = new Date().toISOString().slice(0, 10);
   const path = `monetization_events?select=id&event_name=eq.${encodeFilterValue(eventName)}&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&limit=1`;
-  return supabaseRestWithMeta(path).then(({ total }) => total || 0).catch(() => 0);
+  try {
+    const { total } = await supabaseRestWithMeta(path);
+    return total || 0;
+  } catch (error) {
+    if (!isMissingColumnError(error)) return 0;
+  }
+
+  const legacyPath = `monetization_events?select=id&event_type=eq.${encodeFilterValue(eventName)}&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&limit=1`;
+  return supabaseRestWithMeta(legacyPath).then(({ total }) => total || 0).catch(() => 0);
 }
 
 async function readGrowthEventsToday() {
   const today = new Date().toISOString().slice(0, 10);
   const path = `monetization_events?select=event_name,amount,currency,metadata,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
-  return supabaseRest(path).catch(() => []);
+  try {
+    const rows = await supabaseRest(path);
+    return rows.map(normalizeGrowthEvent);
+  } catch (error) {
+    if (!isMissingColumnError(error)) return [];
+  }
+
+  const legacyPath = `monetization_events?select=event_type,metadata,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
+  return supabaseRest(legacyPath).then((rows) => rows.map(normalizeGrowthEvent)).catch(() => []);
 }
 
 function eventMetadata(row) {
@@ -358,6 +374,21 @@ function eventMetadata(row) {
     }
   }
   return row.metadata;
+}
+
+function isMissingColumnError(error) {
+  const message = String(error?.message || '');
+  return message.includes('Could not find the') || message.includes('schema cache') || message.includes('column');
+}
+
+function normalizeGrowthEvent(row) {
+  const metadata = eventMetadata(row);
+  return {
+    ...row,
+    event_name: row.event_name || row.event_type,
+    amount: row.amount ?? metadata.amount ?? null,
+    currency: row.currency || metadata.currency || 'UYU',
+  };
 }
 
 function topSearchedProducts(events) {

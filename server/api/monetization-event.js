@@ -1,8 +1,9 @@
 import { enforceOrigin, handleOptions, rateLimit, setCors } from './_security.js';
-import { ALLOWED_ORIGINS, supabaseRest } from './supabase/_utils.js';
+import { ALLOWED_ORIGINS } from './supabase/_utils.js';
 import { z } from 'zod';
 import { getBearerToken } from './_security.js';
 import { getUserFromAccessToken } from './supabase/_auth.js';
+import { insertMonetizationEvent } from './_monetization.js';
 
 const eventSchema = z.object({
   eventName: z.enum(['search_product', 'view_best_price', 'share', 'share_click', 'click_whatsapp', 'add_favorite', 'create_alert', 'premium_click', 'landing_view', 'open_app']),
@@ -38,15 +39,12 @@ export default async function handler(req, res) {
   try {
     const body = eventSchema.parse(req.body || {});
     const user = await getUserFromAccessToken(getBearerToken(req));
-    const rows = await supabaseRest('monetization_events', {
-      method: 'POST',
-      body: JSON.stringify({
-        user_id: user?.id || null,
-        event_name: body.eventName,
-        amount: body.amount ?? null,
-        currency: body.currency,
-        metadata: body.metadata,
-      }),
+    const rows = await insertMonetizationEvent({
+      userId: user?.id || null,
+      eventName: body.eventName,
+      amount: body.amount ?? null,
+      currency: body.currency,
+      metadata: body.metadata,
     });
 
     res.status(200).json(rows?.[0] || null);
