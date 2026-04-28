@@ -360,6 +360,14 @@ async function readGrowthEventsToday() {
     if (!isMissingColumnError(error)) return [];
   }
 
+  const compactPath = `monetization_events?select=event_name,metadata,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
+  try {
+    const rows = await supabaseRest(compactPath);
+    return rows.map(normalizeGrowthEvent);
+  } catch (error) {
+    if (!isMissingColumnError(error)) return [];
+  }
+
   const legacyPath = `monetization_events?select=event_type,metadata,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
   return supabaseRest(legacyPath).then((rows) => rows.map(normalizeGrowthEvent)).catch(() => []);
 }

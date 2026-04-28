@@ -26,6 +26,25 @@ export async function insertMonetizationEvent({ userId = null, eventName, amount
     }
   }
 
+  try {
+    return await supabaseRest('monetization_events', {
+      method: 'POST',
+      body: JSON.stringify({
+        user_id: userId,
+        event_name: eventName,
+        metadata: {
+          ...metadata,
+          amount: normalizedAmount,
+          currency: normalizedCurrency,
+        },
+      }),
+    });
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+  }
+
   return supabaseRest('monetization_events', {
     method: 'POST',
     body: JSON.stringify({

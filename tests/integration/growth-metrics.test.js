@@ -119,4 +119,34 @@ describe('GET /api/v1/growth/metrics', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.funnel.share_clicks).toBe(1);
   });
+
+  it('reads compact event_name monetization rows when amount columns are unavailable', async () => {
+    global.fetch = vi.fn((url) => {
+      const target = String(url);
+      if (target.includes('/price_observations?')) {
+        return Promise.resolve(jsonResponse({ message: "Could not find the table 'public.price_observations' in the schema cache" }, 404));
+      }
+      if (target.includes('/prices?')) {
+        return Promise.resolve(jsonResponse([
+          { id: '1', product: 'leche', normalized_product: 'leche', display_name: 'Leche entera 1L', store: 'Disco', neighborhood: 'Centro', price: 58, currency: 'UYU', status: 'approved', created_at: '2026-04-27T03:00:00Z' },
+          { id: '2', product: 'leche', normalized_product: 'leche', display_name: 'Leche entera 1L', store: 'Devoto', neighborhood: 'Pocitos', price: 54, currency: 'UYU', status: 'approved', created_at: '2026-04-27T03:00:00Z' },
+        ], 200, { 'content-range': '0-1/2' }));
+      }
+      if (target.includes('/monetization_events?select=event_name,amount')) {
+        return Promise.resolve(jsonResponse({ message: "Could not find the 'amount' column of 'monetization_events' in the schema cache" }, 400));
+      }
+      if (target.includes('/monetization_events?select=event_name,metadata')) {
+        return Promise.resolve(jsonResponse([
+          { event_name: 'share_click', metadata: { product: 'leche', source: 'whatsapp', amount: 8, currency: 'UYU' }, created_at: '2026-04-28T03:04:00Z' },
+        ], 200, { 'content-range': '0-0/1' }));
+      }
+      return Promise.resolve(jsonResponse([]));
+    });
+
+    const res = mockRes();
+    await growthMetrics(mockReq(), res);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.funnel.share_clicks).toBe(1);
+  });
 });
