@@ -92,6 +92,157 @@ function dateRangeFilters(query, column = 'observed_at') {
   return filters;
 }
 
+function isMissingRelationError(error) {
+  const message = String(error?.message || '');
+  return message.includes('schema cache') || message.includes('Could not find the table');
+}
+
+function normalizeLegacyText(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function legacySlug(value) {
+  return normalizeLegacyText(value || 'general').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'general';
+}
+
+function legacyCountryAllowed(query) {
+  return !query.country || query.country === 'UY';
+}
+
+function buildLegacyPricesPath(query, overrides = {}) {
+  const effective = { ...query, ...overrides };
+  const params = [
+    'select=*',
+    'status=eq.approved',
+    `limit=${effective.limit}`,
+    `offset=${effective.offset}`,
+    'order=created_at.desc',
+  ];
+
+  if (effective.q) params.push(`normalized_product=${ilikeFilter(effective.q)}`);
+  if (effective.currency) params.push(`currency=eq.${encodeFilterValue(effective.currency)}`);
+  if (effective.brand) params.push(`brand=${ilikeFilter(effective.brand)}`);
+  if (effective.category) params.push(`category=${ilikeFilter(effective.category)}`);
+  if (effective.region) params.push(`neighborhood=${ilikeFilter(effective.region)}`);
+  params.push(...dateRangeFilters(effective, 'created_at'));
+
+  return `prices?${params.join('&')}`;
+}
+
+function mapLegacyPrice(row) {
+  return {
+    id: row.id,
+    source_code: 'community_prices',
+    country_code: 'UY',
+    product_name: row.display_name || row.product,
+    normalized_product: row.normalized_product || normalizeLegacyText(row.product),
+    store_name: row.store,
+    normalized_store: normalizeLegacyText(row.store),
+    region_name: row.neighborhood || 'Montevideo',
+    price: row.price,
+    currency: row.currency || 'UYU',
+    unit: row.unit || 'unidad',
+    observed_at: row.created_at,
+    effective_at: row.updated_at || row.created_at,
+    quality_score: row.trust_score || 70,
+    moderation_status: row.status === 'approved' ? 'approved' : 'pending',
+    products: {
+      name: row.display_name || row.product,
+      brands: { name: row.brand || 'Sin marca', normalized_name: normalizeLegacyText(row.brand || 'Sin marca') },
+      categories: { name: row.category || 'General', slug: legacySlug(row.category || 'General') },
+    },
+    stores: { name: row.store },
+    regions: { name: row.neighborhood || 'Montevideo' },
+  };
+}
+
+async function legacyPricesList(query) {
+  if (!legacyCountryAllowed(query)) {
+    return { data: [], total: 0 };
+  }
+  const { data, total } = await supabaseRestWithMeta(buildLegacyPricesPath(query));
+  return { data: data.map(mapLegacyPrice), total };
+}
+
+async function legacyCatalogRows(query) {
+  if (!legacyCountryAllowed(query)) {
+    return [];
+  }
+  const { data } = await supabaseRestWithMeta(buildLegacyPricesPath(query, { limit: 1000, offset: 0 }));
+  return data;
+}
+
+function paginateDerived(rows, query) {
+  return {
+    data: rows.slice(query.offset, query.offset + query.limit),
+    total: rows.length,
+  };
+}
+
+async function legacyProductsList(query) {
+  const seen = new Map();
+  for (const row of await legacyCatalogRows(query)) {
+    const key = row.normalized_product || normalizeLegacyText(row.product);
+    if (seen.has(key)) continue;
+    seen.set(key, {
+      id: `legacy-product-${legacySlug(key)}`,
+      name: row.display_name || row.product,
+      normalized_name: key,
+      default_unit: row.unit || 'unidad',
+      moderation_status: 'approved',
+      created_at: row.created_at,
+      updated_at: row.updated_at || row.created_at,
+      brands: { name: row.brand || 'Sin marca', normalized_name: normalizeLegacyText(row.brand || 'Sin marca') },
+      categories: { name: row.category || 'General', slug: legacySlug(row.category || 'General') },
+      latest_price: {
+        price: row.price,
+        currency: row.currency || 'UYU',
+        store: row.store,
+        neighborhood: row.neighborhood || 'Montevideo',
+      },
+    });
+  }
+  return paginateDerived([...seen.values()], query);
+}
+
+async function legacyStoresList(query) {
+  const seen = new Map();
+  for (const row of await legacyCatalogRows(query)) {
+    const key = normalizeLegacyText(row.store);
+    if (seen.has(key)) continue;
+    seen.set(key, {
+      id: `legacy-store-${legacySlug(key)}`,
+      name: row.store,
+      normalized_name: key,
+      country_code: 'UY',
+      created_at: row.created_at,
+      store_locations: [{ regions: { name: row.neighborhood || 'Montevideo' } }],
+    });
+  }
+  return paginateDerived([...seen.values()], query);
+}
+
+async function legacyCategoriesList(query) {
+  const seen = new Map();
+  for (const row of await legacyCatalogRows(query)) {
+    const name = row.category || 'General';
+    const key = legacySlug(name);
+    if (seen.has(key)) continue;
+    seen.set(key, {
+      id: `legacy-category-${key}`,
+      name,
+      slug: key,
+      created_at: row.created_at,
+    });
+  }
+  return paginateDerived([...seen.values()], query);
+}
+
 function buildProductsPath(query) {
   const hasPriceFilters = Boolean(query.country || query.region || query.currency || query.date || query.from || query.to);
   const brandSelect = query.brand ? 'brands!inner(name,normalized_name)' : 'brands(name,normalized_name)';
@@ -196,7 +347,14 @@ function buildCategoriesPath(query) {
 export function productsList(req, res) {
   return runEndpoint(req, res, ['GET'], 'products', async (_req, _res, reqId) => {
     const query = validate(paginationSchema, req.query);
-    const { data, total } = await supabaseRestWithMeta(buildProductsPath(query));
+    let data;
+    let total;
+    try {
+      ({ data, total } = await supabaseRestWithMeta(buildProductsPath(query)));
+    } catch (error) {
+      if (!isMissingRelationError(error)) throw error;
+      ({ data, total } = await legacyProductsList(query));
+    }
     json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
   });
 }
@@ -204,7 +362,14 @@ export function productsList(req, res) {
 export function priceObservationsList(req, res) {
   return runEndpoint(req, res, ['GET'], 'price-observations', async (_req, _res, reqId) => {
     const query = validate(paginationSchema, req.query);
-    const { data, total } = await supabaseRestWithMeta(buildPricesPath(query));
+    let data;
+    let total;
+    try {
+      ({ data, total } = await supabaseRestWithMeta(buildPricesPath(query)));
+    } catch (error) {
+      if (!isMissingRelationError(error)) throw error;
+      ({ data, total } = await legacyPricesList(query));
+    }
     json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
   });
 }
@@ -212,7 +377,14 @@ export function priceObservationsList(req, res) {
 export function storesList(req, res) {
   return runEndpoint(req, res, ['GET'], 'stores', async (_req, _res, reqId) => {
     const query = validate(paginationSchema, req.query);
-    const { data, total } = await supabaseRestWithMeta(buildStoresPath(query));
+    let data;
+    let total;
+    try {
+      ({ data, total } = await supabaseRestWithMeta(buildStoresPath(query)));
+    } catch (error) {
+      if (!isMissingRelationError(error)) throw error;
+      ({ data, total } = await legacyStoresList(query));
+    }
     json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
   });
 }
@@ -220,7 +392,14 @@ export function storesList(req, res) {
 export function categoriesList(req, res) {
   return runEndpoint(req, res, ['GET'], 'categories', async (_req, _res, reqId) => {
     const query = validate(paginationSchema, req.query);
-    const { data, total } = await supabaseRestWithMeta(buildCategoriesPath(query));
+    let data;
+    let total;
+    try {
+      ({ data, total } = await supabaseRestWithMeta(buildCategoriesPath(query)));
+    } catch (error) {
+      if (!isMissingRelationError(error)) throw error;
+      ({ data, total } = await legacyCategoriesList(query));
+    }
     json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
   });
 }
