@@ -3,21 +3,36 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import SurfaceCard from '../components/ui/SurfaceCard';
 import { ui } from '../lib/ui';
 import { buildShareText, filterMontevideoLaunchPrices, getPopularDeals } from '../services/price-service';
+import { loadGrowthMetrics } from '../services/growth-service';
 import { loadCloudPrices } from '../services/supabase-price-service';
+import { trackEvent } from '../services/tracking-service';
 
 export default function LandingScreen({ onOpenApp }) {
   const [prices, setPrices] = useState([]);
+  const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
 
   useEffect(() => {
     let alive = true;
-    loadCloudPrices()
-      .then((rows) => {
+    const startedAt = Date.now();
+    trackEvent('landing_view', { city: 'Montevideo', source: 'landing' }).catch(() => null);
+    Promise.all([
+      loadCloudPrices(),
+      loadGrowthMetrics().catch(() => null),
+    ])
+      .then(([rows, growthMetrics]) => {
         if (!alive) return;
         const launchRows = filterMontevideoLaunchPrices(rows);
         setPrices(launchRows);
+        setMetrics(growthMetrics);
         setStatus(`${launchRows.length} precios reales activos`);
+        trackEvent('landing_view', {
+          city: 'Montevideo',
+          source: 'landing_prices_loaded',
+          prices: launchRows.length,
+          load_ms: Date.now() - startedAt,
+        }).catch(() => null);
       })
       .catch((error) => {
         if (!alive) return;
@@ -33,13 +48,22 @@ export default function LandingScreen({ onOpenApp }) {
 
   const deals = useMemo(() => getPopularDeals(prices).slice(0, 3), [prices]);
 
+  const handleOpenApp = async () => {
+    await trackEvent('open_app', {
+      city: 'Montevideo',
+      source: 'landing_cta',
+      examples_visible: deals.length,
+    }).catch(() => null);
+    onOpenApp?.();
+  };
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
         <Text selectable style={styles.brand}>AhorroYA</Text>
         <Text selectable style={styles.title}>Encontra el precio mas barato en 30 segundos</Text>
         <Text selectable style={styles.subtitle}>Montevideo, Uruguay. Disco, Tienda Inglesa, Devoto y Ta-Ta.</Text>
-        <Pressable accessibilityRole="button" onPress={onOpenApp} style={styles.cta}>
+        <Pressable accessibilityRole="button" onPress={handleOpenApp} style={styles.cta}>
           <Text style={styles.ctaText}>Abrir app</Text>
         </Pressable>
       </View>
@@ -48,6 +72,10 @@ export default function LandingScreen({ onOpenApp }) {
         <Text selectable style={styles.sectionTitle}>Ahorros detectados en Montevideo</Text>
         {loading ? <ActivityIndicator /> : null}
         <Text selectable style={styles.statusText}>{status}</Text>
+        <View style={styles.metricRow}>
+          <Text selectable style={styles.metricText}>{metrics?.funnel?.searches ?? 0} comparaciones hoy</Text>
+          <Text selectable style={styles.metricText}>{metrics?.funnel?.shares ?? 0} shares</Text>
+        </View>
       </SurfaceCard>
 
       <View style={{ gap: 12 }}>
@@ -124,6 +152,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '700',
+  },
+  metricRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  metricText: {
+    color: ui.colors.primaryInk,
+    fontSize: 13,
+    fontWeight: '900',
   },
   dealCard: {
     flexDirection: 'row',

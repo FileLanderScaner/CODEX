@@ -334,6 +334,49 @@ async function countEventsToday(eventName) {
   return supabaseRestWithMeta(path).then(({ total }) => total || 0).catch(() => 0);
 }
 
+async function readGrowthEventsToday() {
+  const today = new Date().toISOString().slice(0, 10);
+  const path = `monetization_events?select=event_name,amount,currency,metadata,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
+  return supabaseRest(path).catch(() => []);
+}
+
+function eventMetadata(row) {
+  if (!row?.metadata) return {};
+  if (typeof row.metadata === 'string') {
+    try {
+      return JSON.parse(row.metadata);
+    } catch {
+      return {};
+    }
+  }
+  return row.metadata;
+}
+
+function topSearchedProducts(events) {
+  const counts = new Map();
+  for (const event of events) {
+    if (event.event_name !== 'search_product') continue;
+    const metadata = eventMetadata(event);
+    const product = normalizeLegacyText(metadata.product || metadata.search_query || '');
+    if (!product) continue;
+    counts.set(product, (counts.get(product) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([product, searches]) => ({ product, searches }));
+}
+
+function averageTimeToFirstResult(events) {
+  const values = events
+    .filter((event) => event.event_name === 'search_product')
+    .map((event) => Number(eventMetadata(event).time_to_first_result_ms))
+    .filter((value) => Number.isFinite(value) && value >= 0);
+
+  if (!values.length) return null;
+  return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+}
+
 function buildProductsPath(query) {
   const hasPriceFilters = Boolean(query.country || query.region || query.currency || query.date || query.from || query.to);
   const brandSelect = query.brand ? 'brands!inner(name,normalized_name)' : 'brands(name,normalized_name)';
@@ -516,6 +559,47 @@ export function montevideoGrowthContent(req, res) {
         whatsapp_clicks_today: whatsappClicksToday,
       },
       data: deals.map(scriptForDeal),
+    }, reqId);
+  });
+}
+
+export function montevideoGrowthMetrics(req, res) {
+  return runEndpoint(req, res, ['GET'], 'growth-metrics', async (_req, _res, reqId) => {
+    const [rows, events] = await Promise.all([
+      readMontevideoLaunchPrices(),
+      readGrowthEventsToday(),
+    ]);
+    const deals = buildGrowthDeals(rows);
+    const counts = events.reduce((acc, event) => {
+      const key = event.event_name || 'unknown';
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+    const shareCount = (counts.share || 0) + (counts.click_whatsapp || 0);
+    const totalSavings = deals.reduce((sum, deal) => sum + Number(deal.savings || 0), 0);
+
+    json(res, 200, {
+      city: 'Montevideo',
+      window: 'today',
+      generated_at: new Date().toISOString(),
+      funnel: {
+        landing_views: counts.landing_view || 0,
+        open_app: counts.open_app || 0,
+        searches: counts.search_product || 0,
+        best_price_views: counts.view_best_price || 0,
+        shares: shareCount,
+        whatsapp_clicks: counts.click_whatsapp || 0,
+        favorites: counts.add_favorite || 0,
+        alerts: counts.create_alert || 0,
+      },
+      activation: {
+        prices_active: rows.length,
+        supermarkets_active: new Set(rows.map((row) => row.store)).size,
+        savings_detected: deals.length,
+        total_savings_available: totalSavings,
+        avg_time_to_first_result_ms: averageTimeToFirstResult(events),
+      },
+      top_products: topSearchedProducts(events),
     }, reqId);
   });
 }

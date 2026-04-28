@@ -9,6 +9,8 @@ const allowedEvents = new Set([
   'add_favorite',
   'create_alert',
   'premium_click',
+  'landing_view',
+  'open_app',
 ]);
 
 export async function trackEvent(eventName, metadata = {}, amount = null, currency = 'UYU') {

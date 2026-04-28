@@ -26,6 +26,7 @@ import {
   upsertProfile,
 } from '../services/account-service';
 import { loadProductLinks } from '../services/commerce-service';
+import { loadGrowthMetrics } from '../services/growth-service';
 import {
   buildShareText,
   filterMontevideoLaunchPrices,
@@ -58,6 +59,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const [history, setHistory] = useState([]);
   const [cloudPrices, setCloudPrices] = useState([]);
   const [cloudStatus, setCloudStatus] = useState('Cargando precios reales');
+  const [growthMetrics, setGrowthMetrics] = useState(null);
   const [pricesLoading, setPricesLoading] = useState(true);
   const [accountUser, setAccountUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
@@ -88,11 +90,13 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       loadPoints(),
       loadLocalAlerts().catch(() => []),
       loadCloudPrices().catch(() => []),
-    ]).then(([storedFavorites, storedHistory, storedPoints, storedAlerts, storedCloudPrices]) => {
+      loadGrowthMetrics().catch(() => null),
+    ]).then(([storedFavorites, storedHistory, storedPoints, storedAlerts, storedCloudPrices, storedGrowthMetrics]) => {
       setFavorites(storedFavorites);
       setHistory(storedHistory);
       const launchPrices = filterMontevideoLaunchPrices(storedCloudPrices);
       setCloudPrices(launchPrices);
+      setGrowthMetrics(storedGrowthMetrics);
       setPoints(storedPoints);
       setAlerts(storedAlerts);
       setCloudStatus(`Supabase activo: ${launchPrices.length} precios reales en Disco, Tienda Inglesa, Devoto y Ta-Ta`);
@@ -177,10 +181,10 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const allCommunityPrices = useMemo(() => [...cloudPrices], [cloudPrices]);
   const deals = useMemo(() => getPopularDeals(allCommunityPrices), [allCommunityPrices]);
   const socialProof = useMemo(() => ({
-    prices: allCommunityPrices.length,
-    savings: deals.length,
-    stores: new Set(allCommunityPrices.map((item) => item.store)).size,
-  }), [allCommunityPrices, deals]);
+    comparisons: growthMetrics?.funnel?.searches ?? 0,
+    savings: growthMetrics?.activation?.savings_detected ?? deals.length,
+    shares: growthMetrics?.funnel?.shares ?? 0,
+  }), [deals, growthMetrics]);
   const popularProducts = useMemo(
     () => deals.map((deal) => deal.product).concat(allCommunityPrices.map((price) => price.product)).filter(Boolean).filter((product, index, list) => list.indexOf(product) === index).slice(0, 8),
     [allCommunityPrices, deals],
@@ -199,17 +203,27 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
     setQuery(nextQuery);
     setSearchedQuery(nextQuery);
+    const startedAt = Date.now();
     const found = searchPrices(nextQuery, allCommunityPrices, { neighborhood });
+    const firstResultMs = Date.now() - startedAt;
     setResults(found);
     setProductLinks(await loadProductLinks(nextQuery));
     setHistory(await addSearchHistory(nextQuery));
-    await trackEvent('search_product', { product: nextQuery, results: found.length, neighborhood }).catch(() => null);
+    await trackEvent('search_product', {
+      product: nextQuery,
+      results: found.length,
+      neighborhood,
+      city: 'Montevideo',
+      time_to_first_result_ms: firstResultMs,
+    }).catch(() => null);
     if (found[0]) {
       await trackEvent('view_best_price', {
         product: found[0].product,
         price_id: found[0].id,
         price: found[0].price,
         store: found[0].store,
+        city: 'Montevideo',
+        time_to_first_result_ms: firstResultMs,
       }, found[0].price, found[0].currency).catch(() => null);
     }
 
@@ -420,16 +434,16 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
         <SurfaceCard style={styles.localProofCard}>
           <View style={styles.proofMetric}>
-            <Text selectable style={styles.proofValue}>{socialProof.prices}</Text>
-            <Text selectable style={styles.proofLabel}>precios reales</Text>
+            <Text selectable style={styles.proofValue}>{socialProof.comparisons}</Text>
+            <Text selectable style={styles.proofLabel}>compararon hoy</Text>
           </View>
           <View style={styles.proofMetric}>
             <Text selectable style={styles.proofValue}>{socialProof.savings}</Text>
             <Text selectable style={styles.proofLabel}>ahorros detectados</Text>
           </View>
           <View style={styles.proofMetric}>
-            <Text selectable style={styles.proofValue}>{socialProof.stores}</Text>
-            <Text selectable style={styles.proofLabel}>supermercados</Text>
+            <Text selectable style={styles.proofValue}>{socialProof.shares}</Text>
+            <Text selectable style={styles.proofLabel}>shares hoy</Text>
           </View>
         </SurfaceCard>
 

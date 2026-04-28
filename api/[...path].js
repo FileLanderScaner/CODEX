@@ -9,6 +9,7 @@ import billingPaypalWebhook from '../server/api/v1/billing/webhooks/paypal.js';
 import categories from '../server/api/v1/categories.js';
 import favorites from '../server/api/v1/favorites.js';
 import growthContent from '../server/api/v1/growth-content.js';
+import growthMetrics from '../server/api/v1/growth-metrics.js';
 import health from '../server/api/v1/health.js';
 import internalImport from '../server/api/v1/internal/import/[source].js';
 import legacyMe from '../server/api/me.js';
@@ -42,6 +43,7 @@ const exactRoutes = new Map([
   ['v1/categories', categories],
   ['v1/favorites', favorites],
   ['v1/growth/content', growthContent],
+  ['v1/growth/metrics', growthMetrics],
   ['v1/health', health],
   ['v1/prices', prices],
   ['v1/prices/community', pricesCommunity],
