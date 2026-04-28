@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AhorroYA - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffddb8",
+                        "on-surface-variant": "#3c4a42",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#4edea3",
+                        "surface-bright": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#173bab",
+                        "inverse-surface": "#2a313d",
+                        "secondary-fixed": "#dde1ff",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "surface": "#f9f9ff",
+                        "secondary-container": "#708cfd",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "outline-variant": "#bbcabf",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#006c49",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e2e8f8",
+                        "surface-container": "#e7eefe",
+                        "on-tertiary-container": "#523200",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-primary-fixed": "#002113",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "tertiary": "#855300",
+                        "tertiary-container": "#e29100",
+                        "on-secondary-container": "#00217a",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-primary-container": "#00422b",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-dim": "#d3daea",
+                        "primary-fixed-dim": "#4edea3",
+                        "primary-container": "#10b981",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f0f3ff",
+                        "on-surface": "#151c27",
+                        "outline": "#6c7a71",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#dce2f3",
+                        "secondary": "#3755c3",
+                        "on-secondary-fixed": "#001453",
+                        "background": "#f9f9ff",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#6ffbbe",
+                        "on-background": "#151c27",
+                        "surface-variant": "#dce2f3",
+                        "surface-tint": "#006c49"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-gap": "8px",
+                        "margin-page": "20px",
+                        "gutter-card": "16px",
+                        "padding-element": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Manrope"],
+                        "price-display": ["Manrope"],
+                        "title-sm": ["Manrope"],
+                        "label-bold": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-separation { background-color: #f0f3ff; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface antialiased overflow-hidden">
+<!-- TopAppBar Fragment -->
+<header class="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 shadow-sm fixed top-0 w-full z-50">
+<div class="flex justify-between items-center w-full px-5 py-4 max-w-screen-xl mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400" data-icon="savings">savings</span>
+<h1 class="font-manrope font-bold text-lg text-emerald-600 dark:text-emerald-500 tracking-tight">AhorroYA</h1>
+</div>
+<button class="font-manrope font-bold text-lg text-gray-500 hover:bg-gray-50 transition-colors active:scale-95 duration-150 px-3 py-1 rounded-lg">Skip</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="min-h-screen pt-20 pb-24 flex flex-col items-center justify-between px-margin-page">
+<!-- Illustration Section (Bento Inspired) -->
+<div class="w-full max-w-md flex flex-col gap-gutter-card mt-8">
+<div class="relative w-full aspect-[4/5] rounded-[32px] overflow-hidden bg-white shadow-lg border border-outline-variant/30 p-2">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent pointer-events-none"></div>
+<!-- Main Image -->
+<img alt="Scanning barcode" class="w-full h-full object-cover rounded-[24px]" data-alt="Close-up of a modern smartphone scanning a barcode on a product box in a bright grocery store setting with soft bokeh background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJN-bJ_jIsWsdh02h-ipkuF4HW8jO3ngigNaFEx_pJ4uLv775R61ZzgF3e3mjtWxjt4T-Sk8SswEl-nQb4FayEN4cY_n4qqS9CSHzPggotIz-JB2MD4TraQ0uaSAKf_PWdZsT8yr-piNUW-64M7YMBlhFyi_yPYAFwIa308qFHYHe86RjtpXGTChAmNK2b3vRjjMRYkjO2vBoRZlEYmQVAdUEEHGWhV5PETrro3jvRbv9d9uxkstAAkYYN-tgJ92XeMD9TjC0mAgk"/>
+<!-- Scanner UI Overlay (Tactile Influence) -->
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+<div class="w-64 h-48 border-2 border-primary-container rounded-2xl relative">
+<div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
+<div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
+<div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
+<div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+<!-- Scanning Laser Line -->
+<div class="absolute left-0 right-0 h-1 bg-primary-container/80 shadow-[0_0_15px_rgba(16,185,129,0.8)] top-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<!-- Floating Data Badge -->
+<div class="absolute bottom-8 left-8 right-8 bg-white/90 backdrop-blur-md p-padding-element rounded-xl shadow-xl flex items-center gap-3 border border-white/50">
+<div class="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div>
+<p class="font-label-bold text-on-surface-variant">Producto Identificado</p>
+<p class="font-body-sm text-primary font-bold">25% más barato en Coto</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Text Content -->
+<div class="w-full max-w-md text-center flex flex-col gap-stack-gap px-4">
+<h2 class="font-headline-md text-headline-md text-on-surface">Ahorrá en 30 segundos</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Buscá un producto o escaneá el código de barras y encontrá el ahorro al instante.
+            </p>
+<!-- Step Indicators -->
+<div class="flex justify-center gap-2 mt-4">
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-6 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+</div>
+</div>
+<!-- Fixed Bottom Action Area -->
+<div class="w-full max-w-md px-4 mt-8">
+<button class="w-full bg-primary-container text-on-primary font-headline-md py-4 rounded-xl shadow-md hover:brightness-105 active:scale-[0.98] transition-all duration-150">
+                Siguiente
+            </button>
+</div>
+</main>
+<!-- BottomNavBar Fragment (Hidden for Onboarding focus) -->
+<!-- Suppression Logic Applied: Linear/Transactional screen -->
+</body></html>

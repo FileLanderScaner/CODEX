@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+body {
+    -webkit-tap-highlight-color: transparent
+    }
+.map-container {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuA2MukXaRqPc4b5m-of0odkSG4W8G9aRxrl4kbkuU5hByoXvyZWdbClINi6azY5ijvxGRO7fT_baxke-PhRlakZ6_EgdKKsPgNCsR4ecuyUJ1dA8TqpuknNIPUOgrXBh0TppYIvUAq-W7TSyW_SVmgWM5PIPxq4kUBhAVibe71IbBp_3LKZPl_exZDsSsgokDg_AiXNIOqF-ENxRoUXKDLSrRhdCRTMWKgkZH2N29NDEIHiwHdvHwmEiEu7D7N8L3t4RJh8W8aJ4fs);
+    background-size: cover;
+    background-position: center
+    }</style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#002113",
+                    "surface-container": "#e7eefe",
+                    "primary": "#006c49",
+                    "on-secondary-fixed-variant": "#173bab",
+                    "primary-fixed-dim": "#4edea3",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#10b981",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#708cfd",
+                    "surface": "#f9f9ff",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed": "#001453",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "secondary": "#3755c3",
+                    "on-tertiary-container": "#523200",
+                    "on-background": "#151c27",
+                    "inverse-surface": "#2a313d",
+                    "tertiary-container": "#e29100",
+                    "surface-variant": "#dce2f3",
+                    "on-primary-container": "#00422b",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#4edea3",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f0f3ff",
+                    "surface-bright": "#f9f9ff",
+                    "on-secondary": "#ffffff",
+                    "background": "#f9f9ff",
+                    "outline-variant": "#bbcabf",
+                    "surface-tint": "#006c49",
+                    "surface-container-highest": "#dce2f3",
+                    "primary-fixed": "#6ffbbe",
+                    "on-surface-variant": "#3c4a42",
+                    "on-tertiary-fixed": "#2a1700",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "outline": "#6c7a71",
+                    "on-secondary-container": "#00217a",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-primary-fixed-variant": "#005236",
+                    "tertiary": "#855300",
+                    "surface-dim": "#d3daea",
+                    "on-surface": "#151c27",
+                    "tertiary-fixed": "#ffddb8",
+                    "surface-container-high": "#e2e8f8",
+                    "secondary-fixed": "#dde1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "margin-page": "20px",
+                    "gutter-card": "16px",
+                    "padding-element": "12px",
+                    "stack-gap": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Manrope"],
+                    "body-sm": ["Inter"],
+                    "title-sm": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "price-display": ["Manrope"],
+                    "body-md": ["Inter"],
+                    "label-bold": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-5 h-16 bg-white dark:bg-zinc-950 border-b border-zinc-100 dark:border-zinc-800 shadow-sm dark:shadow-none">
+<div class="flex items-center gap-stack-gap">
+<button class="material-symbols-outlined text-emerald-500 dark:text-emerald-400 p-2 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors rounded-full active:scale-95 duration-100">menu</button>
+<h1 class="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">AhorroYA</h1>
+</div>
+<div class="flex items-center gap-padding-element">
+<div class="relative w-10 h-10 rounded-full overflow-hidden border-2 border-emerald-500">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a friendly man with a clean beard smiling warmly against a soft studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPR7P90Am_Brjiof_9ZSFtNURt6Szg1L5ohAsINq07ffVY-rlMqiPW88vtlFGAsjSegzzJm6PVZLWbnWtnAS6wqQGZ_dveaD1VHNNE5IjaagT0tN5E4hADg7MUy6q3KoxaC09I5WBp-07eU-11rN-liNRET5LL4zSh1hZ9hufYOYumIlIUDmU_GEArq-sZNasyz6MqwzAaD5n5i6csiAVMP23UcaUHLqBkYoukoiK1jRgvv40081iyMd1f4FzZ3onmT-sxXEnkdMs"/>
+</div>
+</div>
+</header>
+<!-- Main Content (Map) -->
+<main class="flex-grow pt-16 pb-20 relative">
+<!-- Interactive Map Background -->
+<div class="absolute inset-0 z-0 map-container" data-location="Buenos Aires, Argentina" style="">
+<!-- Simulated Map Overlay (Blur/Tints) -->
+<div class="absolute inset-0 bg-emerald-900/5 backdrop-grayscale-[0.2]"></div>
+<!-- Map Markers -->
+<!-- Carrefour -->
+<button class="absolute top-[30%] left-[40%] group active:scale-90 transition-transform">
+<div class="relative flex flex-col items-center">
+<div class="bg-white px-3 py-1 rounded-full shadow-lg border border-zinc-100 mb-1 flex items-center gap-2">
+<span class="text-label-bold font-label-bold text-zinc-900">Carrefour</span>
+<span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 rounded-full font-bold">-20%</span>
+</div>
+<div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center border-4 border-white shadow-xl">
+<span class="material-symbols-outlined text-white text-xl">shopping_cart</span>
+</div>
+<div class="w-2 h-2 bg-emerald-600 rotate-45 -mt-1.5 shadow-lg"></div>
+</div>
+</button>
+<!-- Disco (Selected) -->
+<button class="absolute top-[50%] left-[60%] group active:scale-90 transition-transform">
+<div class="relative flex flex-col items-center scale-110">
+<div class="bg-primary px-3 py-1 rounded-full shadow-lg mb-1 flex items-center gap-2">
+<span class="text-label-bold font-label-bold text-white">Disco</span>
+<span class="material-symbols-outlined text-white text-xs" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center border-4 border-white shadow-2xl ring-4 ring-primary/20">
+<span class="material-symbols-outlined text-white text-2xl">local_mall</span>
+</div>
+<div class="w-3 h-3 bg-primary rotate-45 -mt-2 shadow-xl"></div>
+</div>
+</button>
+<!-- Ta-Ta -->
+<button class="absolute top-[65%] left-[25%] group active:scale-90 transition-transform">
+<div class="relative flex flex-col items-center">
+<div class="bg-white px-3 py-1 rounded-full shadow-lg border border-zinc-100 mb-1 flex items-center gap-2">
+<span class="text-label-bold font-label-bold text-zinc-900">Ta-Ta</span>
+</div>
+<div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center border-4 border-white shadow-xl">
+<span class="material-symbols-outlined text-white text-xl">store</span>
+</div>
+<div class="w-2 h-2 bg-secondary rotate-45 -mt-1.5 shadow-lg"></div>
+</div>
+</button>
+</div>
+<!-- Floating Search Overlay -->
+<div class="absolute top-padding-element left-margin-page right-margin-page z-10">
+<div class="bg-white/90 backdrop-blur-xl rounded-full shadow-lg flex items-center px-5 h-14 border border-white/50">
+<span class="material-symbols-outlined text-zinc-400 mr-3">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-zinc-800 placeholder-zinc-400 font-body-md" placeholder="Buscar productos o tiendas..." type="text"/>
+<div class="w-px h-6 bg-zinc-200 mx-3"></div>
+<button class="material-symbols-outlined text-emerald-600">tune</button>
+</div>
+</div>
+<!-- Bottom Sheet (Selected Supermarket Details) -->
+<div class="absolute bottom-4 left-4 right-4 z-20">
+<div class="bg-white rounded-3xl shadow-2xl border border-zinc-100 overflow-hidden flex flex-col max-h-[618px]">
+<!-- Drag Handle -->
+<div class="w-full flex justify-center py-3">
+<div class="w-12 h-1.5 bg-zinc-200 rounded-full"></div>
+</div>
+<div class="px-5 pb-6 overflow-y-auto">
+<!-- Header Info -->
+<div class="flex justify-between items-start mb-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<h2 class="font-headline-md text-headline-md text-zinc-900">Disco</h2>
+<span class="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Abierto</span>
+</div>
+<p class="font-body-sm text-zinc-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">location_on</span>
+                                Av. Santa Fe 2345 • 450m de ti
+                            </p>
+</div>
+<div class="flex gap-2">
+<button class="w-12 h-12 rounded-2xl bg-secondary-container/10 flex items-center justify-center text-secondary active:scale-95 transition-all">
+<span class="material-symbols-outlined">directions</span>
+</button>
+<button class="w-12 h-12 rounded-2xl bg-primary-container text-white flex items-center justify-center shadow-lg shadow-emerald-200 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</div>
+<!-- Horizontal Best Offers -->
+<div class="mb-6">
+<div class="flex justify-between items-center mb-3">
+<h3 class="font-title-sm text-title-sm text-zinc-900">Mejores ofertas hoy</h3>
+<button class="text-emerald-600 font-bold text-sm">Ver todas</button>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+<!-- Offer Card 1 -->
+<div class="flex-shrink-0 w-44 bg-zinc-50 rounded-2xl p-3 border border-zinc-100 shadow-sm">
+<div class="relative h-28 w-full rounded-xl overflow-hidden mb-3 bg-white">
+<img alt="Yogur" class="w-full h-full object-cover" data-alt="close-up of fresh yogurt containers in a bright dairy aisle with vibrant packaging colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkCn885DJM5RGb3hknhDbg3BDDtP3XqCTU_FHg1QmlvarYEiSRpF7GdHzoSm4Al9S4iIXsq5gLVCLmgqYgmylLVjZRUk0RXI6t32zNnJ7i0WScnS1Y8eayeeVbaPfpL6OgfJk0wyBkPPNqFFNqVSRzA2fJoVXbaeTfVOhDEqDr4fqSauVJcfCf6SQQ2wW4UnBx-eOluAIXr8KWkJTqqTpW6ulko_YF6KBd1Em9SnpO4cDrvfN8pmR83yCHgTC2RA1zfJJzTQDRzcc"/>
+<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-lg">-35%</div>
+</div>
+<h4 class="font-label-bold text-zinc-900 line-clamp-1">Yogur Ser Entero</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-price-display text-lg text-emerald-600">$1.250</span>
+<span class="text-xs text-zinc-400 line-through">$1.900</span>
+</div>
+</div>
+<!-- Offer Card 2 -->
+<div class="flex-shrink-0 w-44 bg-zinc-50 rounded-2xl p-3 border border-zinc-100 shadow-sm">
+<div class="relative h-28 w-full rounded-xl overflow-hidden mb-3 bg-white">
+<img alt="Galletitas" class="w-full h-full object-cover" data-alt="stack of chocolate chip cookies with golden brown texture on a light neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4A1Npn9ADeEQgQ3xmq3vLiEkJB3cTR-jPWAp1nUQhn9pG8snCXfczVUrkMhWzk_2iUAp_zX27-r0Odbf1wpm7nwzYZgy6wHXQh9NfwTgw-Hq5rN3AVpwPuLjAMWAs9_JnK09Z3u7uiPJpejbYrsr7w2eoIaKje4pODC9oxsX7m9ec4D0fIvgj84WwRye8buw6fLpV_UQVhsMoNHokW_oVv6FK8n0VcYFzUT_cvg2nkEWt5IcIJfD9iI-D0174sZuvamGi0cUFqWU"/>
+<div class="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-lg">2x1</div>
+</div>
+<h4 class="font-label-bold text-zinc-900 line-clamp-1">Galletitas Oreo</h4>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-price-display text-lg text-emerald-600">$2.100</span>
+<span class="text-xs text-zinc-400 line-through">$4.200</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Actions -->
+<button class="w-full bg-primary py-4 rounded-2xl text-white font-headline-md text-center flex items-center justify-center gap-2 shadow-xl shadow-emerald-100 active:scale-[0.98] transition-transform">
+<span class="material-symbols-outlined">shopping_basket</span>
+                        Crear lista para Disco
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-2 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-t border-zinc-100 dark:border-zinc-800 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider">Explorar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">notifications_active</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider">Alertas</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider">Favoritos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 rounded-xl px-3 py-1 active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">map</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider">Mapas</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider">Perfil</span>
+</a>
+</nav>
+</body></html>

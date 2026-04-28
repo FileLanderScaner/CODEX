@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed": "#2a1700",
+                    "primary-fixed": "#6ffbbe",
+                    "surface": "#f9f9ff",
+                    "surface-container-low": "#f0f3ff",
+                    "on-secondary-fixed-variant": "#173bab",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container": "#e7eefe",
+                    "on-surface": "#151c27",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "surface-variant": "#dce2f3",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#dce2f3",
+                    "on-background": "#151c27",
+                    "secondary-fixed": "#dde1ff",
+                    "on-primary-container": "#00422b",
+                    "inverse-primary": "#4edea3",
+                    "on-primary-fixed-variant": "#005236",
+                    "secondary": "#3755c3",
+                    "tertiary": "#855300",
+                    "on-primary-fixed": "#002113",
+                    "surface-dim": "#d3daea",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-container": "#e29100",
+                    "inverse-surface": "#2a313d",
+                    "on-error": "#ffffff",
+                    "surface-tint": "#006c49",
+                    "outline-variant": "#bbcabf",
+                    "error": "#ba1a1a",
+                    "outline": "#6c7a71",
+                    "background": "#f9f9ff",
+                    "surface-container-high": "#e2e8f8",
+                    "secondary-container": "#708cfd",
+                    "on-surface-variant": "#3c4a42",
+                    "on-secondary-container": "#00217a",
+                    "primary": "#006c49",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#10b981",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f9f9ff",
+                    "primary-fixed-dim": "#4edea3",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "on-secondary-fixed": "#001453",
+                    "on-tertiary-container": "#523200",
+                    "tertiary-fixed": "#ffddb8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "stack-gap": "8px",
+                    "gutter-card": "16px",
+                    "padding-element": "12px",
+                    "margin-page": "20px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Manrope"],
+                    "title-sm": ["Manrope"],
+                    "label-bold": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "price-display": ["Manrope"],
+                    "headline-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pb-safe-offset-2 {
+            padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-800 shadow-sm dark:shadow-none h-14 flex justify-between items-center w-full px-5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-500" data-icon="location_on">location_on</span>
+<span class="font-manrope font-semibold text-sm tracking-tight text-on-surface">Buenos Aires, AR</span>
+</div>
+<div class="flex items-center">
+<button class="active:scale-95 transition-transform duration-150 hover:bg-zinc-50 dark:hover:bg-zinc-800 p-2 rounded-full">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-500" data-icon="qr_code_scanner">qr_code_scanner</span>
+</button>
+</div>
+</header>
+<main class="mt-14 px-margin-page py-6 space-y-8">
+<!-- Hero Section -->
+<section class="space-y-4">
+<div>
+<h1 class="font-display-lg text-display-lg text-primary">AhorroYA</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Encontrá el precio más barato cerca tuyo en segundos.</p>
+</div>
+<!-- Search Bar -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+</div>
+<input class="w-full h-14 pl-12 pr-12 bg-white border-none rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] focus:ring-2 focus:ring-primary-container font-body-md text-on-surface placeholder:text-outline-variant" placeholder="Buscar producto" type="text"/>
+<div class="absolute inset-y-0 right-4 flex items-center">
+<span class="material-symbols-outlined text-primary cursor-pointer" data-icon="barcode_scanner">barcode_scanner</span>
+</div>
+</div>
+</section>
+<!-- Quick Search Grid -->
+<section class="space-y-3">
+<h2 class="font-title-sm text-title-sm">Búsqueda rápida</h2>
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-5 px-5">
+<!-- Grid items rendered as chips -->
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Leche</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Arroz</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Carne</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Yerba</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Aceite</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Pan</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Huevos</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Azúcar</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Fideos</button>
+<button class="flex-none px-4 py-2 bg-white border border-outline-variant rounded-full font-label-bold text-label-bold text-on-surface-variant hover:bg-surface-container-low transition-colors">Café</button>
+</div>
+</section>
+<!-- Ahorro del Día (Bento Highlight) -->
+<section class="space-y-3">
+<h2 class="font-title-sm text-title-sm">Ahorro del día</h2>
+<div class="relative bg-primary-container rounded-2xl p-6 overflow-hidden flex items-center justify-between text-on-primary-container">
+<div class="relative z-10 space-y-1">
+<span class="bg-primary text-on-primary text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded">Super Oferta</span>
+<h3 class="font-headline-md text-headline-md leading-tight">Aceite de Girasol 1.5L</h3>
+<div class="flex items-baseline gap-2">
+<span class="font-price-display text-price-display">$1.250</span>
+<span class="text-sm line-through opacity-70">$1.890</span>
+</div>
+<p class="text-sm font-medium">¡Ahorrás un 34% hoy!</p>
+</div>
+<div class="absolute top-0 right-0 w-32 h-full opacity-20 pointer-events-none bg-no-repeat bg-cover bg-center" data-alt="close up of a bottle of clear cooking oil reflecting warm sunlight" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA9vYyT9czmVK4TiPmkmOCEJMlf8GCqSwRxfrkN1bgoRyN-mIjM7HQ8mGzK6tWV3agvNXJNyX4PXOxO2Z3ejOVFH6T14cmyM0czl6aHTLz11KIAnOiUZfl4-eaA1mwZq3Sz7fQduRDBRr3bZ4S9FiQCwmDf_n6mym9wl9sD5bGt2j29OmR-QcQRyzT96ofZ6VWB--PB_t9ZpiI2nGCYmtyIp7Krwq1SdQZz2RRGfsbSNLOocTgF_2Nke5VDIktYtmb4mX8oGOq9N9U')"></div>
+<button class="relative z-10 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="shopping_cart">shopping_cart</span>
+</button>
+</div>
+</section>
+<!-- Supermercados cercanos -->
+<section class="space-y-3">
+<div class="flex justify-between items-center">
+<h2 class="font-title-sm text-title-sm">Supermercados cercanos</h2>
+<button class="text-primary text-sm font-bold">Ver mapa</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white p-3 rounded-xl shadow-sm border border-zinc-100 flex flex-col items-center text-center space-y-2">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="store">store</span>
+</div>
+<div>
+<p class="font-label-bold text-label-bold">Carrefour</p>
+<p class="text-[10px] text-outline">a 300m</p>
+</div>
+</div>
+<div class="bg-white p-3 rounded-xl shadow-sm border border-zinc-100 flex flex-col items-center text-center space-y-2">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="store">store</span>
+</div>
+<div>
+<p class="font-label-bold text-label-bold">Coto</p>
+<p class="text-[10px] text-outline">a 450m</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Ofertas destacadas (Trend Cards) -->
+<section class="space-y-3">
+<h2 class="font-title-sm text-title-sm">Ofertas destacadas</h2>
+<div class="space-y-4">
+<!-- Trend Card 1 -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between gap-4">
+<div class="flex-1 space-y-1">
+<p class="text-xs text-outline uppercase font-bold tracking-wider">Lácteos</p>
+<p class="font-bold text-on-surface">Leche Entera La Serenísima 1L</p>
+<p class="font-price-display text-[22px] text-primary">$850</p>
+</div>
+<div class="w-20 h-10 flex items-center">
+<svg class="w-full h-full" viewbox="0 0 100 40">
+<path d="M0,35 Q25,30 40,20 T80,25 T100,5" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+</div>
+<div class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg text-xs font-bold">
+                        -12%
+                    </div>
+</div>
+<!-- Trend Card 2 -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between gap-4">
+<div class="flex-1 space-y-1">
+<p class="text-xs text-outline uppercase font-bold tracking-wider">Almacén</p>
+<p class="font-bold text-on-surface">Arroz Largo Fino 1kg</p>
+<p class="font-price-display text-[22px] text-primary">$1.100</p>
+</div>
+<div class="w-20 h-10 flex items-center">
+<svg class="w-full h-full" viewbox="0 0 100 40">
+<path d="M0,30 Q20,35 40,32 T70,38 T100,35" fill="none" stroke="#3755c3" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+</div>
+<div class="bg-secondary-container/10 text-secondary px-2 py-1 rounded-lg text-xs font-bold">
+                        ESTABLE
+                    </div>
+</div>
+<!-- Trend Card 3 -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between gap-4">
+<div class="flex-1 space-y-1">
+<p class="text-xs text-outline uppercase font-bold tracking-wider">Infusiones</p>
+<p class="font-bold text-on-surface">Yerba Mate Playadito 500g</p>
+<p class="font-price-display text-[22px] text-primary">$1.420</p>
+</div>
+<div class="w-20 h-10 flex items-center">
+<svg class="w-full h-full" viewbox="0 0 100 40">
+<path d="M0,5 Q30,10 50,25 T100,35" fill="none" stroke="#ba1a1a" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+</div>
+<div class="bg-error-container text-error px-2 py-1 rounded-lg text-xs font-bold">
+                        +5%
+                    </div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] rounded-t-xl flex justify-around items-center px-4 pt-2 pb-safe-offset-2 h-16">
+<a class="flex flex-col items-center justify-center bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-2xl px-3 py-1 active:scale-90 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Inicio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 dark:hover:text-emerald-300 active:scale-90 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Buscar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 dark:hover:text-emerald-300 active:scale-90 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Alertas</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 dark:hover:text-emerald-300 active:scale-90 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Favoritos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 dark:hover:text-emerald-300 active:scale-90 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Perfil</span>
+</a>
+</nav>
+</body></html>

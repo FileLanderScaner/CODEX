@@ -1,0 +1,111 @@
+openapi: 3.1.0
+info:
+  title: AhorroYA API
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/api/v1
+paths:
+  /health:
+    get:
+      responses:
+        "200": { description: OK }
+  /readiness:
+    get:
+      responses:
+        "200": { description: Readiness state }
+  /products:
+    get:
+      parameters:
+        - { name: q, in: query, schema: { type: string } }
+      responses:
+        "200": { description: Product list }
+  /products/{id}:
+    get:
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Product }
+        "404": { description: Not found }
+  /stores:
+    get:
+      responses:
+        "200": { description: Store list }
+  /categories:
+    get:
+      responses:
+        "200": { description: Category list }
+  /prices:
+    get:
+      responses:
+        "200": { description: Price observations }
+  /prices/latest:
+    get:
+      responses:
+        "200": { description: Current prices }
+  /prices/history/{productId}:
+    get:
+      parameters:
+        - { name: productId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Price history }
+  /prices/community:
+    post:
+      security: [{ bearerAuth: [] }]
+      responses:
+        "201": { description: Community price created }
+  /alerts:
+    get: { security: [{ bearerAuth: [] }], responses: { "200": { description: Alerts } } }
+    post: { security: [{ bearerAuth: [] }], responses: { "201": { description: Alert created } } }
+    delete: { security: [{ bearerAuth: [] }], responses: { "204": { description: Alert deleted } } }
+  /favorites:
+    get: { security: [{ bearerAuth: [] }], responses: { "200": { description: Favorites } } }
+    post: { security: [{ bearerAuth: [] }], responses: { "201": { description: Favorite created } } }
+    delete: { security: [{ bearerAuth: [] }], responses: { "204": { description: Favorite deleted } } }
+  /reports:
+    post:
+      security: [{ bearerAuth: [] }]
+      responses:
+        "201": { description: Report created }
+  /billing/subscriptions/create:
+    post:
+      security: [{ bearerAuth: [] }]
+      responses:
+        "201": { description: Subscription intent created }
+  /billing/webhooks/paypal:
+    post:
+      responses:
+        "200": { description: Webhook accepted }
+  /billing/me:
+    get:
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Billing status }
+  /admin/jobs:
+    get:
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Jobs }
+  /admin/retry-job/{id}:
+    post:
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Job queued }
+  /admin/reports:
+    get:
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Reports }
+  /admin/approve-price:
+    post:
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Price approved }
+  /internal/import/{source}:
+    post:
+      security: [{ bearerAuth: [] }, { cronSecret: [] }]
+      responses:
+        "202": { description: Import accepted }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+    cronSecret: { type: apiKey, in: header, name: X-Cron-Secret }

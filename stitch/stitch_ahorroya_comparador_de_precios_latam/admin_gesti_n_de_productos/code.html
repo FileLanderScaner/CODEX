@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#855300",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e7eefe",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#00422b",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9ff",
+                        "on-surface": "#151c27",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "surface-container-low": "#f0f3ff",
+                        "secondary-container": "#708cfd",
+                        "surface-container-highest": "#dce2f3",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-primary-fixed": "#002113",
+                        "outline": "#6c7a71",
+                        "surface-container-high": "#e2e8f8",
+                        "secondary": "#3755c3",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#523200",
+                        "surface-variant": "#dce2f3",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#ebf1ff",
+                        "tertiary-container": "#e29100",
+                        "primary-container": "#10b981",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#6ffbbe",
+                        "surface-tint": "#006c49",
+                        "surface": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#173bab",
+                        "outline-variant": "#bbcabf",
+                        "surface-dim": "#d3daea",
+                        "tertiary-fixed": "#ffddb8",
+                        "primary": "#006c49",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#001453",
+                        "surface-bright": "#f9f9ff",
+                        "on-primary-fixed-variant": "#005236",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-secondary-container": "#00217a",
+                        "on-surface-variant": "#3c4a42",
+                        "on-background": "#151c27",
+                        "inverse-primary": "#4edea3",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2a313d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "8px",
+                        "gutter-card": "16px",
+                        "unit": "4px",
+                        "padding-element": "12px",
+                        "margin-page": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "title-sm": ["Manrope"],
+                        "label-bold": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "price-display": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9ff;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-slate-900 fixed top-0 w-full z-50 border-b border-slate-100 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between px-5 h-16 w-full max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
+<img alt="Admin Profile" class="w-full h-full object-cover" data-alt="Professional headshot of a male administrator with a clean background, soft lighting, and corporate look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1GmpXchdqddAeoUyqO03keiejKTcEtm4m9aePZQ9dp2bFJvPQ_O8camMG7YIqcHWIJFmgwaO6OIISEZGrBKB3VG4BnBfYE5Hvwe8slT7gqvduhezwge4nsTxy8rPSWT3bBas8n2zXlVB5iRC2xeijkBzS3CG0uX8mSCuExgnRa7jjdWdUbK7flvp9iBjDhHWPTVCoBZF2-Kgop6LKrQR6LBbGEDTE7kDVKvF28-qcZyzQja6SRQcGHHZfUzrcUk7ECD89nRlEpxY"/>
+</div>
+<h1 class="font-manrope antialiased text-slate-900 dark:text-slate-100 text-xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">Gestión de Productos</h1>
+</div>
+<button class="active:scale-95 transition-transform duration-150 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-20 pb-28 px-margin-page max-w-md mx-auto">
+<!-- Search & Filter Cluster -->
+<section class="mb-gutter-card flex flex-col gap-stack-gap">
+<div class="relative">
+<input class="w-full h-12 pl-11 pr-4 bg-white border border-outline-variant rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Buscar producto por nombre o SKU..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-3 text-outline" data-icon="search">search</span>
+</div>
+<div class="flex gap-2 overflow-x-auto py-1 scrollbar-hide">
+<button class="bg-primary text-on-primary px-4 py-1.5 rounded-full text-label-bold whitespace-nowrap">Todos</button>
+<button class="bg-surface-container-highest text-on-surface-variant px-4 py-1.5 rounded-full text-label-bold whitespace-nowrap">Lácteos</button>
+<button class="bg-surface-container-highest text-on-surface-variant px-4 py-1.5 rounded-full text-label-bold whitespace-nowrap">Almacén</button>
+<button class="bg-surface-container-highest text-on-surface-variant px-4 py-1.5 rounded-full text-label-bold whitespace-nowrap">Limpieza</button>
+<button class="bg-surface-container-highest text-on-surface-variant px-4 py-1.5 rounded-full text-label-bold whitespace-nowrap">Bebidas</button>
+</div>
+</section>
+<!-- Product Grid/List -->
+<div class="flex flex-col gap-gutter-card">
+<!-- Product Item 1 -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 p-padding-element flex flex-col gap-stack-gap">
+<div class="flex gap-4">
+<div class="w-20 h-20 bg-slate-50 rounded-lg flex-shrink-0 overflow-hidden border border-slate-100">
+<img alt="Product" class="w-full h-full object-cover" data-alt="High quality studio shot of a gallon of fresh milk on a white background with clean reflections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqf51KDYsOYVW-CEo7BSTF3-UQnb8q6jytoMWunah6bCGoyZplzSkvLl61Uz-dKorN9v2_RW9LjNLu8dVGE7aDo21e0T6gqZAK5PMbFMENNEqYbSQFRUwEjuoWayFRVnOWo2aVCOHW7Y4035vTr0BNNkAkyGAzD4co2MhqUUVW83jx0ScpVanBCmNTiJMgv1vq6qQfxDiJiStfEqg7iVo9ffe76nvl3Vp76agDzbRCotF1xM_iLk58sVjZQY59hCrmCREFhCMuLeA"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-0.5">
+<div>
+<h3 class="font-title-sm text-on-surface leading-tight">Leche Entera La Serenísima 1L</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="storefront">storefront</span>
+<span class="text-body-sm text-on-surface-variant">Carrefour Market</span>
+</div>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Min Price</p>
+<p class="font-price-display text-primary text-title-sm">$1.240,00</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-slate-400">Actualizado</p>
+<p class="text-body-sm font-semibold">Hace 2 horas</p>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-50 pt-2 flex justify-end">
+<button class="flex items-center gap-1.5 text-secondary font-label-bold px-3 py-1.5 hover:bg-secondary-container/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+                        Editar
+                    </button>
+</div>
+</div>
+<!-- Product Item 2 -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 p-padding-element flex flex-col gap-stack-gap">
+<div class="flex gap-4">
+<div class="w-20 h-20 bg-slate-50 rounded-lg flex-shrink-0 overflow-hidden border border-slate-100">
+<img alt="Product" class="w-full h-full object-cover" data-alt="Close-up of a pack of high-quality coffee beans, premium packaging, studio lighting with warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCzdr6xnGz9zArjlp3CZjN9dikx1nwjzfIC6mGY6IJRb2I2hVzQqQIzE9pI-SoIrUyItO21ghtBU_oO5eEE0RCGnHsHSCnfAH0kQiJD92xWXOVmqzvW9Rfmo4BUIAp6I1Td1STutjfViPsnz4l4LBwMlXRaHIHeDEfZBPamNkUkab1YqeYWI0CUfN9ARiRj5auh8fooBhTVrf_l5AdSYxAphwt3Ku0Y6aXCCR7Lrixjm8ylTmiUftw8VpiSjTwNYuNKQLilQ1-FQI"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-0.5">
+<div>
+<h3 class="font-title-sm text-on-surface leading-tight">Café Molido Cabrales 500g</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="storefront">storefront</span>
+<span class="text-body-sm text-on-surface-variant">Coto Digital</span>
+</div>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Min Price</p>
+<p class="font-price-display text-primary text-title-sm">$8.450,00</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-slate-400">Actualizado</p>
+<p class="text-body-sm font-semibold">Hace 5 horas</p>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-50 pt-2 flex justify-end">
+<button class="flex items-center gap-1.5 text-secondary font-label-bold px-3 py-1.5 hover:bg-secondary-container/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+                        Editar
+                    </button>
+</div>
+</div>
+<!-- Product Item 3 -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 p-padding-element flex flex-col gap-stack-gap">
+<div class="flex gap-4">
+<div class="w-20 h-20 bg-slate-50 rounded-lg flex-shrink-0 overflow-hidden border border-slate-100">
+<img alt="Product" class="w-full h-full object-cover" data-alt="Pack of luxury toilet paper rolls, soft white texture, clean minimalist branding against a pastel background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZ3IbxmXxMkK9v2I-u-P_GMYG4iQQ4-Qid1d5UWUZlbi5bFfcTbRL0bgdG1GF2XpJZBG_VwMhl5eInPLgvqFWzLHXYa7JRxQ4kiwYKBeddQhtVMM2UB_k5tojB64_dp-q0ke5HMW-GKdkoYizbCG9GCoaBuRTWRavyHIUgGXQDIiGMOdyDhVrGaJORiBnmUmPmarYhvDvxP-mZ_DyTOYcXME3mOr6fI2gYsd2MdigRrRJxvOI5y_bYwKdYU2Tbe2NQML11MEL0I_4"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-0.5">
+<div>
+<h3 class="font-title-sm text-on-surface leading-tight">Papel Higiénico Scott 4u.</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="storefront">storefront</span>
+<span class="text-body-sm text-on-surface-variant">Jumbo Almagro</span>
+</div>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Min Price</p>
+<p class="font-price-display text-primary text-title-sm">$3.120,00</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-slate-400">Actualizado</p>
+<p class="text-body-sm font-semibold">Ayer</p>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-50 pt-2 flex justify-end">
+<button class="flex items-center gap-1.5 text-secondary font-label-bold px-3 py-1.5 hover:bg-secondary-container/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+                        Editar
+                    </button>
+</div>
+</div>
+<!-- Product Item 4 -->
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 p-padding-element flex flex-col gap-stack-gap">
+<div class="flex gap-4">
+<div class="w-20 h-20 bg-slate-50 rounded-lg flex-shrink-0 overflow-hidden border border-slate-100">
+<img alt="Product" class="w-full h-full object-cover" data-alt="Jar of organic peanut butter, smooth texture, rustic wooden background with soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcWmp1QR_Th8Nez1-zjjdATSqy6A3mU_oD4AklCHqZ37xzKQWWGgmAoxsNt6BvArobE9A2Y-kir1OywyzG7oj8kVaQFf33y6i17ouFYQVerr3O6e-9PXA8L6KSSc-Dv_dvymt0xU_4quqAwRyInc2DhnDg7Oxnczrb0Wz_fDv_YDe4g0FzKSI1Frca89T9GilooK12kNvjk9AVNMHN6K-JWbGKnoFNgBcAJ-Pl3CTLW6xQQi2Fcz0qErldBxFyB8CdiL3hpc-7sZw"/>
+</div>
+<div class="flex-1 flex flex-col justify-between py-0.5">
+<div>
+<h3 class="font-title-sm text-on-surface leading-tight">Pasta de Maní King 500g</h3>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="storefront">storefront</span>
+<span class="text-body-sm text-on-surface-variant">Disco Caballito</span>
+</div>
+</div>
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Min Price</p>
+<p class="font-price-display text-primary text-title-sm">$4.890,00</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-slate-400">Actualizado</p>
+<p class="text-body-sm font-semibold">Hace 15 min</p>
+</div>
+</div>
+</div>
+</div>
+<div class="border-t border-slate-50 pt-2 flex justify-end">
+<button class="flex items-center gap-1.5 text-secondary font-label-bold px-3 py-1.5 hover:bg-secondary-container/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+                        Editar
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB: Cargar Producto -->
+<button class="fixed bottom-24 right-5 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center z-40 active:scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<div class="flex justify-around items-center px-4 pt-2 pb-6 w-full max-w-md mx-auto">
+<!-- Overview -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1 hover:text-emerald-500 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span class="font-manrope text-[10px] font-semibold tracking-wide uppercase">Overview</span>
+</a>
+<!-- Inventory (Active) -->
+<a class="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl px-3 py-1 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-manrope text-[10px] font-semibold tracking-wide uppercase">Inventory</span>
+</a>
+<!-- Reports -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1 hover:text-emerald-500 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="analytics">analytics</span>
+<span class="font-manrope text-[10px] font-semibold tracking-wide uppercase">Reports</span>
+</a>
+<!-- Settings -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1 hover:text-emerald-500 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-manrope text-[10px] font-semibold tracking-wide uppercase">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

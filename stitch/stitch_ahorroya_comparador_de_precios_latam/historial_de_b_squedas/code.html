@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AhorroYA - Historial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed": "#002113",
+                        "surface-container": "#e7eefe",
+                        "primary": "#006c49",
+                        "on-secondary-fixed-variant": "#173bab",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#10b981",
+                        "error-container": "#ffdad6",
+                        "secondary-container": "#708cfd",
+                        "surface": "#f9f9ff",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#001453",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "secondary": "#3755c3",
+                        "on-tertiary-container": "#523200",
+                        "on-background": "#151c27",
+                        "inverse-surface": "#2a313d",
+                        "tertiary-container": "#e29100",
+                        "surface-variant": "#dce2f3",
+                        "on-primary-container": "#00422b",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#4edea3",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f0f3ff",
+                        "surface-bright": "#f9f9ff",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9ff",
+                        "outline-variant": "#bbcabf",
+                        "surface-tint": "#006c49",
+                        "surface-container-highest": "#dce2f3",
+                        "primary-fixed": "#6ffbbe",
+                        "on-surface-variant": "#3c4a42",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "outline": "#6c7a71",
+                        "on-secondary-container": "#00217a",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-primary-fixed-variant": "#005236",
+                        "tertiary": "#855300",
+                        "surface-dim": "#d3daea",
+                        "on-surface": "#151c27",
+                        "tertiary-fixed": "#ffddb8",
+                        "surface-container-high": "#e2e8f8",
+                        "secondary-fixed": "#dde1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-page": "20px",
+                        "gutter-card": "16px",
+                        "padding-element": "12px",
+                        "stack-gap": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope"],
+                        "body-sm": ["Inter"],
+                        "title-sm": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "price-display": ["Manrope"],
+                        "body-md": ["Inter"],
+                        "label-bold": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9ff;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-5 h-16 bg-white shadow-sm border-b border-zinc-100">
+<div class="flex items-center gap-4">
+<button class="active:scale-95 duration-100 p-2 rounded-full hover:bg-zinc-50">
+<span class="material-symbols-outlined text-emerald-500" data-icon="menu">menu</span>
+</button>
+<h1 class="font-manrope font-bold text-lg tracking-tight text-emerald-600">AhorroYA</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-emerald-50 bg-emerald-100">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a smiling man in professional attire with soft natural lighting and blurred office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAv-W_pc80amMLera-D04vmoQHmzVrjy_-989VVqNXR0HOygbNn503fcRLwozDl2uYN9UBSj2ibymufbxpHE7J6KTC-BxjPOtaEPl984kXA3AU0gz50ehwlgIEEIwAjAwB9K4gu46aBCM1bRfepVd30KX5I1mU_kKG2eh3gHPJ0aifK3QBsi4olkygJEY5MJBIvQm2i_vw2i4zY3ZyuJ6nbqud2A-175N9BDBcOediTdAFSCCZIZcNz8zW6DcbbqhN1DC5RjxiZHng"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-20 pb-24 px-5 max-w-2xl mx-auto min-h-screen">
+<!-- Header Section -->
+<section class="mb-8 flex justify-between items-end">
+<div>
+<p class="font-body-sm text-zinc-500 mb-1">Tu Actividad</p>
+<h2 class="font-headline-md text-headline-md text-on-background">Historial</h2>
+</div>
+<button class="flex items-center gap-2 text-emerald-600 font-label-bold text-label-bold hover:bg-emerald-50 px-3 py-2 rounded-xl transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete_sweep">delete_sweep</span>
+                Borrar todo
+            </button>
+</section>
+<!-- History Content -->
+<div class="space-y-6">
+<!-- Date Group: Hoy -->
+<div class="space-y-3">
+<h3 class="font-label-bold text-label-bold text-zinc-400 uppercase tracking-widest px-1">Hoy</h3>
+<div class="space-y-2">
+<!-- History Card 1 -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between hover:bg-zinc-50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined" data-icon="shopping_basket">shopping_basket</span>
+</div>
+<div>
+<p class="font-title-sm text-title-sm text-on-background">Aceite de Oliva Extra Virgen</p>
+<p class="font-body-sm text-body-sm text-zinc-500">Buscado en 12 tiendas cercanas</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-zinc-300 material-symbols-outlined group-hover:text-emerald-500 transition-colors" data-icon="arrow_forward_ios" style="font-size: 16px;">arrow_forward_ios</span>
+</div>
+</div>
+<!-- History Card 2 -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between hover:bg-zinc-50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined" data-icon="laptop_chromebook">laptop_chromebook</span>
+</div>
+<div>
+<p class="font-title-sm text-title-sm text-on-background">MacBook Air M2</p>
+<p class="font-body-sm text-body-sm text-zinc-500">Alerta de precio activada</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-zinc-300 material-symbols-outlined group-hover:text-emerald-500 transition-colors" data-icon="arrow_forward_ios" style="font-size: 16px;">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Date Group: Ayer -->
+<div class="space-y-3 pt-2">
+<h3 class="font-label-bold text-label-bold text-zinc-400 uppercase tracking-widest px-1">Ayer</h3>
+<div class="space-y-2">
+<!-- History Card 3 -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between hover:bg-zinc-50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-500">
+<span class="material-symbols-outlined" data-icon="local_gas_station">local_gas_station</span>
+</div>
+<div>
+<p class="font-title-sm text-title-sm text-on-background">Nafta Super - Palermo</p>
+<p class="font-body-sm text-body-sm text-zinc-500">Comparativa de estaciones</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-zinc-300 material-symbols-outlined group-hover:text-emerald-500 transition-colors" data-icon="arrow_forward_ios" style="font-size: 16px;">arrow_forward_ios</span>
+</div>
+</div>
+<!-- History Card 4 -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between hover:bg-zinc-50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-500">
+<span class="material-symbols-outlined" data-icon="egg">egg</span>
+</div>
+<div>
+<p class="font-title-sm text-title-sm text-on-background">Huevos Maple x30</p>
+<p class="font-body-sm text-body-sm text-zinc-500">Búsqueda rápida</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-zinc-300 material-symbols-outlined group-hover:text-emerald-500 transition-colors" data-icon="arrow_forward_ios" style="font-size: 16px;">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Date Group: Semana Pasada -->
+<div class="space-y-3 pt-2">
+<h3 class="font-label-bold text-label-bold text-zinc-400 uppercase tracking-widest px-1">Semana Pasada</h3>
+<div class="space-y-2">
+<!-- History Card 5 -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border border-zinc-100 flex items-center justify-between hover:bg-zinc-50 transition-colors cursor-pointer group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-500">
+<span class="material-symbols-outlined" data-icon="tv">tv</span>
+</div>
+<div>
+<p class="font-title-sm text-title-sm text-on-background">Smart TV 55" 4K</p>
+<p class="font-body-sm text-body-sm text-zinc-500">12 de Octubre</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-zinc-300 material-symbols-outlined group-hover:text-emerald-500 transition-colors" data-icon="arrow_forward_ios" style="font-size: 16px;">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Suggestion Card (Bento Style) -->
+<div class="mt-12 bg-emerald-600 rounded-3xl p-6 relative overflow-hidden text-white shadow-xl">
+<div class="relative z-10 space-y-4">
+<div class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+<span class="material-symbols-outlined text-white" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md leading-tight">Optimiza tu historial</h4>
+<p class="font-body-sm text-emerald-50 opacity-90 mt-2">Activa el seguimiento automático para recibir alertas cuando los productos de tu historial bajen de precio.</p>
+</div>
+<button class="bg-white text-emerald-700 px-6 py-3 rounded-xl font-label-bold text-label-bold active:scale-95 transition-transform">
+                    Activar Seguimiento
+                </button>
+</div>
+<!-- Decorative Elements -->
+<div class="absolute -right-12 -bottom-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute right-8 top-8 opacity-20">
+<span class="material-symbols-outlined text-[80px]" data-icon="trending_down">trending_down</span>
+</div>
+</div>
+</main>
+<!-- NavigationDrawer (Implicit Content: Historial item is active) -->
+<div class="hidden">
+<!-- Structural mapping from JSON for side/overlay navigation -->
+<aside class="fixed inset-y-0 left-0 z-[60] flex flex-col bg-white w-80 rounded-r-2xl shadow-2xl divide-y divide-zinc-100">
+<div class="p-6 flex flex-col items-start">
+<div class="w-16 h-16 rounded-full bg-emerald-100 mb-4 overflow-hidden">
+<img alt="User Profile Avatar" data-alt="Close up portrait of a smiling man in professional attire with soft natural lighting and blurred office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUc7H3O3tkvKeclcYmcxQXnj5XDhqrh5HISKQZeVAcG77A3fpVrtZGqNU2cpnE7feBys5aA-ZwC3k-YLdp1KiLnCOBnqN4HD-h4p-FtiFU9n3kZV16yX3hQ5olXOZRNxKraFtMK0-qwKvUDZXC9GB3OonAuq-bRd6VnfvTQ53CNRMDWCESEDy2QvcdAfIfETrGiJ_icOakBpkEcXcRMEiuwruRFp7KDmZXC1bqkPxvG6ESyLRQxcRxs8h6grtY7cflrM56zG1bNxw"/>
+</div>
+<h3 class="font-manrope font-bold text-emerald-600 text-xl">Usuario Ahorrador</h3>
+<p class="text-zinc-500 text-sm">Plan Premium</p>
+<span class="mt-2 inline-block bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Ahorro total: $12,400</span>
+</div>
+<nav class="flex-1 p-4 space-y-1">
+<a class="flex items-center gap-4 px-4 py-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span> Historial
+                </a>
+<a class="flex items-center gap-4 px-4 py-3 text-zinc-600 hover:bg-zinc-50 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="share">share</span> Compartir App
+                </a>
+<a class="flex items-center gap-4 px-4 py-3 text-zinc-600 hover:bg-zinc-50 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span> Configuración
+                </a>
+</nav>
+</aside>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-2 bg-white/90 backdrop-blur-md border-t border-zinc-100 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+<div class="flex flex-col items-center justify-center text-zinc-400 px-3 py-1 active:scale-90 duration-150 transition-opacity hover:opacity-80">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Explorar</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 px-3 py-1 active:scale-90 duration-150 transition-opacity hover:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Alertas</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 px-3 py-1 active:scale-90 duration-150 transition-opacity hover:opacity-80">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Favoritos</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 px-3 py-1 active:scale-90 duration-150 transition-opacity hover:opacity-80">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Mapas</span>
+</div>
+<!-- ACTIVE TAB: Perfil (Since Historial is a sub-section of Profile/Account) -->
+<div class="flex flex-col items-center justify-center text-emerald-600 bg-emerald-50 rounded-xl px-3 py-1 active:scale-90 duration-150 transition-opacity hover:opacity-80">
+<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Perfil</span>
+</div>
+</nav>
+</body></html>

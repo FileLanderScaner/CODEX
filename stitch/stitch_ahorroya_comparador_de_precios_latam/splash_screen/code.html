@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffddb8",
+                    "on-surface-variant": "#3c4a42",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#4edea3",
+                    "surface-bright": "#f9f9ff",
+                    "on-secondary-fixed-variant": "#173bab",
+                    "inverse-surface": "#2a313d",
+                    "secondary-fixed": "#dde1ff",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface": "#f9f9ff",
+                    "secondary-container": "#708cfd",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "outline-variant": "#bbcabf",
+                    "surface-container-lowest": "#ffffff",
+                    "primary": "#006c49",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#e2e8f8",
+                    "surface-container": "#e7eefe",
+                    "on-tertiary-container": "#523200",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-primary-fixed": "#002113",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "tertiary": "#855300",
+                    "tertiary-container": "#e29100",
+                    "on-secondary-container": "#00217a",
+                    "on-primary-fixed-variant": "#005236",
+                    "on-primary-container": "#00422b",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface-dim": "#d3daea",
+                    "primary-fixed-dim": "#4edea3",
+                    "primary-container": "#10b981",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#f0f3ff",
+                    "on-surface": "#151c27",
+                    "outline": "#6c7a71",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#dce2f3",
+                    "secondary": "#3755c3",
+                    "on-secondary-fixed": "#001453",
+                    "background": "#f9f9ff",
+                    "error": "#ba1a1a",
+                    "primary-fixed": "#6ffbbe",
+                    "on-background": "#151c27",
+                    "surface-variant": "#dce2f3",
+                    "surface-tint": "#006c49"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "stack-gap": "8px",
+                    "margin-page": "20px",
+                    "gutter-card": "16px",
+                    "padding-element": "12px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Manrope"],
+                    "body-sm": ["Inter"],
+                    "display-lg": ["Manrope"],
+                    "price-display": ["Manrope"],
+                    "title-sm": ["Manrope"],
+                    "label-bold": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-splash-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #006c49 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-primary-container font-body-md text-on-primary-container antialiased overflow-hidden">
+<!-- Splash Screen Wrapper -->
+<main class="relative min-h-screen w-full flex flex-col items-center justify-center bg-splash-gradient px-margin-page">
+<!-- Background Texture (Subtle) -->
+<div class="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
+<div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-fixed rounded-full blur-[100px]"></div>
+<div class="absolute -bottom-24 -right-24 w-96 h-96 bg-primary-fixed-dim rounded-full blur-[100px]"></div>
+</div>
+<!-- Central Content Canvas -->
+<div class="relative z-10 flex flex-col items-center space-y-gutter-card text-center">
+<!-- App Logo & Icon -->
+<div class="flex flex-col items-center animate-pulse-subtle">
+<!-- Icon Container with Tactile Shadow -->
+<div class="w-24 h-24 mb-stack-gap flex items-center justify-center rounded-[32px] bg-white shadow-[0_12px_24px_rgba(0,0,0,0.15)] ring-4 ring-white/20">
+<span class="material-symbols-outlined text-[48px] text-primary" data-icon="savings">
+                        savings
+                    </span>
+</div>
+<!-- Brand Identity (Identity Lock) -->
+<div class="flex flex-col items-center">
+<h1 class="font-display-lg text-display-lg text-white tracking-tight">
+                        AhorroYA
+                    </h1>
+<p class="font-title-sm text-title-sm text-primary-fixed opacity-90 mt-1">
+                        Ahorra en cada compra
+                    </p>
+</div>
+</div>
+<!-- Loading Indicator (Minimalist Utility) -->
+<div class="mt-16 w-32 h-1 bg-white/20 rounded-full overflow-hidden">
+<div class="h-full bg-white w-1/3 rounded-full"></div>
+</div>
+</div>
+<!-- Utility Disclaimer / Version (Subtle) -->
+<div class="absolute bottom-10 flex flex-col items-center space-y-1">
+<p class="font-label-bold text-label-bold text-white/60 uppercase tracking-widest">
+                Tu aliado de precios
+            </p>
+<div class="w-1.5 h-1.5 bg-white/40 rounded-full"></div>
+</div>
+<!-- Decorative Abstract Elements (Corporate/Modern Style) -->
+<div class="absolute top-0 left-0 w-full h-full pointer-events-none">
+<div class="absolute top-1/4 -right-10 w-40 h-40 border border-white/10 rounded-[40px] rotate-12"></div>
+<div class="absolute bottom-1/4 -left-10 w-56 h-56 border border-white/5 rounded-[60px] -rotate-12"></div>
+</div>
+</main>
+<!-- Shell Suppression Note: 
+         As per Design System mandates, TopAppBar and BottomNavBar are excluded 
+         from "Linear/Transactional" and "Splash" screens to focus on the content canvas. 
+    -->
+</body></html>

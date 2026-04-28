@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary-fixed": "#6ffbbe",
+                        "surface": "#f9f9ff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary-fixed-variant": "#173bab",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "inverse-on-surface": "#ebf1ff",
+                        "surface-container": "#e7eefe",
+                        "on-surface": "#151c27",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-variant": "#dce2f3",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#dce2f3",
+                        "on-background": "#151c27",
+                        "secondary-fixed": "#dde1ff",
+                        "on-primary-container": "#00422b",
+                        "inverse-primary": "#4edea3",
+                        "on-primary-fixed-variant": "#005236",
+                        "secondary": "#3755c3",
+                        "tertiary": "#855300",
+                        "on-primary-fixed": "#002113",
+                        "surface-dim": "#d3daea",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#e29100",
+                        "inverse-surface": "#2a313d",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#006c49",
+                        "outline-variant": "#bbcabf",
+                        "error": "#ba1a1a",
+                        "outline": "#6c7a71",
+                        "background": "#f9f9ff",
+                        "surface-container-high": "#e2e8f8",
+                        "secondary-container": "#708cfd",
+                        "on-surface-variant": "#3c4a42",
+                        "on-secondary-container": "#00217a",
+                        "primary": "#006c49",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#10b981",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "primary-fixed-dim": "#4edea3",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-secondary-fixed": "#001453",
+                        "on-tertiary-container": "#523200",
+                        "tertiary-fixed": "#ffddb8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-gap": "8px",
+                        "gutter-card": "16px",
+                        "padding-element": "12px",
+                        "margin-page": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Manrope"],
+                        "title-sm": ["Manrope"],
+                        "label-bold": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "price-display": ["Manrope"],
+                        "headline-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .premium-gradient {
+            background: linear-gradient(135deg, #006c49 0%, #10b981 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-20">
+<!-- Top Navigation Shell -->
+<header class="sticky top-0 z-50 bg-white dark:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-800 shadow-sm dark:shadow-none flex justify-between items-center w-full px-5 h-14">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-500" data-icon="location_on">location_on</span>
+<h1 class="font-manrope font-semibold text-sm tracking-tight text-emerald-600 dark:text-emerald-500">Buenos Aires, AR</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 p-2 rounded-full transition-transform active:scale-95" data-icon="qr_code_scanner">qr_code_scanner</span>
+</div>
+</header>
+<main class="px-margin-page py-gutter-card flex flex-col gap-gutter-card">
+<!-- Hero Section -->
+<section class="relative overflow-hidden rounded-xl premium-gradient p-8 text-on-primary">
+<div class="relative z-10">
+<span class="font-label-bold text-label-bold uppercase tracking-widest opacity-80 mb-2 block">Premium Access</span>
+<h2 class="font-display-lg text-display-lg mb-4">Ahorrá más cada semana</h2>
+<p class="font-body-md text-body-md opacity-90 max-w-[280px]">Desbloqueá herramientas profesionales para optimizar tus compras.</p>
+</div>
+<div class="absolute -right-12 -bottom-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute right-4 top-4 opacity-20">
+<span class="material-symbols-outlined text-[120px]" data-icon="auto_graph">auto_graph</span>
+</div>
+</section>
+<!-- Benefits Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-stack-gap">
+<div class="flex items-center gap-4 p-padding-element bg-white rounded-xl shadow-sm border border-zinc-50">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="search_check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">search_check</span>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm leading-none mb-1">Búsquedas ilimitadas</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Sin restricciones diarias.</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-padding-element bg-white rounded-xl shadow-sm border border-zinc-50">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="notifications_active" data-weight="fill" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm leading-none mb-1">Alertas de precio ilimitadas</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Enterate al instante.</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-padding-element bg-white rounded-xl shadow-sm border border-zinc-50">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="block" data-weight="fill" style="font-variation-settings: 'FILL' 1;">block</span>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm leading-none mb-1">Sin anuncios</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Navegación limpia y rápida.</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-padding-element bg-white rounded-xl shadow-sm border border-zinc-50">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="monitoring" data-weight="fill" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm leading-none mb-1">Seguimiento avanzado</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Gráficos de historial detallado.</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-padding-element bg-white rounded-xl shadow-sm border border-zinc-50 md:col-span-2">
+<div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="favorite" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm leading-none mb-1">Favoritos ilimitados</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Guardá todo lo que te interesa.</p>
+</div>
+</div>
+</section>
+<!-- Pricing Cards -->
+<section class="flex flex-col gap-gutter-card mt-4">
+<!-- Monthly Plan -->
+<div class="group relative p-6 bg-white rounded-2xl border-2 border-transparent hover:border-primary-container transition-all shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="font-headline-md text-headline-md">Mensual</h4>
+<p class="font-body-sm text-on-surface-variant">Flexibilidad total</p>
+</div>
+<div class="text-right">
+<span class="font-price-display text-price-display text-primary">$1.200</span>
+<p class="font-label-bold text-label-bold text-on-surface-variant">/mes</p>
+</div>
+</div>
+<div class="h-1 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full w-1/4 bg-primary-container"></div>
+</div>
+</div>
+<!-- Annual Plan -->
+<div class="group relative p-6 bg-surface-container-low rounded-2xl border-2 border-primary transition-all shadow-md">
+<div class="absolute -top-3 right-6 bg-primary text-on-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Mejor Valor
+                </div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="font-headline-md text-headline-md">Anual</h4>
+<p class="font-body-sm text-on-surface-variant">Ahorrá 2 meses</p>
+</div>
+<div class="text-right">
+<span class="font-price-display text-price-display text-primary">$10.000</span>
+<p class="font-label-bold text-label-bold text-on-surface-variant">/año</p>
+</div>
+</div>
+<div class="h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-full bg-primary"></div>
+</div>
+<p class="mt-4 font-body-sm text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+                    Pago único anual con descuento
+                </p>
+</div>
+</section>
+<!-- CTA Button -->
+<footer class="mt-4">
+<button class="w-full bg-primary text-on-primary font-display-lg text-title-sm py-5 rounded-2xl shadow-lg active:scale-[0.98] transition-transform duration-150 flex items-center justify-center gap-2">
+                Activar Premium
+                <span class="material-symbols-outlined" data-icon="bolt" data-weight="fill" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</button>
+<p class="text-center font-body-sm text-on-surface-variant mt-4 px-8">
+                Podés cancelar en cualquier momento desde la configuración de tu cuenta.
+            </p>
+</footer>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-2 pb-safe-offset-2 h-16 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 transition-all duration-200 ease-in-out active:scale-90 hover:text-emerald-500 dark:hover:text-emerald-300" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Inicio</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 transition-all duration-200 ease-in-out active:scale-90 hover:text-emerald-500 dark:hover:text-emerald-300" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Buscar</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 transition-all duration-200 ease-in-out active:scale-90 hover:text-emerald-500 dark:hover:text-emerald-300" href="#">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Alertas</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 transition-all duration-200 ease-in-out active:scale-90 hover:text-emerald-500 dark:hover:text-emerald-300" href="#">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Favoritos</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-2xl px-3 py-1 transition-all duration-200 ease-in-out active:scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="person" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Perfil</span>
+</a>
+</nav>
+</body></html>

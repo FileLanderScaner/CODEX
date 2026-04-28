@@ -1,0 +1,59 @@
+const memoryCounters = new Map();
+
+export function setCors(res, allowedOriginsCsv) {
+  const originHeader = res.req?.headers?.origin;
+  const allowedOrigins = (allowedOriginsCsv || '').split(',').map((value) => value.trim()).filter(Boolean);
+  const allowOrigin = allowedOrigins.length
+    ? allowedOrigins.includes(originHeader) ? originHeader : allowedOrigins[0]
+    : '*';
+
+  res.setHeader('Access-Control-Allow-Origin', allowOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
+export function handleOptions(req, res, allowedOriginsCsv) {
+  if (req.method === 'OPTIONS') {
+    setCors(res, allowedOriginsCsv);
+    res.status(204).end();
+    return true;
+  }
+
+  return false;
+}
+
+export function enforceOrigin(req, allowedOriginsCsv) {
+  const allowedOrigins = (allowedOriginsCsv || '').split(',').map((value) => value.trim()).filter(Boolean);
+  if (!allowedOrigins.length) {
+    return { ok: true };
+  }
+
+  const origin = req.headers?.origin;
+  if (!origin) {
+    return { ok: false, error: 'Missing Origin' };
+  }
+
+  if (!allowedOrigins.includes(origin)) {
+    return { ok: false, error: 'Origin not allowed' };
+  }
+
+  return { ok: true };
+}
+
+export function rateLimit(req, key, { limit = 60, windowMs = 60_000 } = {}) {
+  const ip = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown')
+    .toString()
+    .split(',')[0]
+    .trim();
+  const now = Date.now();
+  const bucket = `${key}:${ip}:${Math.floor(now / windowMs)}`;
+  const current = memoryCounters.get(bucket) || 0;
+  memoryCounters.set(bucket, current + 1);
+  return { ok: current + 1 <= limit, ip, current: current + 1, limit };
+}
+
+export function getBearerToken(req) {
+  const header = req.headers?.authorization || '';
+  const match = /^Bearer\s+(.+)$/i.exec(header);
+  return match?.[1] || '';
+}

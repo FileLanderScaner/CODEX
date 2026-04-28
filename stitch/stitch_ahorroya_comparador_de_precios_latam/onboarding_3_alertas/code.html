@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffddb8",
+                    "on-surface-variant": "#3c4a42",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#4edea3",
+                    "surface-bright": "#f9f9ff",
+                    "on-secondary-fixed-variant": "#173bab",
+                    "inverse-surface": "#2a313d",
+                    "secondary-fixed": "#dde1ff",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface": "#f9f9ff",
+                    "secondary-container": "#708cfd",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "outline-variant": "#bbcabf",
+                    "surface-container-lowest": "#ffffff",
+                    "primary": "#006c49",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#e2e8f8",
+                    "surface-container": "#e7eefe",
+                    "on-tertiary-container": "#523200",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-primary-fixed": "#002113",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "tertiary": "#855300",
+                    "tertiary-container": "#e29100",
+                    "on-secondary-container": "#00217a",
+                    "on-primary-fixed-variant": "#005236",
+                    "on-primary-container": "#00422b",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface-dim": "#d3daea",
+                    "primary-fixed-dim": "#4edea3",
+                    "primary-container": "#10b981",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#f0f3ff",
+                    "on-surface": "#151c27",
+                    "outline": "#6c7a71",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#dce2f3",
+                    "secondary": "#3755c3",
+                    "on-secondary-fixed": "#001453",
+                    "background": "#f9f9ff",
+                    "error": "#ba1a1a",
+                    "primary-fixed": "#6ffbbe",
+                    "on-background": "#151c27",
+                    "surface-variant": "#dce2f3",
+                    "surface-tint": "#006c49"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "stack-gap": "8px",
+                    "margin-page": "20px",
+                    "gutter-card": "16px",
+                    "padding-element": "12px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Manrope"],
+                    "body-sm": ["Inter"],
+                    "display-lg": ["Manrope"],
+                    "price-display": ["Manrope"],
+                    "title-sm": ["Manrope"],
+                    "label-bold": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-separation {
+            background: linear-gradient(180deg, rgba(249, 249, 255, 0) 0%, #f0f3ff 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+<header class="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 shadow-sm sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-5 py-4 max-w-screen-xl mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400" data-icon="savings">savings</span>
+<h1 class="font-manrope font-bold text-lg text-emerald-600 dark:text-emerald-500 tracking-tight text-xl font-extrabold">AhorroYA</h1>
+</div>
+<button class="text-gray-500 dark:text-gray-400 font-manrope font-bold text-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors px-3 py-1 rounded-lg active:scale-95 duration-150">Skip</button>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center justify-center px-margin-page py-10 max-w-md mx-auto w-full">
+<div class="w-full relative mb-12">
+<div class="absolute -top-10 -left-10 w-40 h-40 bg-primary-container/20 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-secondary-container/20 rounded-full blur-3xl"></div>
+<div class="relative bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl p-6 overflow-hidden border border-gray-100 dark:border-gray-800">
+<div class="aspect-[4/5] rounded-2xl overflow-hidden relative group">
+<img class="w-full h-full object-cover" data-alt="Modern smartphone displaying a colorful push notification about a price drop with a green checkmark and financial chart background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAz_ejZdY2KnWDpU7UQVdtiblDcHMQaV73xmK1ZOjIAq5yd2Cf-6-2cCiQh78UnPS4_s3d6_g0bNo4WgnnjT1KElWOttYLgOJNbJqJtGGJ4tgfyQF1KSB_s6aO7yGzXXkg46DmQDYp3aeRtFYYpNHdLOK3IE9S6Bg_cYjT4MxtFyg-F_sbQLuQUjLCAoDumUnKp4gYNNgFUaaQmMX3icBELRdh2dPk3vOZkZqwDnR69Tah7XrBh4R2MASEM2KZk5M0-Mpik-PXOKiY"/>
+<div class="absolute inset-0 bg-black/5 flex flex-col items-center justify-center p-6">
+<div class="w-full bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-white/20 transform -rotate-2">
+<div class="flex items-start gap-3">
+<div class="bg-primary-container p-2 rounded-xl">
+<span class="material-symbols-outlined text-white text-[24px]" data-icon="notifications_active" data-weight="fill" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<p class="font-label-bold text-label-bold text-primary">¡Baja de Precio!</p>
+<p class="text-[10px] text-gray-400">Ahora</p>
+</div>
+<p class="font-title-sm text-[14px] leading-tight mb-1 text-on-surface">Leche Entera 1L</p>
+<div class="flex items-center gap-2">
+<span class="text-gray-400 line-through text-[12px]">$1.250</span>
+<span class="font-price-display text-[18px] text-primary">$980</span>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full bg-white/90 backdrop-blur-sm rounded-2xl p-3 shadow-lg border border-white/20 mt-4 transform translate-x-4 rotate-1">
+<div class="flex items-center gap-3">
+<div class="bg-secondary p-2 rounded-full">
+<span class="material-symbols-outlined text-white text-[18px]" data-icon="trending_down">trending_down</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">-22% en tu lista guardada</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="text-center space-y-stack-gap mb-12">
+<h2 class="font-display-lg text-display-lg text-on-surface tracking-tight">Alertas Inteligentes</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[280px] mx-auto">Te avisamos cuando bajen los precios de tus productos favoritos.</p>
+</div>
+<div class="flex gap-2 mb-10">
+<div class="w-2 h-2 rounded-full bg-gray-200"></div>
+<div class="w-2 h-2 rounded-full bg-gray-200"></div>
+<div class="w-8 h-2 rounded-full bg-primary"></div>
+</div>
+</main>
+<footer class="mt-auto p-margin-page pb-10 max-w-md mx-auto w-full">
+<button class="w-full bg-primary-container text-on-primary py-padding-element rounded-xl font-headline-md text-headline-md shadow-lg shadow-primary-container/30 active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+            Comenzar
+            <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</footer>
+</body></html>

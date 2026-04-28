@@ -1,0 +1,252 @@
+﻿[
+    {
+        "path":  ".babelrc",
+        "sha":  "7d30f8bf0669af261221cb8429e60957d0a7bd64",
+        "size":  39
+    },
+    {
+        "path":  ".env.example",
+        "sha":  "601c2b81701bef4656030865e453b31a5c64622c",
+        "size":  661
+    },
+    {
+        "path":  ".gitignore",
+        "sha":  "9923f7237c4dd28323e26d855c03c479a14e9667",
+        "size":  240
+    },
+    {
+        "path":  ".gitkeep",
+        "sha":  "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+        "size":  0
+    },
+    {
+        "path":  "App.js",
+        "sha":  "6e68a441eeb242831fc5ba171f481f3a8023e8e9",
+        "size":  470
+    },
+    {
+        "path":  "README.md",
+        "sha":  "14f9b34be9b67ba0e380bf5fb211c27927e0edb5",
+        "size":  1572
+    },
+    {
+        "path":  "README_CLOUD.md",
+        "sha":  "41d2d83035a0cc189c89601c5a76a0aea9838186",
+        "size":  2077
+    },
+    {
+        "path":  "README_SUPABASE.md",
+        "sha":  "8a2414027299b74c6b3fbd3135aa9bc9ee114c94",
+        "size":  1539
+    },
+    {
+        "path":  "README_VERCEL.md",
+        "sha":  "72e0662ce2c33278a1a52c835698852bfa8912cd",
+        "size":  1084
+    },
+    {
+        "path":  "SETUP_INSTRUCTIONS.md",
+        "sha":  "dd62810e626e21467af8a085931a0979c9535516",
+        "size":  2073
+    },
+    {
+        "path":  "api/_security.js",
+        "sha":  "0bcb08141fc8613f9e4c9c987631e7d8436d5296",
+        "size":  1896
+    },
+    {
+        "path":  "api/me.js",
+        "sha":  "65ee581ee67e1f4c45347d0b4ba09c5e3e6fe540",
+        "size":  2582
+    },
+    {
+        "path":  "api/premium-status.js",
+        "sha":  "ed000ec2974df107eeade9d26fb7dd16a8e5d4f7",
+        "size":  1467
+    },
+    {
+        "path":  "app.json",
+        "sha":  "f35a3c42bb2a377f97e9c072e0070b23b776c448",
+        "size":  326
+    },
+    {
+        "path":  "components/ActivityFeed.js",
+        "sha":  "856d62091217f9dd8794368143125b9fd425dff1",
+        "size":  1844
+    },
+    {
+        "path":  "components/AdBanner.js",
+        "sha":  "c777a02a8d8ccb9d0d2a30abbfaf75e0b98f5388",
+        "size":  726
+    },
+    {
+        "path":  "components/AuthPanel.js",
+        "sha":  "1416fc93dd5e14fd16476944048df1416d60eb36",
+        "size":  2545
+    },
+    {
+        "path":  "components/MetricCard.js",
+        "sha":  "5c9073ef1f69976857aee3dbbd0c8af8bf06db05",
+        "size":  904
+    },
+    {
+        "path":  "components/PayPalButtons.js",
+        "sha":  "da8a2efc55c923cc8aa893073f3afe496109392e",
+        "size":  619
+    },
+    {
+        "path":  "components/PayPalButtons.web.js",
+        "sha":  "591b6acb38c228dee3c71f42eeab84d32373f4f5",
+        "size":  2976
+    },
+    {
+        "path":  "components/PremiumCard.js",
+        "sha":  "1168dd8e0ae59d65dbb0e5fc50397b9d41820c12",
+        "size":  1275
+    },
+    {
+        "path":  "components/ProductLinks.js",
+        "sha":  "b8f4125723a4ca82e4626e24eccbaf7f71f14bb2",
+        "size":  1830
+    },
+    {
+        "path":  "components/home/OfferOfDayCard.js",
+        "sha":  "31a61cf33f62e9a4fdd909333bb397ee2445b9de",
+        "size":  2745
+    },
+    {
+        "path":  "components/home/SupermarketMiniCard.js",
+        "sha":  "1f231b35ff871454abd385fbeaaa8f83c611732d",
+        "size":  1274
+    },
+    {
+        "path":  "components/home/TrendDealCard.js",
+        "sha":  "bd69ae69423305b1ae995211fee499104ba4ad9f",
+        "size":  2921
+    },
+    {
+        "path":  "components/layout/AppShell.js",
+        "sha":  "53462361f0f9d7135c77f566403bb9d19855e8aa",
+        "size":  3242
+    },
+    {
+        "path":  "components/layout/BottomNav.js",
+        "sha":  "f59406a72b453c7f95a20fdb665e1fa839559bee",
+        "size":  1933
+    },
+    {
+        "path":  "components/ui/Chip.js",
+        "sha":  "e9426fb290285b61ea3334fcd8dea6c385f21818",
+        "size":  1218
+    },
+    {
+        "path":  "components/ui/SearchBar.js",
+        "sha":  "a4c5b7fcfee2ad475678a7b49757f0b957e72369",
+        "size":  1681
+    },
+    {
+        "path":  "components/ui/SurfaceCard.js",
+        "sha":  "69af4a383520d3ca88033489e1dd64cae87670f7",
+        "size":  558
+    },
+    {
+        "path":  "components/ui/TopBar.js",
+        "sha":  "4de1bf9f8989df0f4edbface45d68df33f117867",
+        "size":  1521
+    },
+    {
+        "path":  "data/mockPrices.js",
+        "sha":  "f8034410c581d5eff6274c65b39a2ad2d51be346",
+        "size":  4378
+    },
+    {
+        "path":  "eas.json",
+        "sha":  "11c2fee391cc1e04a20c1646f02bba0310b4f06c",
+        "size":  397
+    },
+    {
+        "path":  "lib/config.js",
+        "sha":  "fe55357af816a4170fc69d52c1995775b73ee31a",
+        "size":  1147
+    },
+    {
+        "path":  "lib/navigation.js",
+        "sha":  "f212c0e57681fff9ccef5b34fa0e38d2a7b10c00",
+        "size":  1885
+    },
+    {
+        "path":  "lib/supabase.js",
+        "sha":  "62ab0b84254ad12d074bec02e9e7a3f13424db35",
+        "size":  517
+    },
+    {
+        "path":  "lib/ui.js",
+        "sha":  "21118c179036e67fccd9857f0669730a274abdc8",
+        "size":  2677
+    },
+    {
+        "path":  "package.json",
+        "sha":  "7723bfa49e76cc03ef7eddee2e55504e7a614c17",
+        "size":  718
+    },
+    {
+        "path":  "screens/PaywallScreen.js",
+        "sha":  "35900464a4c2727cc97afb15c75e65fd7e19d938",
+        "size":  7687
+    },
+    {
+        "path":  "services/account-service.js",
+        "sha":  "c8be94e5d0c702dd40ad01b6ec98891e00e0a424",
+        "size":  4335
+    },
+    {
+        "path":  "services/auth-service.js",
+        "sha":  "26e9d754d39fe676ba4134ca87e9634f2c604ce5",
+        "size":  2266
+    },
+    {
+        "path":  "services/commerce-service.js",
+        "sha":  "9d82d7a71fa828470bf5f84ecccb7204bff09a48",
+        "size":  1003
+    },
+    {
+        "path":  "services/favorites-service.js",
+        "sha":  "c8f8dc461635707768bc3c485ef8b17374bd4bcb",
+        "size":  688
+    },
+    {
+        "path":  "services/finance-service.js",
+        "sha":  "6456c1f23c5b67a5cde211ca339686e20f24df5f",
+        "size":  2976
+    },
+    {
+        "path":  "services/price-service.js",
+        "sha":  "829835a2e23c66452eae339e4995edde5d105515",
+        "size":  3372
+    },
+    {
+        "path":  "services/supabase-price-service.js",
+        "sha":  "b6f7a200143aa146c12bf81d3719f2c189cb4401",
+        "size":  3134
+    },
+    {
+        "path":  "services/user-price-service.js",
+        "sha":  "dd30444c2ae0cf9baeef844cb6106d01879031e2",
+        "size":  4161
+    },
+    {
+        "path":  "supabase-price-schema.sql",
+        "sha":  "3e3fb2d3674077c7978e65be26afbc0a91fd0694",
+        "size":  10264
+    },
+    {
+        "path":  "supabase-schema.sql",
+        "sha":  "446a35356431a9131419a6b885d19919150167b1",
+        "size":  2504
+    },
+    {
+        "path":  "vercel.json",
+        "sha":  "f8f2bbd34210dbcb7671b95748bb7cc26db1ae93",
+        "size":  389
+    }
+]

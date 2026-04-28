@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AhorroYA - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#ffddb8",
+                    "on-surface-variant": "#3c4a42",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#4edea3",
+                    "surface-bright": "#f9f9ff",
+                    "on-secondary-fixed-variant": "#173bab",
+                    "inverse-surface": "#2a313d",
+                    "secondary-fixed": "#dde1ff",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface": "#f9f9ff",
+                    "secondary-container": "#708cfd",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "outline-variant": "#bbcabf",
+                    "surface-container-lowest": "#ffffff",
+                    "primary": "#006c49",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#e2e8f8",
+                    "surface-container": "#e7eefe",
+                    "on-tertiary-container": "#523200",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-primary-fixed": "#002113",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "tertiary": "#855300",
+                    "tertiary-container": "#e29100",
+                    "on-secondary-container": "#00217a",
+                    "on-primary-fixed-variant": "#005236",
+                    "on-primary-container": "#00422b",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface-dim": "#d3daea",
+                    "primary-fixed-dim": "#4edea3",
+                    "primary-container": "#10b981",
+                    "on-error-container": "#93000a",
+                    "surface-container-low": "#f0f3ff",
+                    "on-surface": "#151c27",
+                    "outline": "#6c7a71",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#dce2f3",
+                    "secondary": "#3755c3",
+                    "on-secondary-fixed": "#001453",
+                    "background": "#f9f9ff",
+                    "error": "#ba1a1a",
+                    "primary-fixed": "#6ffbbe",
+                    "on-background": "#151c27",
+                    "surface-variant": "#dce2f3",
+                    "surface-tint": "#006c49"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "stack-gap": "8px",
+                    "margin-page": "20px",
+                    "gutter-card": "16px",
+                    "padding-element": "12px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Manrope"],
+                    "body-sm": ["Inter"],
+                    "display-lg": ["Manrope"],
+                    "price-display": ["Manrope"],
+                    "title-sm": ["Manrope"],
+                    "label-bold": ["Inter"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-separation { background-color: #f0f3ff; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 shadow-sm fixed top-0 w-full z-50">
+<div class="flex justify-between items-center w-full px-5 py-4 max-w-screen-xl mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400" data-icon="savings">savings</span>
+<span class="text-xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-500 font-manrope">AhorroYA</span>
+</div>
+<button class="text-gray-500 dark:text-gray-400 font-manrope font-bold text-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors px-3 py-1 rounded-lg active:scale-95 duration-150">Skip</button>
+</div>
+</header>
+<main class="flex-1 flex flex-col pt-20 pb-10 px-5 max-w-md mx-auto w-full">
+<!-- Hero Visual: Price Comparison Interface Mockup -->
+<div class="relative mt-8 mb-10">
+<div class="bg-surface-container-low rounded-[2rem] p-6 shadow-sm border border-outline-variant/30 overflow-hidden relative">
+<!-- Abstract Background Elements -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+<!-- Mockup List UI -->
+<div class="space-y-4 relative z-10">
+<!-- Product Card -->
+<div class="bg-white rounded-xl p-4 shadow-md flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="local_drink">local_drink</span>
+</div>
+<div class="flex-1">
+<p class="font-label-bold text-label-bold text-on-surface-variant">Leche Entera 1L</p>
+<p class="font-body-sm text-body-sm text-outline">Marca Líder</p>
+</div>
+<div class="text-right">
+<p class="font-price-display text-price-display text-primary">$1.250</p>
+</div>
+</div>
+<!-- Comparison List -->
+<div class="space-y-2">
+<div class="flex items-center justify-between p-3 bg-primary/5 rounded-lg border border-primary/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="storefront">storefront</span>
+<span class="font-title-sm text-body-sm font-bold">Carrefour</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-price-display text-[16px] text-primary">$1.250</span>
+<span class="bg-primary text-white text-[10px] px-2 py-0.5 rounded-full font-bold">MENOR</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-3 bg-white rounded-lg border border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="storefront">storefront</span>
+<span class="font-title-sm text-body-sm">Coto</span>
+</div>
+<span class="font-price-display text-[16px] text-on-surface-variant">$1.420</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-white rounded-lg border border-outline-variant/20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-sm" data-icon="storefront">storefront</span>
+<span class="font-title-sm text-body-sm">Jumbo</span>
+</div>
+<span class="font-price-display text-[16px] text-on-surface-variant">$1.510</span>
+</div>
+</div>
+<!-- Trend Indicator Badge -->
+<div class="flex justify-center">
+<div class="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="trending_down">trending_down</span>
+<span class="font-label-bold text-label-bold">Ahorro promedio del 15%</span>
+</div>
+</div>
+</div>
+<!-- Main Display Image Overlay -->
+<div class="mt-8 rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
+<img alt="Fresh produce aisle" class="w-full h-48 object-cover" data-alt="vibrant supermarket interior with fresh organized vegetables and soft department lighting focusing on quality and variety" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVGDI5ZTcD8eGKK3WLI0gCkwA-s1t3G-9E4A7RmR6UTHIkOOWL6Myd-QSNXBD9eaOWL7smUhB6oVxZHWcqVH42Bz8zssDG82kPwzU8A-lptO6nSC8oGHQGgVKthpFv-ptbar0FGEhq3KeL4zc44q7MzW_v_nalK1mGlryZ3dAsubVI3Yoi-ncBMnuLQRtcZxhFKoLRw7qaib6nML1FHqtB7uZvI78GlQCgaCURNADjVnQhW4Mc9pETXRLKG8aA009N04bRXPIUbLA"/>
+</div>
+</div>
+</div>
+<!-- Content Section -->
+<div class="text-center space-y-4">
+<h1 class="font-display-lg text-display-lg text-on-surface leading-tight">
+                Encontrá el mejor precio
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant px-4">
+                Comparamos precios de supermercados cercanos para que no pagues de más.
+            </p>
+</div>
+<!-- Progress Dots -->
+<div class="flex justify-center gap-2 mt-8 mb-10">
+<div class="w-8 h-2 rounded-full bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+</div>
+<!-- Action Button -->
+<div class="mt-auto">
+<button class="w-full bg-primary-container text-on-primary-container font-headline-md text-headline-md py-4 rounded-xl shadow-lg active:scale-95 transition-transform duration-150 flex items-center justify-center gap-2">
+                Siguiente
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</main>
+<!-- Visual separation for bottom of screen -->
+<div class="h-8 w-full bg-transparent"></div>
+</body></html>

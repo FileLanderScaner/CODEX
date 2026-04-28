@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed": "#002113",
+                    "surface-container": "#e7eefe",
+                    "primary": "#006c49",
+                    "on-secondary-fixed-variant": "#173bab",
+                    "primary-fixed-dim": "#4edea3",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#10b981",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#708cfd",
+                    "surface": "#f9f9ff",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed": "#001453",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "secondary": "#3755c3",
+                    "on-tertiary-container": "#523200",
+                    "on-background": "#151c27",
+                    "inverse-surface": "#2a313d",
+                    "tertiary-container": "#e29100",
+                    "surface-variant": "#dce2f3",
+                    "on-primary-container": "#00422b",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#4edea3",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f0f3ff",
+                    "surface-bright": "#f9f9ff",
+                    "on-secondary": "#ffffff",
+                    "background": "#f9f9ff",
+                    "outline-variant": "#bbcabf",
+                    "surface-tint": "#006c49",
+                    "surface-container-highest": "#dce2f3",
+                    "primary-fixed": "#6ffbbe",
+                    "on-surface-variant": "#3c4a42",
+                    "on-tertiary-fixed": "#2a1700",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "outline": "#6c7a71",
+                    "on-secondary-container": "#00217a",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-primary-fixed-variant": "#005236",
+                    "tertiary": "#855300",
+                    "surface-dim": "#d3daea",
+                    "on-surface": "#151c27",
+                    "tertiary-fixed": "#ffddb8",
+                    "surface-container-high": "#e2e8f8",
+                    "secondary-fixed": "#dde1ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "margin-page": "20px",
+                    "gutter-card": "16px",
+                    "padding-element": "12px",
+                    "stack-gap": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Manrope"],
+                    "body-sm": ["Inter"],
+                    "title-sm": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "price-display": ["Manrope"],
+                    "body-md": ["Inter"],
+                    "label-bold": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9ff;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-5 h-16 bg-white dark:bg-zinc-950 shadow-sm dark:shadow-none border-b border-zinc-100 dark:border-zinc-800">
+<div class="flex items-center gap-3">
+<button class="active:scale-95 duration-100 p-2 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors rounded-full">
+<span class="material-symbols-outlined text-emerald-500 dark:text-emerald-400">menu</span>
+</button>
+<h1 class="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">AhorroYA</h1>
+</div>
+<div class="active:scale-95 duration-100 h-10 w-10 rounded-full overflow-hidden border-2 border-emerald-500">
+<img alt="User Profile Avatar" class="h-full w-full object-cover" data-alt="close-up portrait of a friendly man with a slight smile and neat hair, warm natural studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANBAPy3WBVR5q4qpmDCbhPbSBcjHarxpyahPXxfJVXdwDcrrVg1-K8M6JgdUCNN6KC1qtEBG2B-fmCYiynBmfa-4wbN1HmOAyECv0FlrG3T9PbCcHP0f0Ghn8or8APFlJRmi9RcjAw0K6e7k-glmNZA1lUAY5QCJZe0JLhcK3dbhi2VoRotnM1DncFSEJsK7OgbqfJwUAJZWeKw56EwiiHhZ_s9-YXW-WaPmAO-9UKj5WuP8uSXUwPEhUxz3-8SxLQgnO6bXy-S_w"/>
+</div>
+</header>
+<main class="pt-24 pb-32 px-5 max-w-lg mx-auto">
+<!-- Hero Profile Section -->
+<section class="mb-8">
+<div class="flex flex-col items-center text-center">
+<div class="relative mb-4">
+<div class="h-28 w-28 rounded-full overflow-hidden border-4 border-white shadow-lg">
+<img alt="Profile Large" class="h-full w-full object-cover" data-alt="high quality portrait of a young professional man in a casual shirt, soft daylight setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtBfRtuKvNfG1SVAlXKsl4v06mpaFLQgIetuVCuLyUeDKWlw-HnyxpzDdO0Nnl6pmmhefz_CpVH4fWbd6uo2rDnNg0DD755QBupByeI8tShUHbyOGR2WmrtI69mvyM0AzOxYabc-Ws9ahQjOLtkQTMUpbPjJxCEU1sam-avG24m485VK8sPSI0LO_PlazNyll05IeDloWn1ZPs6sj1sy8OC00g0FsFTpKxDn6Y8IJabMdcpvhBOEG2bh8o8egz2kZ2d66Y7hoZGUc"/>
+</div>
+<div class="absolute bottom-1 right-1 bg-emerald-500 text-white rounded-full p-1.5 border-2 border-white shadow-md">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Usuario Ahorrador</h2>
+<div class="mt-1 flex items-center gap-2 px-3 py-1 bg-tertiary-container/20 rounded-full">
+<span class="material-symbols-outlined text-sm text-tertiary">star</span>
+<span class="font-label-bold text-label-bold text-tertiary">Plan Premium</span>
+</div>
+</div>
+</section>
+<!-- Bento Grid Metrics -->
+<section class="mb-8 bento-grid">
+<div class="col-span-2 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl p-5 text-white shadow-md relative overflow-hidden">
+<div class="relative z-10">
+<p class="font-label-bold text-label-bold opacity-80 uppercase tracking-widest">Ahorro Total</p>
+<h3 class="font-price-display text-price-display mt-1">$12,400</h3>
+<div class="mt-3 flex items-center gap-1.5 text-emerald-100 text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span>+15% este mes</span>
+</div>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-9xl">savings</span>
+</div>
+</div>
+<div class="bg-white rounded-xl p-4 shadow-sm border border-zinc-100">
+<span class="material-symbols-outlined text-secondary mb-2">favorite</span>
+<p class="font-label-bold text-label-bold text-zinc-500">Favoritos</p>
+<p class="font-title-sm text-title-sm">24 items</p>
+</div>
+<div class="bg-white rounded-xl p-4 shadow-sm border border-zinc-100">
+<span class="material-symbols-outlined text-primary mb-2">notifications_active</span>
+<p class="font-label-bold text-label-bold text-zinc-500">Alertas</p>
+<p class="font-title-sm text-title-sm">8 activas</p>
+</div>
+</section>
+<!-- Menu Items -->
+<section class="space-y-3">
+<p class="font-label-bold text-label-bold text-zinc-400 px-2 uppercase tracking-widest">General</p>
+<div class="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden divide-y divide-zinc-50">
+<!-- Mis Favoritos -->
+<button class="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors active:scale-[0.98] duration-100 group">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<span class="font-title-sm text-on-surface">Mis Favoritos</span>
+</div>
+<span class="material-symbols-outlined text-zinc-300 group-hover:text-zinc-500">chevron_right</span>
+</button>
+<!-- Historial de Búsquedas -->
+<button class="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors active:scale-[0.98] duration-100 group">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-600">
+<span class="material-symbols-outlined">history</span>
+</div>
+<span class="font-title-sm text-on-surface">Historial de Búsquedas</span>
+</div>
+<span class="material-symbols-outlined text-zinc-300 group-hover:text-zinc-500">chevron_right</span>
+</button>
+<!-- Invitar Amigos -->
+<button class="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors active:scale-[0.98] duration-100 group">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 flex items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+<span class="material-symbols-outlined">share</span>
+</div>
+<span class="font-title-sm text-on-surface">Invitar Amigos</span>
+</div>
+<span class="material-symbols-outlined text-zinc-300 group-hover:text-zinc-500">chevron_right</span>
+</button>
+</div>
+<p class="font-label-bold text-label-bold text-zinc-400 px-2 pt-4 uppercase tracking-widest">Cuenta</p>
+<div class="bg-white rounded-2xl shadow-sm border border-zinc-100 overflow-hidden divide-y divide-zinc-50">
+<!-- Configuración -->
+<button class="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors active:scale-[0.98] duration-100 group">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 flex items-center justify-center rounded-xl bg-zinc-100 text-zinc-600">
+<span class="material-symbols-outlined">settings</span>
+</div>
+<span class="font-title-sm text-on-surface">Configuración</span>
+</div>
+<span class="material-symbols-outlined text-zinc-300 group-hover:text-zinc-500">chevron_right</span>
+</button>
+<!-- Plan Premium -->
+<button class="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors active:scale-[0.98] duration-100 group">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 flex items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<div class="text-left">
+<span class="font-title-sm text-on-surface block">Plan Premium</span>
+<span class="text-xs text-emerald-600 font-medium">Gestionar suscripción</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-zinc-300 group-hover:text-zinc-500">chevron_right</span>
+</button>
+<!-- Logout -->
+<button class="w-full flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors active:scale-[0.98] duration-100 group">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 flex items-center justify-center rounded-xl bg-error-container/30 text-error">
+<span class="material-symbols-outlined">logout</span>
+</div>
+<span class="font-title-sm text-error">Cerrar Sesión</span>
+</div>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe pt-2 bg-white/90 backdrop-blur-md border-t border-zinc-100 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+<button class="flex flex-col items-center justify-center text-zinc-400 px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150">
+<span class="material-symbols-outlined">search</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Explorar</span>
+</button>
+<button class="flex flex-col items-center justify-center text-zinc-400 px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150">
+<span class="material-symbols-outlined">notifications_active</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Alertas</span>
+</button>
+<button class="flex flex-col items-center justify-center text-zinc-400 px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Favoritos</span>
+</button>
+<button class="flex flex-col items-center justify-center text-zinc-400 px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150">
+<span class="material-symbols-outlined">map</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Mapas</span>
+</button>
+<button class="flex flex-col items-center justify-center text-emerald-600 bg-emerald-50 rounded-xl px-3 py-1 hover:opacity-80 transition-opacity active:scale-90 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-manrope text-[11px] font-semibold uppercase tracking-wider mt-1">Perfil</span>
+</button>
+</nav>
+</body></html>

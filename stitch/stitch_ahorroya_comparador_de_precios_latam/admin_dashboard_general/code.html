@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AhorroYA Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#855300",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#e7eefe",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#00422b",
+                        "error": "#ba1a1a",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "on-secondary": "#ffffff",
+                        "background": "#f9f9ff",
+                        "on-surface": "#151c27",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "surface-container-low": "#f0f3ff",
+                        "secondary-container": "#708cfd",
+                        "surface-container-highest": "#dce2f3",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-primary-fixed": "#002113",
+                        "outline": "#6c7a71",
+                        "surface-container-high": "#e2e8f8",
+                        "secondary": "#3755c3",
+                        "secondary-fixed": "#dde1ff",
+                        "on-tertiary-container": "#523200",
+                        "surface-variant": "#dce2f3",
+                        "on-error-container": "#93000a",
+                        "inverse-on-surface": "#ebf1ff",
+                        "tertiary-container": "#e29100",
+                        "primary-container": "#10b981",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#6ffbbe",
+                        "surface-tint": "#006c49",
+                        "surface": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#173bab",
+                        "outline-variant": "#bbcabf",
+                        "surface-dim": "#d3daea",
+                        "tertiary-fixed": "#ffddb8",
+                        "primary": "#006c49",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#001453",
+                        "surface-bright": "#f9f9ff",
+                        "on-primary-fixed-variant": "#005236",
+                        "primary-fixed-dim": "#4edea3",
+                        "on-secondary-container": "#00217a",
+                        "on-surface-variant": "#3c4a42",
+                        "on-background": "#151c27",
+                        "inverse-primary": "#4edea3",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2a313d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-gap": "8px",
+                        "gutter-card": "16px",
+                        "unit": "4px",
+                        "padding-element": "12px",
+                        "margin-page": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "title-sm": ["Manrope"],
+                        "label-bold": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "price-display": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .chart-gradient {
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body-md text-on-background">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between px-5 h-16 w-full max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="Admin Profile Picture" class="w-full h-full object-cover" data-alt="Close-up portrait of a professional male administrator in a clean office setting, soft professional lighting, neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkrgjKZrGLULG_hnTAyj59ibGbh1EwTmRVEMD_574BJnzN98aEkRmi18F2sa5wnfKYNCTl5KW8538Gznor-UnbIQyfLeqn-jsM8vYpx7NppcDeQDKLG5TiZOO9cb9DVy2lV5dFMsGNx1RA7ztnPHvkDEFCrZGHQsIogVqMFT3aMDC4UtF0asG_iqlEaqla4PIPq4r1DQC-Xw0w4q6Mw5Z4YqAIzc-jGHLYCtXxmsSFf7OlIvIsd0b5Vd6B55s-srTEdm5i47AIZHQ"/>
+</div>
+<h1 class="text-xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400 font-headline-md">AhorroYA Admin</h1>
+</div>
+<button class="text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 p-2 rounded-full active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-20 pb-28 px-margin-page max-w-md mx-auto space-y-gutter-card">
+<!-- Welcome Section -->
+<section class="space-y-unit">
+<h2 class="font-headline-md text-headline-md text-on-surface">Panel de Control</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Lunes, 12 de Junio</p>
+</section>
+<!-- KPI Grid: Asymmetric Bento Style -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Total Users -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-2 col-span-1">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary" data-icon="group">group</span>
+<span class="bg-primary-container/10 text-on-primary-container font-label-bold text-[10px] px-2 py-0.5 rounded-full">+5%</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Total Users</p>
+<p class="font-price-display text-price-display text-on-surface">12.4k</p>
+</div>
+</div>
+<!-- Active Alerts -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-2 col-span-1">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Active Alerts</p>
+<p class="font-price-display text-price-display text-on-surface">24</p>
+</div>
+</div>
+<!-- Savings Generated - Double Width -->
+<div class="bg-primary text-on-primary p-5 rounded-xl shadow-md col-span-2 space-y-4 relative overflow-hidden">
+<div class="relative z-10">
+<p class="font-label-bold text-label-bold opacity-80">Total Savings Generated</p>
+<p class="font-display-lg text-display-lg">$450,230</p>
+<div class="mt-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span class="font-body-sm text-body-sm">Peak performance this month</span>
+</div>
+</div>
+<!-- Decorative background shape -->
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="savings">savings</span>
+</div>
+</div>
+<!-- Premium Revenue -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 space-y-2 col-span-2">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Premium Revenue</p>
+<p class="font-headline-md text-headline-md text-on-surface">$12,840</p>
+</div>
+<div class="w-24 h-12 flex items-end gap-1">
+<div class="w-full bg-primary-container/20 rounded-t-sm h-[40%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-sm h-[60%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-sm h-[45%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-sm h-[80%]"></div>
+<div class="w-full bg-primary rounded-t-sm h-[95%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Metrics Chart Section -->
+<section class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 space-y-4">
+<div class="flex justify-between items-center">
+<h3 class="font-title-sm text-title-sm">Métricas de Ahorro</h3>
+<button class="text-primary font-label-bold text-label-bold flex items-center gap-1">
+                    Últimos 7 días <span class="material-symbols-outlined text-xs" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<div class="h-40 w-full relative flex items-end justify-between px-2 pt-4">
+<!-- Simple Sparkline Representation using Divs/CSS -->
+<div class="absolute inset-0 chart-gradient rounded-lg"></div>
+<div class="relative w-full h-full flex items-end gap-4 overflow-hidden">
+<svg class="w-full h-full overflow-visible" viewbox="0 0 400 100">
+<path d="M0,80 Q50,70 100,50 T200,60 T300,20 T400,30" fill="none" stroke="#10b981" stroke-linecap="round" stroke-width="3"></path>
+<circle cx="400" cy="30" fill="#10b981" r="4"></circle>
+</svg>
+</div>
+</div>
+<div class="flex justify-between font-body-sm text-[10px] text-slate-400">
+<span>06 JUN</span>
+<span>08 JUN</span>
+<span>10 JUN</span>
+<span>Hoy</span>
+</div>
+</section>
+<!-- Recent Reports Section -->
+<section class="space-y-stack-gap">
+<div class="flex justify-between items-center mb-2">
+<h3 class="font-title-sm text-title-sm">Recent Reports</h3>
+<span class="text-primary font-label-bold text-label-bold">View All</span>
+</div>
+<div class="space-y-3">
+<!-- Report Item 1 -->
+<div class="bg-white p-4 rounded-xl border border-slate-100 flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-error-container/30 flex items-center justify-center text-error">
+<span class="material-symbols-outlined" data-icon="price_check">price_check</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<p class="font-label-bold text-on-surface">Flagged Price: Milk 1L</p>
+<span class="text-[10px] text-slate-400">2m ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-1">Reported price $1.20 vs $4.50 avg.</p>
+<div class="mt-2 flex gap-2">
+<span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-semibold text-slate-600">STORE #042</span>
+<span class="px-2 py-0.5 bg-amber-50 rounded text-[10px] font-semibold text-amber-700 uppercase tracking-tighter">Pending</span>
+</div>
+</div>
+</div>
+<!-- Report Item 2 -->
+<div class="bg-white p-4 rounded-xl border border-slate-100 flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<p class="font-label-bold text-on-surface">User Feedback</p>
+<span class="text-[10px] text-slate-400">1h ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-1">"The store location for Market Max is incorrect..."</p>
+<div class="mt-2 flex gap-2">
+<span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-semibold text-slate-600">ID: #9821</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<div class="flex justify-around items-center px-4 pt-2 pb-6 w-full max-w-md mx-auto">
+<!-- Active Tab: Overview -->
+<a class="flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl px-3 py-1 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-manrope text-[10px] font-semibold tracking-wide uppercase mt-1">Overview</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1 hover:text-emerald-500 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-manrope text-[10px] font-semibold tracking-wide uppercase mt-1">Inventory</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1 hover:text-emerald-500 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-manrope text-[10px] font-semibold tracking-wide uppercase mt-1">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-3 py-1 hover:text-emerald-500 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-manrope text-[10px] font-semibold tracking-wide uppercase mt-1">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

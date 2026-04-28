@@ -1,0 +1,1185 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import ActivityFeed from '../components/ActivityFeed';
+import AdBanner from '../components/AdBanner';
+import AuthPanel from '../components/AuthPanel';
+import PremiumCard from '../components/PremiumCard';
+import OfferOfDayCard from '../components/home/OfferOfDayCard';
+import SupermarketMiniCard from '../components/home/SupermarketMiniCard';
+import TrendDealCard from '../components/home/TrendDealCard';
+import TopBar from '../components/ui/TopBar';
+import SearchBar from '../components/ui/SearchBar';
+import Chip from '../components/ui/Chip';
+import SurfaceCard from '../components/ui/SurfaceCard';
+import { popularProducts } from '../data/mockPrices';
+import { getApiUrl } from '../lib/config';
+import { ui } from '../lib/ui';
+import PaywallScreen from './PaywallScreen';
+import ResultsScreen from './ResultsScreen';
+import ProductDetailScreen from './ProductDetailScreen';
+import QrScreen from './QrScreen';
+import { loadFavorites, toggleFavorite } from '../services/favorites-service';
+import {
+  checkPremiumStatus,
+  createCloudAlert,
+  getAuthHeaders,
+  getSessionUser,
+  loadCloudFavorites,
+  saveCloudFavorite,
+  subscribeToAuth,
+  upsertProfile,
+} from '../services/account-service';
+import { loadProductLinks } from '../services/commerce-service';
+import { getPopularDeals, normalizeProduct, searchPrices } from '../services/price-service';
+import { addCloudPrice, addCloudReport, addCloudShare, loadCloudPrices } from '../services/supabase-price-service';
+import {
+  addPoints,
+  addSearchHistory,
+  addUserPrice,
+  deleteLocalAlert,
+  loadLocalAlerts,
+  loadPoints,
+  loadSearchHistory,
+  loadUserPrices,
+  reportPrice,
+  setLocalAlertActive,
+  upsertLocalAlert,
+} from '../services/user-price-service';
+import { deleteCloudAlert, loadCloudAlerts, setCloudAlertActive } from '../services/account-service';
+// keep signOut in the same module (explicit import kept separate to avoid big diffs)
+import { signOutAccount } from '../services/account-service';
+
+const SEARCHES_PER_INTERSTITIAL = 3;
+
+export default function PriceSearchScreen({ nav, activeTab }) {
+  const [query, setQuery] = useState('');
+  const [searchedQuery, setSearchedQuery] = useState('');
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState('Todos');
+  const [results, setResults] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [userPrices, setUserPrices] = useState([]);
+  const [cloudPrices, setCloudPrices] = useState([]);
+  const [cloudStatus, setCloudStatus] = useState('Modo local');
+  const [accountUser, setAccountUser] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
+  const [productLinks, setProductLinks] = useState([]);
+  const [points, setPoints] = useState(0);
+  const [searchCount, setSearchCount] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [showPremium, setShowPremium] = useState(false);
+  const [sortKey, setSortKey] = useState('relevance');
+  const [showDeveloperFeed, setShowDeveloperFeed] = useState(false);
+  const [savingPrice, setSavingPrice] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+  const [qrText, setQrText] = useState('');
+  const [newPrice, setNewPrice] = useState({
+    product: '',
+    price: '',
+    store: '',
+    neighborhood: '',
+  });
+
+  const locationLabel = useMemo(() => 'Montevideo, UY', []);
+  const currentPath = Platform.OS === 'web' ? (nav?.path || '/app') : '/app';
+  const currentQuery = Platform.OS === 'web' ? (nav?.query || {}) : {};
+
+  useEffect(() => {
+    Promise.all([
+      loadFavorites(),
+      loadSearchHistory(),
+      loadUserPrices(),
+      loadPoints(),
+      loadLocalAlerts().catch(() => []),
+      loadCloudPrices().catch(() => []),
+    ]).then(([storedFavorites, storedHistory, storedPrices, storedPoints, storedAlerts, storedCloudPrices]) => {
+      setFavorites(storedFavorites);
+      setHistory(storedHistory);
+      setUserPrices(storedPrices);
+      setCloudPrices(storedCloudPrices);
+      setPoints(storedPoints);
+      setAlerts(storedAlerts);
+      setCloudStatus(`Supabase activo: ${storedCloudPrices.length} precios`);
+    }).catch(() => null);
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+    const path = nav?.path || '/app';
+    if (path.startsWith('/app/premium')) {
+      setShowPremium(true);
+    }
+    if (path.startsWith('/app/qr')) {
+      const text = String(currentQuery.text || '').trim();
+      if (text) setQrText(text);
+    }
+  }, [nav?.path]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
+    const path = nav?.path || '/app';
+    if (path.startsWith('/app/buscar')) {
+      const q = String(currentQuery.q || '').trim();
+      if (q && normalizeProduct(q) !== normalizeProduct(searchedQuery)) {
+        runSearch(q);
+      }
+    }
+  }, [nav?.path, currentQuery.q]);
+
+  useEffect(() => {
+    getSessionUser().then(async (user) => {
+      setAccountUser(user);
+      if (user) {
+        await upsertProfile(user).catch(() => null);
+        const [cloudFavorites, premium] = await Promise.all([
+          loadCloudFavorites(user),
+          checkPremiumStatus(user),
+        ]);
+        const cloudAlerts = await loadCloudAlerts(user).catch(() => []);
+        if (cloudFavorites.length) {
+          setFavorites(cloudFavorites);
+        }
+        if (cloudAlerts?.length) {
+          setAlerts(cloudAlerts);
+        }
+        setIsPremium(premium);
+      }
+    });
+
+    return subscribeToAuth(async (user) => {
+      setAccountUser(user);
+      if (user) {
+        await upsertProfile(user).catch(() => null);
+        const [cloudFavorites, premium] = await Promise.all([
+          loadCloudFavorites(user),
+          checkPremiumStatus(user),
+        ]);
+        const cloudAlerts = await loadCloudAlerts(user).catch(() => []);
+        if (cloudFavorites.length) {
+          setFavorites(cloudFavorites);
+        }
+        if (cloudAlerts?.length) {
+          setAlerts(cloudAlerts);
+        }
+        setIsPremium(premium);
+      } else {
+        setIsPremium(false);
+        // Keep local alerts as fallback
+        setAlerts(await loadLocalAlerts().catch(() => []));
+      }
+    });
+  }, []);
+
+  const allCommunityPrices = useMemo(() => [...cloudPrices, ...userPrices], [cloudPrices, userPrices]);
+  const deals = useMemo(() => getPopularDeals(allCommunityPrices), [allCommunityPrices]);
+
+  const runSearch = async (value = query, neighborhood = selectedNeighborhood) => {
+    const nextQuery = normalizeProduct(value);
+    if (!nextQuery) {
+      return;
+    }
+
+    const nextSearchCount = searchCount + 1;
+    setSearchCount(nextSearchCount);
+    setQuery(nextQuery);
+    setSearchedQuery(nextQuery);
+    setResults(searchPrices(nextQuery, allCommunityPrices, { neighborhood }));
+    setProductLinks(await loadProductLinks(nextQuery));
+    setHistory(await addSearchHistory(nextQuery));
+
+    if (nav?.goSearch) {
+      nav.goSearch();
+    }
+
+    if (!isPremium && nextSearchCount % SEARCHES_PER_INTERSTITIAL === 0) {
+      setFeedback('Anuncio interstitial (simulado): desbloquea Premium para eliminar publicidad.');
+    }
+  };
+
+  const handleNeighborhood = (neighborhood) => {
+    setSelectedNeighborhood(neighborhood);
+    if (searchedQuery) {
+      setResults(searchPrices(searchedQuery, allCommunityPrices, { neighborhood }));
+    }
+  };
+
+  const handleFavorite = async (product) => {
+    const normalized = normalizeProduct(product);
+    const nextFavorites = await toggleFavorite(favorites, normalized);
+    await saveCloudFavorite(accountUser, normalized, nextFavorites.includes(normalized)).catch(() => null);
+    setFavorites(nextFavorites);
+    setFeedback(nextFavorites.includes(normalized) ? 'Favorito guardado.' : 'Favorito eliminado.');
+  };
+
+  const handleSharePoints = async (price, channel) => {
+    const nextPoints = await addPoints(1);
+    await addCloudShare(price, channel).catch(() => null);
+    setPoints(nextPoints);
+    setFeedback('+1 punto por compartir. Gracias por sumar a la comunidad.');
+  };
+
+  const handleReportPrice = async (price) => {
+    await reportPrice(price);
+    await addCloudReport(price).catch(() => null);
+    setFeedback('Reporte guardado. Gracias por ayudar a limpiar la base de precios.');
+  };
+
+  const handleCreateAlert = async (product) => {
+    const normalized = normalizeProduct(product);
+    const nextFavorites = favorites.includes(normalized) ? favorites : await toggleFavorite(favorites, normalized);
+    await saveCloudFavorite(accountUser, normalized, true).catch(() => null);
+    const neighborhood = selectedNeighborhood === 'Todos' ? null : selectedNeighborhood;
+    if (accountUser) {
+      const created = await createCloudAlert(accountUser, normalized, neighborhood).catch(() => null);
+      if (created) {
+        setAlerts((current) => [created, ...current.filter((a) => a.id !== created.id)]);
+      }
+    } else {
+      const next = await upsertLocalAlert({ normalized_product: normalized, neighborhood, target_price: null }).catch(() => []);
+      setAlerts(next);
+    }
+    setFavorites(nextFavorites);
+    setFeedback(accountUser ? `Alerta creada para ${normalized}.` : `Alerta local simulada para ${normalized}. Entra con Google para sincronizarla.`);
+  };
+
+  const toggleAlert = async (alert, nextActive) => {
+    if (!alert) {
+      return;
+    }
+    if (accountUser && alert.id && !String(alert.id).startsWith('local-alert-')) {
+      await setCloudAlertActive(accountUser, alert.id, nextActive).catch(() => null);
+      setAlerts((current) => current.map((a) => (a.id === alert.id ? { ...a, active: Boolean(nextActive) } : a)));
+      return;
+    }
+    const key = alert.key || `${alert.normalized_product}::${alert.neighborhood || ''}`;
+    const next = await setLocalAlertActive(key, nextActive).catch(() => []);
+    setAlerts(next);
+  };
+
+  const removeAlert = async (alert) => {
+    if (!alert) {
+      return;
+    }
+    if (accountUser && alert.id && !String(alert.id).startsWith('local-alert-')) {
+      const ok = await deleteCloudAlert(accountUser, alert.id).catch(() => false);
+      if (ok) {
+        setAlerts((current) => current.filter((a) => a.id !== alert.id));
+      }
+      return;
+    }
+    const key = alert.key || `${alert.normalized_product}::${alert.neighborhood || ''}`;
+    const next = await deleteLocalAlert(key).catch(() => []);
+    setAlerts(next);
+  };
+
+  const openPremium = async () => {
+    const authHeaders = await getAuthHeaders();
+    await fetch(getApiUrl('/api/monetization-event'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
+      body: JSON.stringify({ type: 'premium_click', source: 'home_cta', value: deals.reduce((s, d) => s + d.savings, 0) }),
+    }).catch(() => null);
+    setShowPremium(true);
+    if (Platform.OS === 'web') {
+      nav?.navigate?.('/app/premium');
+    }
+  };
+
+  const openProductDetail = (item) => {
+    const normalized = normalizeProduct(item?.product || item?.normalizedProduct || searchedQuery);
+    if (!normalized) return;
+    if (Platform.OS === 'web') {
+      nav?.navigate?.(`/app/productos/${encodeURIComponent(normalized)}`);
+    }
+  };
+
+  const openQr = (text) => {
+    const payload = String(text || '').trim();
+    if (!payload) return;
+    setQrText(payload);
+    if (Platform.OS === 'web') {
+      nav?.navigate?.(`/app/qr?text=${encodeURIComponent(payload)}`);
+    }
+  };
+
+  const handleAddPrice = async () => {
+    const product = normalizeProduct(newPrice.product);
+    const price = Number(String(newPrice.price || '').replace(',', '.'));
+    const store = String(newPrice.store || '').trim();
+    const neighborhood = String(newPrice.neighborhood || '').trim();
+
+    if (!product || !price || !store) {
+      setFeedback('Completa producto, precio y tienda.');
+      return;
+    }
+
+    if (price <= 0 || price > 99999) {
+      setFeedback('Revisa el precio. Tiene que ser un monto valido.');
+      return;
+    }
+
+    setSavingPrice(true);
+    setFeedback('');
+    try {
+      const savedLocal = await addUserPrice({
+        product,
+        price,
+        store,
+        neighborhood: neighborhood || 'Cerca tuyo',
+      });
+      setUserPrices(savedLocal);
+
+      const savedCloud = await addCloudPrice({
+        product,
+        price,
+        store,
+        neighborhood: neighborhood || 'Cerca tuyo',
+      }).catch(() => null);
+      if (savedCloud) {
+        setCloudPrices((current) => [savedCloud, ...current].slice(0, 250));
+      }
+
+      const nextPoints = await addPoints(1);
+      setPoints(nextPoints);
+      setNewPrice({ product: '', price: '', store: '', neighborhood: '' });
+      setFeedback('Gracias, estas ayudando a otros a ahorrar.');
+    } finally {
+      setSavingPrice(false);
+    }
+  };
+
+  if (showPremium) {
+    return (
+      <PaywallScreen
+        user={accountUser ? { id: accountUser.id, email: accountUser.email } : null}
+        onBack={() => {
+          setShowPremium(false);
+          if (Platform.OS === 'web') {
+            nav?.navigate?.('/app/perfil');
+          }
+        }}
+      />
+    );
+  }
+
+  const renderHome = () => {
+    const topDeal = deals[0] || { product: 'aceite de girasol', savings: 340, cheapest: { price: 1250 }, expensive: { price: 1890 } };
+    const stores = Array.from(new Set(allCommunityPrices.map((item) => item.store))).slice(0, 2);
+    const featured = deals.slice(0, 3);
+
+    return (
+      <View style={{ gap: 18 }}>
+        <TopBar
+          locationLabel={locationLabel}
+          onPressLocation={() => Platform.OS === 'web' ? nav?.navigate?.('/app/configuracion') : Alert.alert('Ubicacion', 'Proximo paso: elegir ciudad y barrio.')}
+          onPressQr={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : Alert.alert('Escanear', 'Proximo paso: escaneo por codigo de barras.')}
+        />
+
+        <View style={styles.hero}>
+          <Text selectable style={styles.brand}>AhorroYA</Text>
+          <Text selectable style={styles.heroSubtitle}>Encontra el precio mas barato cerca tuyo en segundos.</Text>
+        </View>
+
+        <SearchBar
+          value={query}
+          onChangeText={setQuery}
+          onSubmit={() => runSearch()}
+          onPressBarcode={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : Alert.alert('Escanear', 'Proximo paso: escaneo por codigo de barras.')}
+        />
+
+        <View style={{ gap: 10 }}>
+          <Text selectable style={styles.sectionTitle}>Busqueda rapida</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+            {popularProducts.map((product) => (
+              <Chip key={product} label={product} active={false} onPress={() => runSearch(product)} />
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <Text selectable style={styles.sectionTitle}>Ahorro del dia</Text>
+          <OfferOfDayCard
+            title={String(topDeal.product || 'Oferta destacada').replace(/\b\w/g, (c) => c.toUpperCase())}
+            price={`$${Number(topDeal.cheapest?.price || 1250)}`}
+            oldPrice={`$${Number(topDeal.expensive?.price || 1890)}`}
+            subtitle={`Ahorra un ${Math.max(10, Math.round((topDeal.savings / Math.max(topDeal.expensive?.price || 1, 1)) * 100))}% hoy`}
+            onPress={() => runSearch(topDeal.product || 'aceite')}
+          />
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <View style={styles.rowBetween}>
+            <Text selectable style={styles.sectionTitle}>Supermercados cercanos</Text>
+            <Pressable accessibilityRole="button" onPress={() => Platform.OS === 'web' ? nav?.navigate?.('/app/supermercados') : Alert.alert('Mapa', 'Proximo paso: mapa de sucursales.')}>
+              <Text style={styles.link}>Ver mapa</Text>
+            </Pressable>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <SupermarketMiniCard name={stores[0] || 'Ta-Ta'} distanceLabel="a 300m" onPress={() => runSearch(query || 'leche')} />
+            <SupermarketMiniCard name={stores[1] || 'Disco'} distanceLabel="a 450m" onPress={() => runSearch(query || 'arroz')} />
+          </View>
+        </View>
+
+        <View style={{ gap: 10 }}>
+          <Text selectable style={styles.sectionTitle}>Ofertas destacadas</Text>
+          <View style={{ gap: 12 }}>
+            {featured.length ? featured.map((deal, idx) => (
+              <TrendDealCard
+                key={`${deal.product}-${idx}`}
+                category={String(deal.cheapest?.category || 'Supermercado').toUpperCase()}
+                title={String(deal.cheapest?.displayName || deal.product)}
+                priceLabel={`$${Number(deal.cheapest?.price || 0) || 0}`}
+                badgeLabel={deal.savings > 0 ? `-${Math.min(99, Math.round((deal.savings / Math.max(deal.expensive?.price || 1, 1)) * 100))}%` : 'ESTABLE'}
+                badgeTone={deal.savings > 0 ? 'down' : 'stable'}
+                onPress={() => runSearch(deal.product)}
+              />
+            )) : (
+              <SurfaceCard>
+                <Text selectable style={styles.emptyTitle}>Todavia no hay suficientes precios.</Text>
+                <Text selectable style={styles.emptyText}>Carga 1 precio para empezar a ver tendencias y mejores compras.</Text>
+              </SurfaceCard>
+            )}
+          </View>
+        </View>
+
+        {!isPremium ? <AdBanner /> : null}
+      </View>
+    );
+  };
+
+  const renderSearch = () => (
+    <View style={{ gap: 14 }}>
+      <TopBar
+        locationLabel={locationLabel}
+        onPressLocation={() => Platform.OS === 'web' ? nav?.navigate?.('/app/configuracion') : Alert.alert('Ubicacion', 'Proximo paso: elegir ciudad y barrio.')}
+        onPressQr={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : Alert.alert('Escanear', 'Proximo paso: escaneo por codigo de barras.')}
+      />
+
+      <View style={styles.searchHeader}>
+        <Pressable accessibilityRole="button" onPress={() => nav?.goHome?.()} style={styles.backBtn}>
+          <Text style={styles.backBtnText}>{"<"}</Text>
+        </Pressable>
+        <View style={{ flex: 1 }}>
+          <SearchBar
+            value={query}
+            onChangeText={setQuery}
+            onSubmit={() => runSearch()}
+            onPressBarcode={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : Alert.alert('Escanear', 'Proximo paso: escaneo por codigo de barras.')}
+          />
+        </View>
+      </View>
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+        <Chip label="Relevancia" active={sortKey === 'relevance'} onPress={() => setSortKey('relevance')} leading="≡" />
+        <Chip label="Precio" active={sortKey === 'price'} onPress={() => setSortKey('price')} />
+        <Chip label="Distancia" active={sortKey === 'distance'} onPress={() => setSortKey('distance')} />
+        <Chip label="Filtros" active={sortKey === 'filters'} onPress={() => setSortKey('filters')} leading="⎚" />
+      </ScrollView>
+
+      <ResultsScreen
+        searchedQuery={searchedQuery}
+        results={results}
+        favorites={favorites}
+        onFavorite={handleFavorite}
+        onSharePoints={handleSharePoints}
+        onReportPrice={handleReportPrice}
+        onCreateAlert={handleCreateAlert}
+        productLinks={productLinks}
+        sortKey={sortKey}
+        selectedNeighborhood={selectedNeighborhood}
+        onNeighborhood={handleNeighborhood}
+        onOpenMap={() => Platform.OS === 'web' ? nav?.navigate?.('/app/supermercados') : Alert.alert('Mapa', 'Proximo paso: mapa de sucursales.')}
+        onOpenDetail={(item) => openProductDetail(item)}
+      />
+
+      <SurfaceCard style={{ gap: 10 }}>
+        <Text selectable style={styles.sectionTitle}>Sumar un precio</Text>
+        <Text selectable style={styles.emptyText}>Gracias, estas ayudando a otros a ahorrar.</Text>
+        <View style={styles.formRow}>
+          <TextInput
+            autoCapitalize="none"
+            placeholder="Producto (ej: leche entera 1L)"
+            value={newPrice.product}
+            onChangeText={(value) => setNewPrice((current) => ({ ...current, product: value }))}
+            style={[styles.inputBox, styles.flexInput]}
+          />
+          <TextInput
+            keyboardType="decimal-pad"
+            placeholder="Precio"
+            value={newPrice.price}
+            onChangeText={(value) => setNewPrice((current) => ({ ...current, price: value }))}
+            style={[styles.inputBox, styles.smallInput]}
+          />
+        </View>
+        <View style={styles.formRow}>
+          <TextInput
+            placeholder="Tienda"
+            value={newPrice.store}
+            onChangeText={(value) => setNewPrice((current) => ({ ...current, store: value }))}
+            style={[styles.inputBox, styles.flexInput]}
+          />
+          <TextInput
+            placeholder="Barrio"
+            value={newPrice.neighborhood}
+            onChangeText={(value) => setNewPrice((current) => ({ ...current, neighborhood: value }))}
+            style={[styles.inputBox, styles.flexInput]}
+          />
+        </View>
+        <Pressable accessibilityRole="button" onPress={handleAddPrice} disabled={savingPrice} style={[styles.addButton, savingPrice && { opacity: 0.65 }]}>
+          <Text style={styles.addButtonText}>{savingPrice ? 'Guardando...' : 'Guardar precio'}</Text>
+        </Pressable>
+      </SurfaceCard>
+
+      {!isPremium ? <PremiumCard onPress={openPremium} /> : null}
+      {!isPremium ? <AdBanner /> : null}
+    </View>
+  );
+
+  const renderAlerts = () => (
+    <View style={{ gap: 14 }}>
+      <TopBar
+        locationLabel={locationLabel}
+        onPressLocation={() => Platform.OS === 'web' ? nav?.navigate?.('/app/configuracion') : null}
+        onPressQr={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : setShowDeveloperFeed((v) => !v)}
+      />
+      <View style={styles.rowBetween}>
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text selectable style={styles.pageTitle}>Mis Alertas</Text>
+          <Text selectable style={styles.pageSubtitle}>Gestiona tus avisos de precios bajos.</Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => Platform.OS === 'web' ? nav?.navigate?.('/app/buscar') : Alert.alert('Crear alerta', 'Desde resultados toca “Avisarme si baja”.')}
+          style={styles.primaryCta}
+        >
+          <Text style={styles.primaryCtaText}>Crear alerta</Text>
+        </Pressable>
+      </View>
+
+      {alerts.length ? (
+        <View style={{ gap: 12 }}>
+          {alerts.map((alert) => {
+            const name = alert.normalized_product || alert.normalizedProduct || 'producto';
+            const neighborhood = alert.neighborhood ? `En ${alert.neighborhood}` : 'Cerca tuyo';
+            const target = alert.target_price ? `Aviso cuando baje de $${Number(alert.target_price)}` : 'Aviso cuando baje de precio';
+            const active = alert.active !== false;
+            return (
+              <SurfaceCard key={alert.id || alert.key} style={styles.alertRow}>
+                <View style={styles.alertIcon}>
+                  <Text style={styles.alertIconText}>{active ? 'A' : '-'}</Text>
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text selectable style={styles.alertTitle}>{name}</Text>
+                  <Text selectable style={styles.alertMeta}>{target}</Text>
+                  <Text selectable style={styles.alertMetaLink}>{neighborhood}</Text>
+                </View>
+                <View style={styles.alertActions}>
+                  <Pressable accessibilityRole="button" onPress={() => toggleAlert(alert, !active)} style={[styles.toggle, active && styles.toggleOn]}>
+                    <View style={[styles.toggleKnob, active && styles.toggleKnobOn]} />
+                  </Pressable>
+                  <Pressable accessibilityRole="button" onPress={() => removeAlert(alert)} style={styles.trashBtn}>
+                    <Text style={styles.trashText}>X</Text>
+                  </Pressable>
+                </View>
+              </SurfaceCard>
+            );
+          })}
+          <SurfaceCard style={styles.infoCard}>
+            <Text selectable style={styles.infoTitle}>Como funcionan?</Text>
+            <Text selectable style={styles.infoText}>
+              Cuando detectemos un precio mas bajo para un producto que seguis, te lo vamos a avisar. Proximo paso: notificaciones push reales.
+            </Text>
+          </SurfaceCard>
+        </View>
+      ) : (
+        <SurfaceCard>
+          <Text selectable style={styles.emptyTitle}>Todavia no tenes alertas.</Text>
+          <Text selectable style={styles.emptyText}>Abri un producto en Buscar y toca “Crear alerta de precio”.</Text>
+        </SurfaceCard>
+      )}
+    </View>
+  );
+
+  const renderFavorites = () => (
+    <View style={{ gap: 14 }}>
+      <TopBar
+        locationLabel={locationLabel}
+        onPressLocation={() => Platform.OS === 'web' ? nav?.navigate?.('/app/configuracion') : null}
+        onPressQr={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : setShowDeveloperFeed((v) => !v)}
+      />
+      <View style={{ gap: 6 }}>
+        <Text selectable style={styles.pageTitle}>Favoritos</Text>
+        <Text selectable style={styles.pageSubtitle}>Tus productos con seguimiento activo.</Text>
+      </View>
+
+      {favorites.length ? (
+        <View style={{ gap: 12 }}>
+          {favorites.map((fav) => (
+            <Pressable key={fav} accessibilityRole="button" onPress={() => runSearch(fav)}>
+              <SurfaceCard style={{ gap: 10 }}>
+                <View style={styles.rowBetween}>
+                  <Text selectable style={styles.favTitle}>{fav}</Text>
+                  <Pressable accessibilityRole="button" onPress={() => handleFavorite(fav)} style={styles.heartBtn}>
+                    <Text style={styles.heartBtnText}>F</Text>
+                  </Pressable>
+                </View>
+                <Text selectable style={styles.emptyText}>Toca para ver comparacion y crear alerta.</Text>
+              </SurfaceCard>
+            </Pressable>
+          ))}
+        </View>
+      ) : (
+        <SurfaceCard>
+          <Text selectable style={styles.emptyTitle}>Todavia no guardaste favoritos.</Text>
+          <Text selectable style={styles.emptyText}>Busca un producto y toca “Favorito” para seguir su precio.</Text>
+        </SurfaceCard>
+      )}
+
+      <SurfaceCard style={styles.tipCard}>
+        <Text selectable style={styles.tipTitle}>Queres ahorrar mas?</Text>
+        <Text selectable style={styles.tipText}>Activa alertas para tus favoritos y te avisamos cuando bajen de precio.</Text>
+      </SurfaceCard>
+    </View>
+  );
+
+  const renderProfile = () => (
+    <View style={{ gap: 14 }}>
+      <TopBar
+        locationLabel={locationLabel}
+        onPressLocation={() => Platform.OS === 'web' ? nav?.navigate?.('/app/configuracion') : null}
+        onPressQr={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : setShowDeveloperFeed((v) => !v)}
+      />
+      <SurfaceCard style={{ gap: 10 }}>
+        <Text selectable style={styles.pageTitle}>{accountUser?.email || 'Usuario Ahorrador'}</Text>
+        <Text selectable style={styles.pageSubtitle}>{isPremium ? 'Plan Premium' : 'Plan gratis'}</Text>
+        <View style={styles.rowBetween}>
+          <View style={styles.statMini}>
+            <Text selectable style={styles.statLabel}>Favoritos</Text>
+            <Text selectable style={styles.statValue}>{favorites.length}</Text>
+          </View>
+          <View style={styles.statMini}>
+            <Text selectable style={styles.statLabel}>Puntos</Text>
+            <Text selectable style={styles.statValue}>{points}</Text>
+          </View>
+        </View>
+        {!isPremium ? (
+          <Pressable accessibilityRole="button" onPress={openPremium} style={styles.primaryCta}>
+            <Text style={styles.primaryCtaText}>Ver Premium</Text>
+          </Pressable>
+        ) : null}
+      </SurfaceCard>
+
+      <AuthPanel user={accountUser} isPremium={isPremium} />
+
+      <SurfaceCard style={{ gap: 10 }}>
+        <Pressable accessibilityRole="button" onPress={() => Platform.OS === 'web' ? nav?.navigate?.('/app/favoritos') : null} style={styles.menuRow}>
+          <Text selectable style={styles.menuText}>Mis Favoritos</Text>
+          <Text style={styles.menuArrow}>{'>'}</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => Platform.OS === 'web' ? nav?.navigate?.('/app/historial') : null} style={styles.menuRow}>
+          <Text selectable style={styles.menuText}>Historial de Busquedas</Text>
+          <Text style={styles.menuArrow}>{'>'}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={async () => {
+            const message = 'AhorroYA te muestra el precio mas barato en segundos. Probalala: https://project-6vgnm.vercel.app';
+            try {
+              await Share.share({ message });
+            } catch (_e) {
+              Alert.alert('Invitar amigos', message);
+            }
+          }}
+          style={styles.menuRow}
+        >
+          <Text selectable style={styles.menuText}>Invitar Amigos</Text>
+          <Text style={styles.menuArrow}>{'>'}</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => Platform.OS === 'web' ? nav?.navigate?.('/app/configuracion') : null} style={styles.menuRow}>
+          <Text selectable style={styles.menuText}>Configuracion</Text>
+          <Text style={styles.menuArrow}>{'>'}</Text>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={openPremium} style={styles.menuRow}>
+          <Text selectable style={[styles.menuText, { color: ui.colors.primaryInk }]}>Plan Premium</Text>
+          <Text style={styles.menuArrow}>{'>'}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={async () => {
+            await signOutAccount().catch(() => null);
+            setAccountUser(null);
+            setIsPremium(false);
+            setFeedback('Sesion cerrada.');
+          }}
+          style={[styles.menuRow, { borderTopWidth: 1, borderTopColor: ui.colors.outline, paddingTop: 12 }]}
+        >
+          <Text selectable style={[styles.menuText, { color: ui.colors.danger }]}>Cerrar Sesion</Text>
+          <Text style={[styles.menuArrow, { color: ui.colors.danger }]}>{'>'}</Text>
+        </Pressable>
+      </SurfaceCard>
+
+      {history.length ? (
+        <View style={{ gap: 10 }}>
+          <Text selectable style={styles.sectionTitle}>Historial</Text>
+          <View style={{ gap: 10 }}>
+            {history.map((item) => (
+              <Pressable key={item} accessibilityRole="button" onPress={() => runSearch(item)}>
+                <SurfaceCard style={styles.historyRow}>
+                  <Text selectable style={styles.favTitle}>{item}</Text>
+                  <Text style={styles.link}>Buscar</Text>
+                </SurfaceCard>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      {showDeveloperFeed ? (
+        <View style={{ gap: 12 }}>
+          <Text selectable style={styles.sectionTitle}>Actividad (dev)</Text>
+          <ActivityFeed activities={allCommunityPrices} />
+          <SurfaceCard>
+            <Text selectable style={styles.emptyTitle}>Supabase</Text>
+            <Text selectable style={styles.emptyText}>{cloudStatus}</Text>
+          </SurfaceCard>
+        </View>
+      ) : null}
+    </View>
+  );
+
+  return (
+    <View style={styles.wrapper}>
+      {feedback ? (
+        <SurfaceCard style={styles.feedbackCard} elevated={false}>
+          <Text selectable style={styles.feedbackText}>{feedback}</Text>
+        </SurfaceCard>
+      ) : null}
+
+      {Platform.OS === 'web' && currentPath.startsWith('/app/qr') ? (
+        <QrScreen
+          text={qrText || String(currentQuery.text || '')}
+          onBack={() => nav?.navigate?.('/app/perfil')}
+        />
+      ) : null}
+
+      {Platform.OS === 'web' && currentPath.startsWith('/app/productos/') ? (
+        <ProductDetailScreen
+          product={decodeURIComponent(currentPath.replace('/app/productos/', ''))}
+          allPrices={allCommunityPrices}
+          onBack={() => nav?.navigate?.('/app/buscar')}
+          onCreateAlert={handleCreateAlert}
+          onOpenQr={(text) => openQr(text)}
+          locationLabel={locationLabel}
+        />
+      ) : null}
+
+      {Platform.OS === 'web' && currentPath.startsWith('/app/escanear') ? (
+        <View style={{ gap: 14 }}>
+          <TopBar locationLabel={locationLabel} onPressLocation={() => nav?.navigate?.('/app/configuracion')} />
+          <SurfaceCard style={{ gap: 10 }}>
+            <Text selectable style={styles.pageTitle}>Escanear</Text>
+            <Text selectable style={styles.pageSubtitle}>Ingresa el codigo de barras para buscar (MVP).</Text>
+            <TextInput
+              placeholder="Codigo de barras"
+              keyboardType="number-pad"
+              value={query}
+              onChangeText={setQuery}
+              style={styles.inputBox}
+            />
+            <Pressable accessibilityRole="button" onPress={() => runSearch(query)} style={styles.primaryCta}>
+              <Text style={styles.primaryCtaText}>Buscar producto</Text>
+            </Pressable>
+          </SurfaceCard>
+        </View>
+      ) : null}
+
+      {Platform.OS === 'web' && currentPath.startsWith('/app/supermercados') ? (
+        <View style={{ gap: 14 }}>
+          <TopBar locationLabel={locationLabel} onPressLocation={() => nav?.navigate?.('/app/configuracion')} onPressQr={() => nav?.navigate?.('/app/escanear')} />
+          <View style={{ gap: 6 }}>
+            <Text selectable style={styles.pageTitle}>Supermercados</Text>
+            <Text selectable style={styles.pageSubtitle}>Listado rapido (hasta tener mapa real).</Text>
+          </View>
+          <View style={{ gap: 12 }}>
+            {Array.from(new Set(allCommunityPrices.map((p) => p.store))).slice(0, 12).map((store) => (
+              <Pressable
+                key={store}
+                accessibilityRole="button"
+                onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${store} ${locationLabel}`)}`)}
+              >
+                <SurfaceCard style={styles.historyRow}>
+                  <Text selectable style={styles.favTitle}>{store}</Text>
+                  <Text style={styles.link}>Abrir</Text>
+                </SurfaceCard>
+              </Pressable>
+            ))}
+            <SurfaceCard>
+              <Text selectable style={styles.emptyTitle}>Mapa</Text>
+              <Text selectable style={styles.emptyText}>Proximo paso: mapa real con sucursales y distancia usando ubicacion del telefono.</Text>
+            </SurfaceCard>
+          </View>
+        </View>
+      ) : null}
+
+      {Platform.OS === 'web' && currentPath.startsWith('/app/configuracion') ? (
+        <View style={{ gap: 14 }}>
+          <TopBar locationLabel={locationLabel} onPressQr={() => nav?.navigate?.('/app/escanear')} />
+          <SurfaceCard style={{ gap: 10 }}>
+            <Text selectable style={styles.pageTitle}>Configuracion</Text>
+            <Text selectable style={styles.pageSubtitle}>Elegimos barrio para ordenar resultados.</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+              {['Todos', 'Centro', 'Cordón', 'Pocitos', 'Carrasco'].map((name) => (
+                <Chip key={name} label={name} active={selectedNeighborhood === name} onPress={() => handleNeighborhood(name)} />
+              ))}
+            </View>
+            <Pressable accessibilityRole="button" onPress={() => nav?.navigate?.('/app')} style={styles.primaryCta}>
+              <Text style={styles.primaryCtaText}>Guardar</Text>
+            </Pressable>
+          </SurfaceCard>
+        </View>
+      ) : null}
+
+      {Platform.OS === 'web' && currentPath.startsWith('/app/historial') ? (
+        <View style={{ gap: 14 }}>
+          <TopBar locationLabel={locationLabel} onPressLocation={() => nav?.navigate?.('/app/configuracion')} />
+          <View style={{ gap: 6 }}>
+            <Text selectable style={styles.pageTitle}>Historial</Text>
+            <Text selectable style={styles.pageSubtitle}>Tus ultimas busquedas.</Text>
+          </View>
+          {history.length ? (
+            <View style={{ gap: 10 }}>
+              {history.map((item) => (
+                <Pressable key={item} accessibilityRole="button" onPress={() => runSearch(item)}>
+                  <SurfaceCard style={styles.historyRow}>
+                    <Text selectable style={styles.favTitle}>{item}</Text>
+                    <Text style={styles.link}>Buscar</Text>
+                  </SurfaceCard>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <SurfaceCard>
+              <Text selectable style={styles.emptyTitle}>Todavia no hay historial.</Text>
+              <Text selectable style={styles.emptyText}>Busca un producto y quedara guardado aca.</Text>
+            </SurfaceCard>
+          )}
+        </View>
+      ) : null}
+
+      {!(Platform.OS === 'web' && (
+        currentPath.startsWith('/app/qr') ||
+        currentPath.startsWith('/app/productos/') ||
+        currentPath.startsWith('/app/escanear') ||
+        currentPath.startsWith('/app/supermercados') ||
+        currentPath.startsWith('/app/configuracion') ||
+        currentPath.startsWith('/app/historial')
+      )) ? (
+        <>
+          {activeTab === 'home' ? renderHome() : null}
+          {activeTab === 'search' ? renderSearch() : null}
+          {activeTab === 'alerts' ? renderAlerts() : null}
+          {activeTab === 'favorites' ? renderFavorites() : null}
+          {activeTab === 'profile' ? renderProfile() : null}
+        </>
+      ) : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrapper: {
+    gap: 16,
+  },
+  hero: {
+    gap: 8,
+  },
+  brand: {
+    ...ui.type.display,
+    color: ui.colors.primaryInk,
+  },
+  heroSubtitle: {
+    ...ui.type.body,
+    color: ui.colors.muted,
+  },
+  sectionTitle: {
+    color: ui.colors.text,
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  link: {
+    color: ui.colors.primaryInk,
+    fontWeight: '900',
+  },
+  searchHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  backBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: ui.colors.surface,
+    borderWidth: 1,
+    borderColor: ui.colors.outline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backBtnText: {
+    color: ui.colors.text,
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  pageTitle: {
+    ...ui.type.headline,
+    color: ui.colors.text,
+  },
+  pageSubtitle: {
+    ...ui.type.bodySm,
+    color: '#667085',
+  },
+  primaryCta: {
+    minHeight: 56,
+    paddingHorizontal: 18,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.primaryInk,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primaryCtaText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  emptyTitle: {
+    color: ui.colors.text,
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  emptyText: {
+    color: '#667085',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  feedbackCard: {
+    backgroundColor: '#FFFAEB',
+    borderColor: '#FEC84B',
+  },
+  feedbackText: {
+    color: '#B54708',
+    fontWeight: '800',
+  },
+  formRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  inputBox: {
+    minHeight: 48,
+    borderRadius: ui.radius.md,
+    borderWidth: 1,
+    borderColor: ui.colors.outline,
+    paddingHorizontal: 12,
+    backgroundColor: ui.colors.surface,
+    color: ui.colors.text,
+    fontWeight: '700',
+  },
+  flexInput: {
+    flex: 1,
+  },
+  smallInput: {
+    width: 110,
+  },
+  addButton: {
+    minHeight: 52,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.primaryInk,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  favTitle: {
+    color: ui.colors.text,
+    fontWeight: '900',
+    fontSize: 16,
+    textTransform: 'capitalize',
+  },
+  heartBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E9FBF2',
+    borderWidth: 1,
+    borderColor: '#CFF7E3',
+  },
+  heartBtnText: {
+    color: ui.colors.primaryInk,
+    fontWeight: '900',
+  },
+  tipCard: {
+    backgroundColor: '#FFF7ED',
+    borderColor: '#FED7AA',
+  },
+  tipTitle: {
+    color: '#7C2D12',
+    fontWeight: '900',
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  tipText: {
+    color: '#7C2D12',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  statMini: {
+    flex: 1,
+    backgroundColor: ui.colors.surfaceLow,
+    borderRadius: ui.radius.md,
+    borderWidth: 1,
+    borderColor: ui.colors.outline,
+    padding: 12,
+    gap: 6,
+  },
+  statLabel: {
+    color: '#667085',
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 0.4,
+  },
+  statValue: {
+    color: ui.colors.text,
+    fontSize: 24,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+  },
+  historyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 10,
+  },
+  menuText: {
+    color: ui.colors.text,
+    fontWeight: '900',
+    fontSize: 15,
+  },
+  menuArrow: {
+    color: '#98A2B3',
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  alertRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+  },
+  alertIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: '#E9FBF2',
+    borderWidth: 1,
+    borderColor: '#CFF7E3',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  alertIconText: {
+    color: ui.colors.primaryInk,
+    fontWeight: '900',
+  },
+  alertTitle: {
+    color: ui.colors.text,
+    fontWeight: '900',
+    fontSize: 16,
+    textTransform: 'capitalize',
+  },
+  alertMeta: {
+    color: '#667085',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  alertMetaLink: {
+    color: ui.colors.secondary,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  alertActions: {
+    alignItems: 'flex-end',
+    gap: 10,
+  },
+  toggle: {
+    width: 56,
+    height: 32,
+    borderRadius: 999,
+    backgroundColor: '#E4E7EC',
+    borderWidth: 1,
+    borderColor: ui.colors.outline,
+    padding: 3,
+    justifyContent: 'center',
+  },
+  toggleOn: {
+    backgroundColor: ui.colors.primary,
+    borderColor: '#7AE7BE',
+  },
+  toggleKnob: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#FFFFFF',
+  },
+  toggleKnobOn: {
+    alignSelf: 'flex-end',
+  },
+  trashBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F2F4F7',
+    borderWidth: 1,
+    borderColor: ui.colors.outline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trashText: {
+    color: '#667085',
+    fontWeight: '900',
+  },
+  infoCard: {
+    backgroundColor: '#EEF4FF',
+    borderColor: '#C7D7FE',
+    gap: 8,
+  },
+  infoTitle: {
+    color: '#1E40AF',
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  infoText: {
+    color: '#1F2A37',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+});

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-secondary-fixed": "#001453",
+                    "surface": "#f9f9ff",
+                    "primary-container": "#10b981",
+                    "surface-tint": "#006c49",
+                    "on-secondary-fixed-variant": "#173bab",
+                    "secondary-fixed-dim": "#b8c4ff",
+                    "surface-variant": "#dce2f3",
+                    "surface-container-highest": "#dce2f3",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface-container": "#e7eefe",
+                    "surface-dim": "#d3daea",
+                    "secondary-fixed": "#dde1ff",
+                    "on-tertiary-fixed": "#2a1700",
+                    "on-tertiary-container": "#523200",
+                    "on-error-container": "#93000a",
+                    "on-surface": "#151c27",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#3c4a42",
+                    "tertiary-fixed": "#ffddb8",
+                    "tertiary": "#855300",
+                    "outline-variant": "#bbcabf",
+                    "secondary": "#3755c3",
+                    "tertiary-container": "#e29100",
+                    "inverse-primary": "#4edea3",
+                    "on-secondary-container": "#00217a",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#f0f3ff",
+                    "on-primary-fixed": "#002113",
+                    "on-background": "#151c27",
+                    "inverse-surface": "#2a313d",
+                    "secondary-container": "#708cfd",
+                    "surface-bright": "#f9f9ff",
+                    "primary": "#006c49",
+                    "on-primary-fixed-variant": "#005236",
+                    "surface-container-high": "#e2e8f8",
+                    "primary-fixed": "#6ffbbe",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed-dim": "#4edea3",
+                    "error": "#ba1a1a",
+                    "outline": "#6c7a71",
+                    "on-error": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-container": "#00422b",
+                    "background": "#f9f9ff",
+                    "on-tertiary-fixed-variant": "#653e00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "padding-element": "12px",
+                    "unit": "4px",
+                    "stack-gap": "8px",
+                    "margin-page": "20px",
+                    "gutter-card": "16px"
+            },
+            "fontFamily": {
+                    "title-sm": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "price-display": ["Manrope"],
+                    "label-bold": ["Inter"],
+                    "display-lg": ["Manrope"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .share-card-gradient {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .confetti-overlay {
+            background-image: radial-gradient(#ffffff 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-background min-h-screen pb-margin-page">
+<!-- Top Navigation -->
+<nav class="fixed top-0 w-full z-50 flex items-center px-5 h-16 bg-white dark:bg-zinc-950 shadow-sm border-b border-zinc-100 dark:border-zinc-800">
+<button class="text-emerald-500 dark:text-emerald-400 active:scale-95 transition-transform flex items-center justify-center h-10 w-10 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-full">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-manrope font-bold text-lg text-emerald-500 dark:text-emerald-400 flex-1 text-center pr-10">Share Success</h1>
+</nav>
+<main class="pt-24 px-margin-page max-w-md mx-auto">
+<!-- Celebration Header -->
+<div class="text-center mb-8">
+<div class="inline-flex items-center justify-center p-3 bg-primary-container/10 rounded-full mb-4">
+<span class="material-symbols-outlined text-primary text-4xl" data-weight="fill">celebration</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">¡Buen ahorro!</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Compartí tu hallazgo con amigos y ayudalos a ahorrar también.</p>
+</div>
+<!-- Share Card Preview (Bento/Modern Style) -->
+<div class="relative overflow-hidden rounded-[24px] shadow-2xl transition-transform hover:scale-[1.02] duration-300">
+<!-- Glassmorphism Card Content -->
+<div class="share-card-gradient p-8 text-white relative">
+<div class="absolute inset-0 confetti-overlay"></div>
+<!-- Card Header -->
+<div class="flex justify-between items-start mb-12 relative z-10">
+<div class="flex flex-col">
+<span class="font-label-bold text-label-bold uppercase tracking-wider opacity-90">AhorroYA</span>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-xl" data-weight="fill">bolt</span>
+<span class="font-title-sm text-title-sm">Precio Imbatible</span>
+</div>
+</div>
+<div class="bg-white/20 backdrop-blur-md rounded-xl p-2">
+<span class="material-symbols-outlined text-3xl">qr_code_2</span>
+</div>
+</div>
+<!-- Product Display -->
+<div class="flex flex-col items-center justify-center text-center py-6 relative z-10">
+<div class="w-32 h-32 rounded-full bg-white p-1 shadow-lg mb-6 flex items-center justify-center overflow-hidden">
+<img alt="Leche Entera 1L" class="w-full h-full object-cover rounded-full" data-alt="close-up of a fresh carton of milk on a bright clean kitchen counter with soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDN-0ngvfqlg2FLCPoR8PFEYmgmjugA86SDH4uTRoeJfZQxpaBnzt8C4E29Q01o-OZMdIF8yqBtS6Q3f9u_8mLx_Ry_MHiJtGs7fWMNbAG5TZ80uttdqMPXjv8XMIFaemTdPsftODY2WWYdr9IRTG7PF3cynKtSd7OVlMCZNoPH3c1X3yXbKyfOfolC2UDnsOs55mg9Yt7THLPNnEKj27UA3lUx69edAFEkZmLyogSumDzL4D9iBjxQn1k7l-lu2wVX2VgsP-lPGM"/>
+</div>
+<h3 class="font-display-lg text-display-lg mb-1">Leche Entera 1L</h3>
+<p class="font-body-md text-body-md opacity-90 mb-4">¡Mirá lo que ahorré con AhorroYA!</p>
+<!-- Savings Badge -->
+<div class="bg-white text-primary rounded-2xl px-6 py-3 shadow-xl transform -rotate-2">
+<span class="font-price-display text-price-display block">¡Ahorré $120!</span>
+<span class="font-label-bold text-label-bold uppercase text-on-surface-variant opacity-70">Descuento Real</span>
+</div>
+</div>
+<!-- Card Footer -->
+<div class="mt-12 flex justify-between items-center opacity-80 border-t border-white/20 pt-4 relative z-10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="font-body-sm text-body-sm">Supermercado Local</span>
+</div>
+<span class="font-body-sm text-body-sm italic">ahorroya.com</span>
+</div>
+</div>
+</div>
+<!-- Sharing Actions -->
+<div class="mt-gutter-card space-y-4">
+<!-- Primary WhatsApp Button -->
+<button class="w-full bg-[#25D366] text-white font-title-sm text-title-sm py-5 rounded-2xl shadow-lg flex items-center justify-center gap-3 active:scale-[0.98] transition-all">
+<svg class="w-6 h-6 fill-current" viewbox="0 0 24 24">
+<path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.512-2.96-2.626-.087-.114-.694-.924-.694-1.769 0-.845.433-1.261.587-1.428.154-.167.337-.208.45-.208.112 0 .225.001.322.005.102.005.243-.039.379.285.136.326.467 1.141.508 1.223.041.082.068.178.013.287-.054.11-.121.177-.201.273-.081.095-.169.159-.241.248-.081.1-.165.207-.071.37.093.161.413.682.889 1.104.611.544 1.127.712 1.291.794.163.082.259.068.354-.041.095-.11.41-.477.52-.64.11-.163.22-.136.37-.082.15.054.952.45 1.116.531.164.082.273.123.314.191.041.069.041.397-.103.802z"></path>
+</svg>
+                Compartir por WhatsApp
+            </button>
+<!-- Grid for Secondary Options -->
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-white border border-outline-variant text-on-surface font-title-sm text-title-sm py-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-surface-container transition-colors active:scale-95">
+<span class="material-symbols-outlined text-secondary">photo_camera</span>
+<span class="text-body-sm font-label-bold">Instagram</span>
+</button>
+<button class="bg-white border border-outline-variant text-on-surface font-title-sm text-title-sm py-4 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-surface-container transition-colors active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant">share</span>
+<span class="text-body-sm font-label-bold">Más opciones</span>
+</button>
+</div>
+</div>
+<!-- Tip Section -->
+<div class="mt-8 bg-surface-container-low rounded-xl p-4 border border-surface-variant">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary" data-weight="fill">lightbulb</span>
+<div>
+<p class="font-label-bold text-label-bold text-primary mb-1 uppercase">Pro-Tip</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Al compartir tus ahorros, ayudás a que otros comercios bajen sus precios para competir.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual Footer (Hidden on focused task as per rules, but included for completeness if user wants to go back) -->
+<div class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-white dark:bg-zinc-950 rounded-t-2xl border-t border-zinc-100 dark:border-zinc-800 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-emerald-500 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-manrope text-[11px] font-semibold">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-emerald-500 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">trending_up</span>
+<span class="font-manrope text-[11px] font-semibold">Trends</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-emerald-500 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-manrope text-[11px] font-semibold">Savings</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-emerald-500 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-manrope text-[11px] font-semibold">Profile</span>
+</a>
+</div>
+</body></html>

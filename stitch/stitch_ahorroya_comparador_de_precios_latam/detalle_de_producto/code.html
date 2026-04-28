@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary-fixed": "#6ffbbe",
+                        "surface": "#f9f9ff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary-fixed-variant": "#173bab",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "inverse-on-surface": "#ebf1ff",
+                        "surface-container": "#e7eefe",
+                        "on-surface": "#151c27",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-variant": "#dce2f3",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#dce2f3",
+                        "on-background": "#151c27",
+                        "secondary-fixed": "#dde1ff",
+                        "on-primary-container": "#00422b",
+                        "inverse-primary": "#4edea3",
+                        "on-primary-fixed-variant": "#005236",
+                        "secondary": "#3755c3",
+                        "tertiary": "#855300",
+                        "on-primary-fixed": "#002113",
+                        "surface-dim": "#d3daea",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#e29100",
+                        "inverse-surface": "#2a313d",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#006c49",
+                        "outline-variant": "#bbcabf",
+                        "error": "#ba1a1a",
+                        "outline": "#6c7a71",
+                        "background": "#f9f9ff",
+                        "surface-container-high": "#e2e8f8",
+                        "secondary-container": "#708cfd",
+                        "on-surface-variant": "#3c4a42",
+                        "on-secondary-container": "#00217a",
+                        "primary": "#006c49",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#10b981",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "primary-fixed-dim": "#4edea3",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-secondary-fixed": "#001453",
+                        "on-tertiary-container": "#523200",
+                        "tertiary-fixed": "#ffddb8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-gap": "8px",
+                        "gutter-card": "16px",
+                        "padding-element": "12px",
+                        "margin-page": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Manrope"],
+                        "title-sm": ["Manrope"],
+                        "label-bold": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "price-display": ["Manrope"],
+                        "headline-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pb-safe-offset-2 {
+            padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-24">
+<header class="fixed top-0 left-0 w-full z-50 bg-white dark:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-800 shadow-sm dark:shadow-none flex justify-between items-center px-5 h-14">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-500" data-icon="location_on">location_on</span>
+<h1 class="font-manrope font-semibold text-sm tracking-tight text-zinc-500 dark:text-zinc-400">Buenos Aires, AR</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-500" data-icon="qr_code_scanner">qr_code_scanner</span>
+</button>
+</div>
+</header>
+<main class="mt-14 px-margin-page py-6 max-w-2xl mx-auto">
+<div class="mb-gutter-card">
+<button class="flex items-center gap-1 text-primary mb-4 font-label-bold text-label-bold active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]" data-icon="arrow_back">arrow_back</span>
+                VOLVER
+            </button>
+<div class="bg-white rounded-xl overflow-hidden shadow-sm border border-surface-container mb-gutter-card">
+<div class="relative h-64 bg-zinc-50 flex items-center justify-center">
+<img alt="Leche Conaprole" class="h-48 w-auto object-contain" data-alt="Close-up of a 1-liter milk carton with clean branding on a white background with soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJshfQfIdne2SXKPUL6h4edItkewH9k_ZfpY3eEl78FL2CAMIRm2DifwPCuO3Rg_4xdwqDr37zb-yc7qfOmN9UOW4ghWoOUs7Wr6GJcM0WJCpbZnc-j55ua0OX2ORlnG8D9tm9VTjxiOx5o2FstgMdt7kVQrhGWK-FgmVeYr_agS7cBlVogZS-I_ijzOxVl3l-SrXKIN_adMPaBKJzeC-x3b1jtKGiZRbbVOqmrElpJYKTUb8zG3royP693aoMNfcTkT1ZAO6K3Tg"/>
+<div class="absolute top-4 left-4 bg-primary-container text-on-primary-container px-3 py-1 rounded-full font-label-bold text-label-bold flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified</span>
+                        PRECIO VERIFICADO
+                    </div>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h2 class="font-display-lg text-headline-md text-on-background">Leche Entera Conaprole 1L</h2>
+<p class="text-on-surface-variant font-body-sm">Lácteos • Conaprole</p>
+</div>
+<div class="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-100 flex flex-col items-end">
+<span class="text-[10px] font-bold uppercase tracking-wider">Hace 2 horas</span>
+<span class="text-[12px] font-medium">Actualizado</span>
+</div>
+</div>
+<div class="mt-6 flex flex-col md:flex-row gap-gutter-card">
+<div class="flex-1 bg-surface-container-lowest p-4 rounded-xl border border-surface-container shadow-sm">
+<p class="font-label-bold text-label-bold text-zinc-500 uppercase tracking-widest mb-1">Precio más barato</p>
+<div class="flex items-baseline gap-2">
+<span class="font-price-display text-display-lg text-primary">$52</span>
+<span class="text-on-surface-variant text-body-sm">en Tienda Inglesa</span>
+</div>
+</div>
+<div class="flex-1 bg-surface-container-low p-4 rounded-xl flex items-center justify-between">
+<div class="flex flex-col">
+<p class="font-label-bold text-label-bold text-zinc-500 uppercase mb-1">Tendencia Semanal</p>
+<span class="text-emerald-600 font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]" data-icon="trending_down">trending_down</span>
+                                    -4.2%
+                                </span>
+</div>
+<div class="w-24 h-12 relative">
+<svg class="w-full h-full" viewbox="0 0 100 40">
+<path class="text-primary" d="M0,35 Q20,30 40,20 T80,10 L100,5" fill="none" stroke="currentColor" stroke-width="3"></path>
+<circle class="text-primary" cx="100" cy="5" fill="currentColor" r="3"></circle>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-gutter-card">
+<div class="bg-white p-4 rounded-xl border border-surface-container flex flex-col gap-1">
+<span class="font-label-bold text-label-bold text-zinc-400">PROMEDIO</span>
+<span class="font-title-sm text-on-surface">$58,00</span>
+</div>
+<div class="bg-white p-4 rounded-xl border border-surface-container flex flex-col gap-1">
+<span class="font-label-bold text-label-bold text-zinc-400">MÁXIMO</span>
+<span class="font-title-sm text-on-surface">$64,00</span>
+</div>
+<div class="bg-secondary-container/10 p-4 rounded-xl border border-secondary-container/20 flex flex-col gap-1">
+<span class="font-label-bold text-label-bold text-secondary">AHORRO POSIBLE</span>
+<span class="font-title-sm text-secondary">$12,00 (19%)</span>
+</div>
+</div>
+<section class="mb-gutter-card">
+<h3 class="font-headline-md text-title-sm mb-4">Comparativa de Precios</h3>
+<div class="space-y-3">
+<div class="bg-white p-4 rounded-xl border-l-4 border-l-primary border border-surface-container flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center font-bold text-zinc-600">TI</div>
+<div>
+<p class="font-title-sm text-on-surface">Tienda Inglesa</p>
+<p class="text-body-sm text-primary font-medium">El mejor precio</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-price-display text-headline-md text-on-background">$52</p>
+<span class="material-symbols-outlined text-zinc-400 text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<div class="bg-white p-4 rounded-xl border border-surface-container flex items-center justify-between shadow-sm active:bg-zinc-50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center font-bold text-zinc-600">DI</div>
+<div>
+<p class="font-title-sm text-on-surface">Disco</p>
+<p class="text-body-sm text-zinc-500">Precio promedio</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-price-display text-headline-md text-on-background">$58</p>
+<span class="material-symbols-outlined text-zinc-400 text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<div class="bg-white p-4 rounded-xl border border-surface-container flex items-center justify-between shadow-sm active:bg-zinc-50 transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center font-bold text-zinc-600">TT</div>
+<div>
+<p class="font-title-sm text-on-surface">Ta-Ta</p>
+<p class="text-body-sm text-error">Más costoso</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-price-display text-headline-md text-on-background">$64</p>
+<span class="material-symbols-outlined text-zinc-400 text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-3 mb-10">
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl font-title-sm flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+                Crear alerta de precio
+            </button>
+<div class="flex gap-3">
+<button class="flex-1 bg-white border border-surface-container text-on-surface py-3 rounded-xl font-label-bold flex items-center justify-center gap-2 active:bg-zinc-50 transition-colors">
+<span class="material-symbols-outlined text-zinc-500" data-icon="share">share</span>
+                    Compartir ahorro
+                </button>
+<button class="flex-1 bg-[#25D366] text-white py-3 rounded-xl font-label-bold flex items-center justify-center gap-2 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+                    WhatsApp
+                </button>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex justify-around items-center px-4 pt-2 pb-safe-offset-2 h-16">
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Inicio</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Buscar</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Alertas</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Favoritos</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 transition-all active:scale-90">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Perfil</span>
+</div>
+</nav>
+</body></html>

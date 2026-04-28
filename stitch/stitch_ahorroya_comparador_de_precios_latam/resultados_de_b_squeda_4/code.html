@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary-fixed": "#6ffbbe",
+                        "surface": "#f9f9ff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-secondary-fixed-variant": "#173bab",
+                        "secondary-fixed-dim": "#b8c4ff",
+                        "inverse-on-surface": "#ebf1ff",
+                        "surface-container": "#e7eefe",
+                        "on-surface": "#151c27",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-variant": "#dce2f3",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#dce2f3",
+                        "on-background": "#151c27",
+                        "secondary-fixed": "#dde1ff",
+                        "on-primary-container": "#00422b",
+                        "inverse-primary": "#4edea3",
+                        "on-primary-fixed-variant": "#005236",
+                        "secondary": "#3755c3",
+                        "tertiary": "#855300",
+                        "on-primary-fixed": "#002113",
+                        "surface-dim": "#d3daea",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#e29100",
+                        "inverse-surface": "#2a313d",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#006c49",
+                        "outline-variant": "#bbcabf",
+                        "error": "#ba1a1a",
+                        "outline": "#6c7a71",
+                        "background": "#f9f9ff",
+                        "surface-container-high": "#e2e8f8",
+                        "secondary-container": "#708cfd",
+                        "on-surface-variant": "#3c4a42",
+                        "on-secondary-container": "#00217a",
+                        "primary": "#006c49",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#10b981",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "primary-fixed-dim": "#4edea3",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-secondary-fixed": "#001453",
+                        "on-tertiary-container": "#523200",
+                        "tertiary-fixed": "#ffddb8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-gap": "8px",
+                        "gutter-card": "16px",
+                        "padding-element": "12px",
+                        "margin-page": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Manrope"],
+                        "title-sm": ["Manrope"],
+                        "label-bold": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "price-display": ["Manrope"],
+                        "headline-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "price-display": ["28px", {"lineHeight": "32px", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9ff;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md antialiased">
+<!-- Top Navigation Anchor (Based on JSON) -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-800 shadow-sm dark:shadow-none flex justify-between items-center w-full px-5 h-14">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-500" data-icon="location_on">location_on</span>
+<h1 class="font-manrope font-semibold text-sm tracking-tight text-on-background">Buenos Aires, AR</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="active:scale-95 transition-transform duration-150 hover:bg-zinc-50 dark:hover:bg-zinc-800 p-1 rounded-full">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-500" data-icon="qr_code_scanner">qr_code_scanner</span>
+</button>
+</div>
+</header>
+<main class="pt-20 pb-24 px-5">
+<!-- Search Query Display -->
+<section class="mb-6">
+<div class="flex items-center gap-3 mb-4">
+<button class="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-sm">
+<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex-1 bg-white border border-outline-variant px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="search">search</span>
+<span class="font-title-sm text-on-surface">Leche Entera 1L</span>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+<button class="bg-primary text-on-primary px-4 py-2 rounded-full font-label-bold text-label-bold flex items-center gap-1 shrink-0">
+<span class="material-symbols-outlined text-sm" data-icon="sort">sort</span>
+                    Relevancia
+                </button>
+<button class="bg-surface-variant text-on-surface-variant px-4 py-2 rounded-full font-label-bold text-label-bold flex items-center gap-1 shrink-0">
+                    Precio
+                </button>
+<button class="bg-surface-variant text-on-surface-variant px-4 py-2 rounded-full font-label-bold text-label-bold flex items-center gap-1 shrink-0">
+                    Distancia
+                </button>
+<button class="bg-surface-variant text-on-surface-variant px-4 py-2 rounded-full font-label-bold text-label-bold flex items-center gap-1 shrink-0">
+<span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+                    Filtros
+                </button>
+</div>
+</section>
+<!-- Search Results -->
+<div class="space-y-4">
+<!-- Result Card 1: Best Deal -->
+<div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-emerald-500 relative overflow-hidden">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-12 h-12 bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3lz36X7ZKE3Woml1jgOt33E45Uhke3pVEga2bDzaSvD4szxeYRfV0EPeQCouSt_ULLEmv1qXs1g9mnlKteMNcRm0u0oW9KoBetNPnb2HqT85vHnimo44GQBrg9Ow-j8UBqSiJLHK4zhWJr2GiSkwGNguG7p6UA432oz0Ta7uOyxdDXKa-Qvudw1iuQvcd8B0pUEcaxhuIkLZNwxtXBAveWMqrFw5F1byFLEpgCz5dXlkCdSNgbnBRy5puzEdnjGU4jwRmLNnlOpM"/>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm text-on-surface">Tienda Inglesa</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Leche Entera 1L</p>
+</div>
+</div>
+<div class="text-right">
+<div class="flex items-center justify-end text-primary gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="near_me">near_me</span>
+<span class="text-xs font-bold uppercase tracking-wider">0.8km</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<div class="flex flex-col">
+<span class="font-price-display text-price-display text-on-surface">$52</span>
+<div class="flex items-center gap-2 mt-1">
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase">MÁS BARATO</span>
+<span class="text-primary font-bold text-[10px] uppercase tracking-tighter">Ahorrá $12</span>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-6 py-3 rounded-xl font-label-bold text-label-bold active:scale-95 transition-all shadow-lg shadow-primary/20">
+                        Ver detalle
+                    </button>
+</div>
+</div>
+<!-- Result Card 2 -->
+<div class="bg-white rounded-xl p-4 shadow-sm relative">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-12 h-12 bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHdGsemwKr3CVDXfCLLPg44ViWRc9VctoOrShanAsUpJyVR3V7rwix5s9uHlUSlJJ59QdeZId1hyrodmxobuwL0W_qBTRWkun2rloU4pUkPmMtSzotw4NHoG8ffI30pzWrFfM8xQmz2-mSt0uhsa7G_7IKIxq_yGmnWtTFX_OHMpQKDACpTeW1c04d_nwFYdiwPYG6J5Ml9qKmq4AiVv3D5hiMZx-0Dn6sCQL6BBFC6A74y2k_xhlY8qFGmspDqTqaqfFDotaVuVM"/>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm text-on-surface">Disco</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Leche Entera 1L</p>
+</div>
+</div>
+<div class="text-right">
+<div class="flex items-center justify-end text-on-surface-variant gap-1 opacity-60">
+<span class="material-symbols-outlined text-sm" data-icon="near_me">near_me</span>
+<span class="text-xs font-bold uppercase tracking-wider">1.2km</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<div class="flex flex-col">
+<span class="font-price-display text-price-display text-on-surface">$58</span>
+</div>
+<button class="bg-surface-container-high text-on-surface px-6 py-3 rounded-xl font-label-bold text-label-bold active:scale-95 transition-all">
+                        Ver detalle
+                    </button>
+</div>
+</div>
+<!-- Result Card 3 -->
+<div class="bg-white rounded-xl p-4 shadow-sm relative">
+<div class="flex justify-between items-start mb-3">
+<div class="flex gap-3">
+<div class="w-12 h-12 bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="Logo" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAu7iQMcqN0j-nL8tH2hfJlixoqrnrFVbZlzjLzhm1YsaLYh3zOOKslbYcJtHY-vwdsseFUfBnah0uHdIW3DI58bKJthjvzsqqjLn4EJ-k_hrKjl-e9RYAMUx7xPq8yyeWmwRa9G7hcX6-5NPTkI0WgbsfQuTWKHtqCSEve1_P9b9cPZyuqnveup-E5TB-tdFJgyZjWKeRnH_MbJY5Ye7WTfFutgPJIJ1NO90ooG6qQ8j7SNtnn7tbM2BPCjKTzGpjU1NgBfb8IhOw"/>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm text-on-surface">Ta-Ta</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Leche Entera 1L</p>
+</div>
+</div>
+<div class="text-right">
+<div class="flex items-center justify-end text-on-surface-variant gap-1 opacity-60">
+<span class="material-symbols-outlined text-sm" data-icon="near_me">near_me</span>
+<span class="text-xs font-bold uppercase tracking-wider">0.5km</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<div class="flex flex-col">
+<span class="font-price-display text-price-display text-on-surface">$60</span>
+</div>
+<button class="bg-surface-container-high text-on-surface px-6 py-3 rounded-xl font-label-bold text-label-bold active:scale-95 transition-all">
+                        Ver detalle
+                    </button>
+</div>
+</div>
+<!-- Map View CTA (Bento style) -->
+<div class="bg-surface-container relative rounded-2xl p-6 h-48 overflow-hidden group cursor-pointer flex flex-col justify-end">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30 grayscale group-hover:scale-105 transition-transform duration-700" data-alt="clean minimal street map of urban neighborhood with clean vector lines and muted colors" data-location="Montevideo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABu5ht9fMJsnsvAUtg5X5PWsMOGeS9Ivhwe3_ToX7l7fgh7ZOP5MAg5pt34khkPTqEwF0ULPiP4MC5S9Xj1_oXpHjlCIeogQbxLmjcPfi4xNyA0ZQri82m72sletS3B2gwhQcxhc3jmF3g3BAdLApONpgYEUPETGxmEfFLRTb6hQGjE5bEPx1NnG_U_Bb9LNeie5OprlK8sJei_eXIrcZ1cgr8eWCN6r_8bp_ouJDUJa1PQUYxS7IA2kiF1ydJarkQilWTYhcL-PU"/>
+<div class="relative z-10">
+<div class="bg-white/80 backdrop-blur-md inline-flex items-center gap-2 px-4 py-2 rounded-full mb-2">
+<span class="material-symbols-outlined text-primary" data-icon="map">map</span>
+<span class="font-label-bold text-label-bold text-on-surface">Ver en el mapa</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-[200px]">Encuentra el precio más bajo en tu camino diario.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Based on JSON) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-2 pb-safe-offset-2 h-16 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 dark:hover:text-emerald-300 active:scale-90 transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Inicio</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-2xl px-3 py-1 active:scale-90 transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="search" style="font-variation-settings: 'FILL' 1;">search</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Buscar</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 dark:hover:text-emerald-300 active:scale-90 transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Alertas</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 dark:hover:text-emerald-300 active:scale-90 transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Favoritos</span>
+</div>
+<div class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 px-3 py-1 hover:text-emerald-500 dark:hover:text-emerald-300 active:scale-90 transition-all duration-200 ease-in-out">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-manrope text-[10px] font-bold uppercase tracking-wider">Perfil</span>
+</div>
+</nav>
+</body></html>
