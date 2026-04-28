@@ -5,20 +5,29 @@ function isMissingColumnError(error) {
   return message.includes('Could not find the') || message.includes('schema cache') || message.includes('column');
 }
 
+async function tryInsertEvent(body) {
+  return supabaseRest('monetization_events', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
 export async function insertMonetizationEvent({ userId = null, eventName, amount = null, currency = 'UYU', metadata = {} }) {
   const normalizedAmount = amount ?? null;
   const normalizedCurrency = currency || 'UYU';
+  const compactMetadata = {
+    ...metadata,
+    amount: normalizedAmount,
+    currency: normalizedCurrency,
+  };
 
   try {
-    return await supabaseRest('monetization_events', {
-      method: 'POST',
-      body: JSON.stringify({
-        user_id: userId,
-        event_name: eventName,
-        amount: normalizedAmount,
-        currency: normalizedCurrency,
-        metadata,
-      }),
+    return await tryInsertEvent({
+      user_id: userId,
+      event_name: eventName,
+      amount: normalizedAmount,
+      currency: normalizedCurrency,
+      metadata,
     });
   } catch (error) {
     if (!isMissingColumnError(error)) {
@@ -27,17 +36,10 @@ export async function insertMonetizationEvent({ userId = null, eventName, amount
   }
 
   try {
-    return await supabaseRest('monetization_events', {
-      method: 'POST',
-      body: JSON.stringify({
-        user_id: userId,
-        event_name: eventName,
-        metadata: {
-          ...metadata,
-          amount: normalizedAmount,
-          currency: normalizedCurrency,
-        },
-      }),
+    return await tryInsertEvent({
+      user_id: userId,
+      event_name: eventName,
+      metadata: compactMetadata,
     });
   } catch (error) {
     if (!isMissingColumnError(error)) {
@@ -45,16 +47,31 @@ export async function insertMonetizationEvent({ userId = null, eventName, amount
     }
   }
 
-  return supabaseRest('monetization_events', {
-    method: 'POST',
-    body: JSON.stringify({
+  try {
+    return await tryInsertEvent({
+      event_name: eventName,
+      metadata: compactMetadata,
+    });
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+  }
+
+  try {
+    return await tryInsertEvent({
       user_id: userId,
       event_type: eventName,
-      metadata: {
-        ...metadata,
-        amount: normalizedAmount,
-        currency: normalizedCurrency,
-      },
-    }),
+      metadata: compactMetadata,
+    });
+  } catch (error) {
+    if (!isMissingColumnError(error)) {
+      throw error;
+    }
+  }
+
+  return tryInsertEvent({
+    event_type: eventName,
+    metadata: compactMetadata,
   });
 }
