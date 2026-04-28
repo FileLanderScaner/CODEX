@@ -38,9 +38,31 @@ describe('rate limiting', () => {
     }));
   });
 
-  it('fails closed in production when Redis is missing', async () => {
-    process.env = { ...originalEnv, APP_ENV: 'production', UPSTASH_REDIS_REST_URL: '', UPSTASH_REDIS_REST_TOKEN: '' };
+  it('uses local fallback in production when Redis is missing and fallback is enabled', async () => {
+    process.env = {
+      ...originalEnv,
+      APP_ENV: 'production',
+      UPSTASH_REDIS_REST_URL: '',
+      UPSTASH_REDIS_REST_TOKEN: '',
+      ENABLE_LOCAL_FALLBACK: 'true',
+    };
     const req = { headers: { 'x-forwarded-for': '203.0.113.11' }, socket: {} };
+
+    await expect(rateLimit(req, 'api', { limit: 100, windowMs: 60_000 })).resolves.toMatchObject({
+      ok: true,
+      backend: 'memory_fallback',
+    });
+  });
+
+  it('fails closed in production when Redis is missing and fallback is disabled', async () => {
+    process.env = {
+      ...originalEnv,
+      APP_ENV: 'production',
+      UPSTASH_REDIS_REST_URL: '',
+      UPSTASH_REDIS_REST_TOKEN: '',
+      ENABLE_LOCAL_FALLBACK: 'false',
+    };
+    const req = { headers: { 'x-forwarded-for': '203.0.113.12' }, socket: {} };
 
     await expect(rateLimit(req, 'api', { limit: 100, windowMs: 60_000 })).resolves.toMatchObject({
       ok: false,

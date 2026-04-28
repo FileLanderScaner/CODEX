@@ -85,10 +85,10 @@ export async function rateLimit(req, key, { limit = 100, windowMs = 60_000 } = {
   const bucket = `rate:${key}:${ip}:${Math.floor(Date.now() / windowMs)}`;
 
   if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) {
-    if (env.APP_ENV === 'production') {
+    if (env.APP_ENV === 'production' && !env.ENABLE_LOCAL_FALLBACK) {
       return { ok: false, ip, current: 0, limit, error: 'rate_limit_not_configured' };
     }
-    return memoryRateLimit(req, key, { limit, windowMs });
+    return { ...memoryRateLimit(req, key, { limit, windowMs }), backend: 'memory_fallback' };
   }
 
   const result = await upstashCommand([
