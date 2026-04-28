@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import ActivityFeed from '../components/ActivityFeed';
 import AuthPanel from '../components/AuthPanel';
@@ -50,6 +50,23 @@ import { deleteCloudAlert, loadCloudAlerts, setCloudAlertActive } from '../servi
 // keep signOut in the same module (explicit import kept separate to avoid big diffs)
 import { signOutAccount } from '../services/account-service';
 
+function shareAttributionFromQuery(query = {}) {
+  const source = String(query.utm_source || query.source || '').trim().toLowerCase();
+  if (source !== 'whatsapp') {
+    return null;
+  }
+
+  const savings = Number(query.savings || query.saving || 0);
+  return {
+    source: 'whatsapp',
+    medium: String(query.utm_medium || 'share'),
+    campaign: String(query.utm_campaign || 'montevideo_launch'),
+    product: normalizeProduct(query.q || query.product || ''),
+    store: String(query.store || ''),
+    savings: Number.isFinite(savings) && savings > 0 ? Math.round(savings) : null,
+  };
+}
+
 export default function PriceSearchScreen({ nav, activeTab }) {
   const [query, setQuery] = useState('');
   const [searchedQuery, setSearchedQuery] = useState('');
@@ -82,6 +99,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const locationLabel = useMemo(() => 'Montevideo, UY', []);
   const currentPath = Platform.OS === 'web' ? (nav?.path || '/app') : '/app';
   const currentQuery = Platform.OS === 'web' ? (nav?.query || {}) : {};
+  const trackedInboundShareRef = useRef(new Set());
 
   useEffect(() => {
     Promise.all([
@@ -125,14 +143,34 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     if (Platform.OS !== 'web') {
       return;
     }
+    const attribution = shareAttributionFromQuery(currentQuery);
+    if (!attribution) {
+      return;
+    }
+    const key = [currentPath, attribution.product, attribution.campaign, attribution.store, attribution.savings].join('|');
+    if (trackedInboundShareRef.current.has(key)) {
+      return;
+    }
+    trackedInboundShareRef.current.add(key);
+    trackEvent('share_click', {
+      ...attribution,
+      city: 'Montevideo',
+      path: currentPath,
+    }, attribution.savings).catch(() => null);
+  }, [currentPath, currentQuery.q, currentQuery.utm_source, currentQuery.utm_medium, currentQuery.utm_campaign, currentQuery.store, currentQuery.savings, currentQuery.saving]);
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      return;
+    }
     const path = nav?.path || '/app';
     if (path.startsWith('/app/buscar')) {
       const q = String(currentQuery.q || '').trim();
-      if (q && normalizeProduct(q) !== normalizeProduct(searchedQuery)) {
+      if (q && !pricesLoading && normalizeProduct(q) !== normalizeProduct(searchedQuery)) {
         runSearch(q);
       }
     }
-  }, [nav?.path, currentQuery.q]);
+  }, [nav?.path, currentQuery.q, pricesLoading]);
 
   useEffect(() => {
     getSessionUser().then(async (user) => {
@@ -204,6 +242,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     setQuery(nextQuery);
     setSearchedQuery(nextQuery);
     const startedAt = Date.now();
+    const attribution = shareAttributionFromQuery(currentQuery);
     const found = searchPrices(nextQuery, allCommunityPrices, { neighborhood });
     const firstResultMs = Date.now() - startedAt;
     setResults(found);
@@ -215,6 +254,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       neighborhood,
       city: 'Montevideo',
       time_to_first_result_ms: firstResultMs,
+      attribution,
     }).catch(() => null);
     if (found[0]) {
       await trackEvent('view_best_price', {
@@ -224,6 +264,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         store: found[0].store,
         city: 'Montevideo',
         time_to_first_result_ms: firstResultMs,
+        attribution,
       }, found[0].price, found[0].currency).catch(() => null);
     }
 
@@ -855,6 +896,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
           allPrices={allCommunityPrices}
           onBack={() => nav?.navigate?.('/app/buscar')}
           onCreateAlert={handleCreateAlert}
+          onSharePoints={handleSharePoints}
           onOpenQr={(text) => openQr(text)}
           locationLabel={locationLabel}
         />

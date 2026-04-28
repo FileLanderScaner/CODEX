@@ -5,7 +5,7 @@ import { getBearerToken } from './_security.js';
 import { getUserFromAccessToken } from './supabase/_auth.js';
 
 const eventSchema = z.object({
-  eventName: z.enum(['search_product', 'view_best_price', 'share', 'click_whatsapp', 'add_favorite', 'create_alert', 'premium_click', 'landing_view', 'open_app']),
+  eventName: z.enum(['search_product', 'view_best_price', 'share', 'share_click', 'click_whatsapp', 'add_favorite', 'create_alert', 'premium_click', 'landing_view', 'open_app']),
   amount: z.coerce.number().optional().nullable(),
   currency: z.string().length(3).optional().default('UYU'),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),

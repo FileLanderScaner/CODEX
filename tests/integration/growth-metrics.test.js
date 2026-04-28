@@ -57,6 +57,7 @@ describe('GET /api/v1/growth/metrics', () => {
           { event_name: 'open_app', metadata: { source: 'landing_cta' }, created_at: '2026-04-28T03:01:00Z' },
           { event_name: 'search_product', metadata: { product: 'leche', time_to_first_result_ms: 42 }, created_at: '2026-04-28T03:02:00Z' },
           { event_name: 'click_whatsapp', metadata: { product: 'leche' }, created_at: '2026-04-28T03:03:00Z' },
+          { event_name: 'share_click', metadata: { product: 'leche', source: 'whatsapp' }, created_at: '2026-04-28T03:04:00Z' },
         ], 200, { 'content-range': '0-3/4' }));
       }
       return Promise.resolve(jsonResponse([]));
@@ -78,6 +79,7 @@ describe('GET /api/v1/growth/metrics', () => {
       open_app: 1,
       searches: 1,
       shares: 1,
+      share_clicks: 1,
       whatsapp_clicks: 1,
     });
     expect(res.body.activation).toMatchObject({

@@ -5,6 +5,7 @@ const allowedEvents = new Set([
   'search_product',
   'view_best_price',
   'share',
+  'share_click',
   'click_whatsapp',
   'add_favorite',
   'create_alert',

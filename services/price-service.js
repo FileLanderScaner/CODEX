@@ -114,6 +114,22 @@ export function getSavingsText(prices) {
   return difference > 0 ? `Ahorro real: $${difference} frente al mas caro` : 'Sin diferencia real entre tiendas';
 }
 
+export function buildShareUrl(product, metadata = {}) {
+  const normalizedProduct = normalizeProduct(product);
+  const baseUrl = String(getAppUrl() || '').replace(/\/+$/, '');
+  const params = new URLSearchParams({
+    q: normalizedProduct,
+    utm_source: 'whatsapp',
+    utm_medium: 'share',
+    utm_campaign: 'montevideo_launch',
+  });
+
+  if (metadata.store) params.set('store', String(metadata.store));
+  if (Number.isFinite(Number(metadata.savings))) params.set('savings', String(Math.round(Number(metadata.savings))));
+
+  return `${baseUrl}/app/buscar?${params.toString()}`;
+}
+
 export function buildShareText(prices) {
   const sorted = getAllPrices(prices).sort((a, b) => Number(a.price) - Number(b.price));
   const cheapest = sorted[0];
@@ -121,8 +137,7 @@ export function buildShareText(prices) {
 
   const difference = getSavingsOpportunity(sorted);
   const product = cheapest.displayName || formatProductName(cheapest.product);
-  const baseUrl = String(getAppUrl() || '').replace(/\/+$/, '');
-  const productUrl = `${baseUrl}/app/buscar?q=${encodeURIComponent(cheapest.product)}`;
+  const productUrl = buildShareUrl(cheapest.product, { savings: difference, store: cheapest.store });
   const store = cheapest.store || 'Montevideo';
   return `Estoy ahorrando $${difference} en ${product} en ${store} usando AhorroYA 👉 ${productUrl}`;
 }

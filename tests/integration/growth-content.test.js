@@ -60,7 +60,7 @@ describe('GET /api/v1/growth/content', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.city).toBe('Montevideo');
-    expect(res.body.data[0].whatsapp_text).toBe('Estoy ahorrando $4 en Leche entera 1L en Devoto usando AhorroYA 👉 https://codex-kohl-mu.vercel.app/app/buscar?q=leche');
+    expect(res.body.data[0].whatsapp_text).toBe('Estoy ahorrando $4 en Leche entera 1L en Devoto usando AhorroYA 👉 https://codex-kohl-mu.vercel.app/app/buscar?q=leche&utm_source=whatsapp&utm_medium=share&utm_campaign=montevideo_launch&store=Devoto&savings=4');
     expect(res.body.data[0].tiktok_script).toContain('Leche entera 1L');
   });
 });

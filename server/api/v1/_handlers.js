@@ -304,7 +304,15 @@ function buildGrowthDeals(rows) {
 
 function shareTextForGrowth(deal) {
   const baseUrl = (readEnv().APP_URL || 'https://codex-kohl-mu.vercel.app').replace(/\/+$/, '');
-  const productUrl = `${baseUrl}/app/buscar?q=${encodeURIComponent(deal.cheapest.product)}`;
+  const params = new URLSearchParams({
+    q: deal.cheapest.product,
+    utm_source: 'whatsapp',
+    utm_medium: 'share',
+    utm_campaign: 'montevideo_launch',
+    store: deal.cheapest.store,
+    savings: String(Math.round(Number(deal.savings || 0))),
+  });
+  const productUrl = `${baseUrl}/app/buscar?${params.toString()}`;
   return `Estoy ahorrando $${deal.savings} en ${deal.product} en ${deal.cheapest.store} usando AhorroYA 👉 ${productUrl}`;
 }
 
@@ -576,6 +584,7 @@ export function montevideoGrowthMetrics(req, res) {
       return acc;
     }, {});
     const shareCount = (counts.share || 0) + (counts.click_whatsapp || 0);
+    const shareClickCount = counts.share_click || 0;
     const totalSavings = deals.reduce((sum, deal) => sum + Number(deal.savings || 0), 0);
 
     json(res, 200, {
@@ -588,6 +597,7 @@ export function montevideoGrowthMetrics(req, res) {
         searches: counts.search_product || 0,
         best_price_views: counts.view_best_price || 0,
         shares: shareCount,
+        share_clicks: shareClickCount,
         whatsapp_clicks: counts.click_whatsapp || 0,
         favorites: counts.add_favorite || 0,
         alerts: counts.create_alert || 0,

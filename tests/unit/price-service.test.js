@@ -43,7 +43,7 @@ describe('price service real data mapping', () => {
 
     expect(searchPrices('aceite', prices)).toHaveLength(2);
     expect(getPopularDeals(prices)[0].savings).toBe(20);
-    expect(buildShareText(prices)).toBe('Estoy ahorrando $20 en Aceite en Tienda Inglesa usando AhorroYA 👉 /app/buscar?q=aceite');
+    expect(buildShareText(prices)).toBe('Estoy ahorrando $20 en Aceite en Tienda Inglesa usando AhorroYA 👉 /app/buscar?q=aceite&utm_source=whatsapp&utm_medium=share&utm_campaign=montevideo_launch&store=Tienda+Inglesa&savings=20');
   });
 
   it('generates Montevideo launch content only from target supermarkets', () => {

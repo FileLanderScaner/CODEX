@@ -2,13 +2,14 @@ import React, { useMemo } from 'react';
 import { Alert, Linking, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import SurfaceCard from '../components/ui/SurfaceCard';
 import { ui } from '../lib/ui';
-import { buildShareText, getCheapest, getPriceStats, getSavingsText } from '../services/price-service';
+import { buildShareText, getCheapest, getPriceStats, getSavingsOpportunity, getSavingsText } from '../services/price-service';
 
 export default function ProductDetailScreen({
   product,
   allPrices,
   onBack,
   onCreateAlert,
+  onSharePoints,
   onOpenQr,
   locationLabel = 'Montevideo, UY',
 }) {
@@ -29,11 +30,14 @@ export default function ProductDetailScreen({
       await Share.share({ message: shareMessage });
     } catch (_e) {
       Alert.alert('Compartir', shareMessage);
+    } finally {
+      onSharePoints?.(cheapest, 'native', { savings: getSavingsOpportunity(sorted), url: shareMessage.match(/https?:\/\/\S+/)?.[0] || '' });
     }
   };
 
   const handleWhatsApp = async () => {
     await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`);
+    onSharePoints?.(cheapest, 'whatsapp', { savings: getSavingsOpportunity(sorted), url: shareMessage.match(/https?:\/\/\S+/)?.[0] || '' });
   };
 
   const openStoreMap = async (store) => {
@@ -314,4 +318,3 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 });
-
