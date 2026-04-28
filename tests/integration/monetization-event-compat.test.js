@@ -118,6 +118,9 @@ describe('monetization event schema compatibility', () => {
       if (target.includes('/monetization_events')) {
         return Promise.resolve(jsonResponse({ message: 'Could not find the event column of monetization_events in the schema cache' }, 400));
       }
+      if (Object.prototype.hasOwnProperty.call(body, 'product')) {
+        return Promise.resolve(jsonResponse({ message: "Could not find the 'product' column of 'shares' in the schema cache" }, 400));
+      }
       return Promise.resolve(jsonResponse([{ id: 'share-evt-1', ...body }]));
     });
 
@@ -131,7 +134,6 @@ describe('monetization event schema compatibility', () => {
 
     expect(global.fetch.mock.calls.at(-1)[0]).toContain('/shares');
     expect(rows[0]).toMatchObject({
-      product: 'leche',
       channel: 'share_click',
     });
   });

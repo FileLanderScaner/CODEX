@@ -399,10 +399,22 @@ async function readGrowthEventsToday() {
 async function readShareFallbackEventsToday() {
   const today = new Date().toISOString().slice(0, 10);
   const path = `shares?select=channel,product,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
-  return supabaseRest(path)
-    .then((rows) => rows.map((row) => ({
+  try {
+    const rows = await supabaseRest(path);
+    return rows.map((row) => ({
       event_name: row.channel,
       metadata: { product: row.product, analytics_fallback: 'shares' },
+      created_at: row.created_at,
+    }));
+  } catch (error) {
+    if (!isMissingColumnError(error)) return [];
+  }
+
+  const minimalPath = `shares?select=channel,created_at&created_at=gte.${encodeFilterValue(`${today}T00:00:00.000Z`)}&order=created_at.desc&limit=1000`;
+  return supabaseRest(minimalPath)
+    .then((rows) => rows.map((row) => ({
+      event_name: row.channel,
+      metadata: { analytics_fallback: 'shares' },
       created_at: row.created_at,
     })))
     .catch(() => []);

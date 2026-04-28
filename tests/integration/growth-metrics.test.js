@@ -165,9 +165,12 @@ describe('GET /api/v1/growth/metrics', () => {
       if (target.includes('/monetization_events?')) {
         return Promise.resolve(jsonResponse({ message: 'Could not find monetization event columns' }, 400));
       }
-      if (target.includes('/shares?')) {
+      if (target.includes('/shares?select=channel,product')) {
+        return Promise.resolve(jsonResponse({ message: "Could not find the 'product' column of 'shares' in the schema cache" }, 400));
+      }
+      if (target.includes('/shares?select=channel')) {
         return Promise.resolve(jsonResponse([
-          { channel: 'share_click', product: 'leche', created_at: '2026-04-28T03:04:00Z' },
+          { channel: 'share_click', created_at: '2026-04-28T03:04:00Z' },
         ], 200, { 'content-range': '0-0/1' }));
       }
       return Promise.resolve(jsonResponse([]));

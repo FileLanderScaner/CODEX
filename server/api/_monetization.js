@@ -14,30 +14,29 @@ async function tryInsertEvent(body) {
 
 async function insertSharesAnalyticsFallback({ userId, eventName, metadata }) {
   const product = normalizeProduct(metadata.product || metadata.search_query || metadata.query || eventName);
-  const baseBody = {
-    user_id: userId,
-    product,
-    channel: eventName,
-  };
+  const variants = [
+    { user_id: userId, product, channel: eventName },
+    { product, channel: eventName },
+    { user_id: userId, channel: eventName },
+    { channel: eventName },
+  ];
 
-  try {
-    return await supabaseRest('shares', {
-      method: 'POST',
-      body: JSON.stringify(baseBody),
-    });
-  } catch (error) {
-    if (!isMissingColumnError(error)) {
-      throw error;
+  let lastError = null;
+  for (const body of variants) {
+    try {
+      return await supabaseRest('shares', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      lastError = error;
+      if (!isMissingColumnError(error)) {
+        throw error;
+      }
     }
   }
 
-  return supabaseRest('shares', {
-    method: 'POST',
-    body: JSON.stringify({
-      product,
-      channel: eventName,
-    }),
-  });
+  throw lastError || new Error('Could not save analytics fallback');
 }
 
 export async function insertMonetizationEvent({ userId = null, eventName, amount = null, currency = 'UYU', metadata = {} }) {
