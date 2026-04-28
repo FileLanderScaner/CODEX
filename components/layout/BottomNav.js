@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ui, shadow } from '../../lib/ui';
 
 function iconFor(key) {
-  // Avoid extra deps; use compact glyphs that read well.
   switch (key) {
     case 'home':
       return 'H';

@@ -14,7 +14,6 @@ function isPremiumFromProfile(profile) {
 
   const until = profile.premium_until ? new Date(profile.premium_until) : null;
   if (!until || Number.isNaN(until.getTime())) {
-    // If we have plan=premium but no date, treat as premium for backwards compatibility.
     return true;
   }
 
@@ -98,4 +97,3 @@ export default async function handler(req, res) {
     res.status(500).json({ error: error.message || 'Could not load profile' });
   }
 }
-

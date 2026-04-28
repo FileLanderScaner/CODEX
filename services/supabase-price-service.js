@@ -47,14 +47,14 @@ export async function addCloudPrice(price) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
-    product,
-    displayName: price.displayName || `${formatProductName(product)} ${price.unit || ''}`.trim(),
-    brand: price.brand?.trim() || 'Sin marca',
-    category: price.category?.trim() || 'General',
-    unit: price.unit?.trim() || 'unidad',
-    store: price.store.trim(),
-    neighborhood: price.neighborhood?.trim() || 'Cerca tuyo',
-    price: Number(price.price),
+      product,
+      displayName: price.displayName || `${formatProductName(product)} ${price.unit || ''}`.trim(),
+      brand: price.brand?.trim() || 'Sin marca',
+      category: price.category?.trim() || 'General',
+      unit: price.unit?.trim() || 'unidad',
+      store: price.store.trim(),
+      neighborhood: price.neighborhood?.trim() || 'Cerca tuyo',
+      price: Number(price.price),
     }),
   });
 
@@ -76,9 +76,9 @@ export async function addCloudShare(price, channel = 'share') {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
-    priceId: price.id,
-    product: price.product,
-    channel,
+      priceId: price.id,
+      product: price.product,
+      channel,
     }),
   });
 }
@@ -93,10 +93,10 @@ export async function addCloudReport(price, reason = 'Precio incorrecto') {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
-    priceId: price.id,
-    product: price.product,
-    store: price.store,
-    reason,
+      priceId: price.id,
+      product: price.product,
+      store: price.store,
+      reason,
     }),
   });
 }

@@ -27,8 +27,6 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Deprecated: we avoid trusting arbitrary email params.
-    // Prefer /api/me which validates by Supabase access token.
     const accessToken = getBearerToken(req);
     const user = await getUserFromAccessToken(accessToken);
     const email = String(user?.email || req.query.email || '').trim().toLowerCase();

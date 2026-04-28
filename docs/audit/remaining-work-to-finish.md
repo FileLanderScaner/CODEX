@@ -103,7 +103,7 @@ Ya existe una base productiva inicial:
 - Agregar CSP en Vercel cuando se estabilicen dominios PayPal/Supabase.
 - Agregar WAF/bot protection si se abre API publica B2B.
 - Agregar rotacion documentada y responsables.
-- Agregar pruebas automáticas de RLS usando Supabase local.
+- Agregar pruebas automaticas de RLS usando Supabase local.
 
 ### Monetizacion
 
