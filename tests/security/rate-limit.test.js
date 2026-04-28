@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { rateLimit } from '../../api/_security.js';
+import { rateLimit } from '../../server/api/_security.js';
 
 describe('rate limiting', () => {
   const originalEnv = { ...process.env };

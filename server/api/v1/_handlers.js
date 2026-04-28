@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createPayPalSubscription } from '../paypal/_utils.js';
-import { runPricingJob } from '../../src/services/pricing/jobs.js';
+import { runPricingJob } from '../../../src/services/pricing/jobs.js';
 import {
   buildPageMeta,
   encodeFilterValue,

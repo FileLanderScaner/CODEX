@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import health from '../../api/v1/health.js';
+import health from '../../server/api/v1/health.js';
 
 function mockReq(method = 'GET') {
   return { method, headers: {}, socket: { remoteAddress: '127.0.0.1' }, url: '/api/v1/health' };

@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import pino from 'pino';
 import { z } from 'zod';
-import { readEnv } from '../../lib/env.js';
+import { readEnv } from '../../../lib/env.js';
 import { getBearerToken, rateLimit } from '../_security.js';
 import { getUserFromAccessToken } from '../supabase/_auth.js';
 

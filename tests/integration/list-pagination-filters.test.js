@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import products from '../../api/v1/products/index.js';
-import prices from '../../api/v1/prices/index.js';
-import stores from '../../api/v1/stores.js';
-import categories from '../../api/v1/categories.js';
+import products from '../../server/api/v1/products/index.js';
+import prices from '../../server/api/v1/prices/index.js';
+import stores from '../../server/api/v1/stores.js';
+import categories from '../../server/api/v1/categories.js';
 
 const originalEnv = { ...process.env };
 

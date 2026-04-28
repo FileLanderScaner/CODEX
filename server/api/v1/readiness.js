@@ -1,4 +1,4 @@
-import { readEnv } from '../../lib/env.js';
+import { readEnv } from '../../../lib/env.js';
 import { json, runEndpoint } from './_utils.js';
 
 export default function handler(req, res) {
