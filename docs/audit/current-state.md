@@ -9,7 +9,7 @@ Fecha de auditoria: 2026-04-27.
 - Deploy principal documentado: Vercel.
 - Backend actual: Vercel Serverless Functions bajo `api/`.
 - Datos: Supabase REST y cliente `@supabase/supabase-js`.
-- Fallback local: `data/mockPrices.js` + AsyncStorage; queda como modo degradado oficial.
+- Precios: solo API/Supabase real; no hay fallback local de precios.
 - Package manager: npm, detectado por `package-lock.json`.
 - Git: no especificado en el repo; el binario `git` no esta disponible en este entorno.
 
@@ -18,7 +18,7 @@ Fecha de auditoria: 2026-04-27.
 ```text
 api/, api/paypal/, api/supabase/, api/v1/
 components/, components/home/, components/layout/, components/ui/
-data/mockPrices.js
+Sin mock local de precios.
 docs/
 lib/
 screens/

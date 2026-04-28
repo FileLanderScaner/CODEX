@@ -13,7 +13,7 @@ export default function PayPalButtons({ accessToken, onStatus }) {
 
     setLoadingScript(true);
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(config.paypalClientId)}&currency=${encodeURIComponent(config.premiumCurrency)}&components=buttons`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(config.paypalClientId)}&currency=${encodeURIComponent(config.premiumCurrency)}&components=buttons&vault=true&intent=subscription`;
     script.async = true;
     script.onload = () => setLoadingScript(false);
     script.onerror = () => {
@@ -30,35 +30,23 @@ export default function PayPalButtons({ accessToken, onStatus }) {
 
     containerRef.current.innerHTML = '';
     window.paypal.Buttons({
-      createOrder: async () => {
-        onStatus('Creando orden...');
-        const response = await fetch(getApiUrl('/api/paypal/create-order'), {
+      createSubscription: async () => {
+        onStatus('Creando suscripcion...');
+        const response = await fetch(getApiUrl('/api/v1/billing/subscriptions/create'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: accessToken ? `Bearer ${accessToken}` : '' },
           body: JSON.stringify({
-            amount: config.premiumPrice,
-            currency: config.premiumCurrency,
             plan: 'premium_monthly',
           }),
         });
-        const order = await response.json();
+        const subscription = await response.json();
         if (!response.ok) {
-          throw new Error(order.error || 'No pudimos crear la orden.');
+          throw new Error(subscription.error || 'No pudimos crear la suscripcion.');
         }
-        return order.id;
+        return subscription.data?.provider_subscription_id;
       },
-      onApprove: async (data) => {
-        onStatus('Confirmando pago...');
-        const response = await fetch(getApiUrl('/api/paypal/capture-order'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: accessToken ? `Bearer ${accessToken}` : '' },
-          body: JSON.stringify({ orderId: data.orderID }),
-        });
-        const capture = await response.json();
-        if (!response.ok) {
-          throw new Error(capture.error || 'No pudimos confirmar el pago.');
-        }
-        onStatus('Pago confirmado. Tu plan premium quedo registrado.');
+      onApprove: async () => {
+        onStatus('Suscripcion aprobada. PayPal notificara el alta premium en unos segundos.');
       },
       onError: (error) => {
         onStatus(error.message || 'PayPal rechazo la operacion.');

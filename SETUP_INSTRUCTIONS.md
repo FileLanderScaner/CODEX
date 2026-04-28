@@ -60,8 +60,8 @@ http://127.0.0.1:8081
 - Busqueda y comparacion por producto.
 - Filtro por barrio.
 - Carga comunitaria de precios.
-- Historial, favoritos y alertas simuladas.
+- Historial local; favoritos y alertas reales cuando hay sesion Supabase.
 - Reportes de precio incorrecto.
 - Share viral y WhatsApp.
-- Ads simulados y Premium simulado.
+- Premium real via PayPal/Supabase. Ads desactivados hasta tener comercios verificados.
 - Datos estructurados para crecer sobre Supabase sin perder fallback local.

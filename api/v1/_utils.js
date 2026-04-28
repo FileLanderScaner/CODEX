@@ -51,10 +51,10 @@ export function guardMethod(req, res, reqId, methods) {
   return true;
 }
 
-export function guardRateLimit(req, res, reqId, key, options) {
-  const limit = rateLimit(req, key, options);
+export async function guardRateLimit(req, res, reqId, key, options) {
+  const limit = await rateLimit(req, key, options);
   if (!limit.ok) {
-    json(res, 429, { error: 'rate_limit_exceeded', limit: limit.limit }, reqId);
+    json(res, 429, { error: limit.error || 'rate_limit_exceeded', limit: limit.limit }, reqId);
     return false;
   }
   return true;
@@ -65,6 +65,11 @@ export function validate(schema, value) {
 }
 
 export async function supabaseRest(path, options = {}) {
+  const { data } = await supabaseRestWithMeta(path, options);
+  return data;
+}
+
+export async function supabaseRestWithMeta(path, options = {}) {
   const env = readEnv();
   if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error('Supabase server config not available');
@@ -76,7 +81,7 @@ export async function supabaseRest(path, options = {}) {
       apikey: env.SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
       'Content-Type': 'application/json',
-      Prefer: 'return=representation',
+      Prefer: 'return=representation,count=exact',
       ...(options.headers || {}),
     },
   });
@@ -84,7 +89,10 @@ export async function supabaseRest(path, options = {}) {
   if (!response.ok) {
     throw new Error(data?.message || data?.hint || `Supabase request failed (${response.status})`);
   }
-  return data;
+  const contentRange = response.headers.get('content-range') || '';
+  const totalMatch = /\/(\d+|\*)$/.exec(contentRange);
+  const total = totalMatch && totalMatch[1] !== '*' ? Number(totalMatch[1]) : null;
+  return { data, total, contentRange };
 }
 
 export async function optionalUser(req) {
@@ -117,19 +125,62 @@ export function cronAuthorized(req) {
   return Boolean(env.CRON_SHARED_SECRET && req.headers['x-cron-secret'] === env.CRON_SHARED_SECRET);
 }
 
+const optionalText = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  z.string().trim().optional(),
+);
+
+const isoDate = z.preprocess(
+  (value) => (typeof value === 'string' && value.trim() === '' ? undefined : value),
+  z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD').optional(),
+);
+
 export const paginationSchema = z.object({
-  q: z.string().optional(),
-  country: z.string().length(2).optional(),
-  currency: z.string().length(3).optional(),
+  q: optionalText,
+  country: optionalText.transform((value) => value?.toUpperCase()).pipe(z.string().length(2).optional()),
+  region: optionalText,
+  currency: optionalText.transform((value) => value?.toUpperCase()).pipe(z.string().length(3).optional()),
+  brand: optionalText,
+  category: optionalText,
+  date: isoDate,
+  from: isoDate,
+  to: isoDate,
+  page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(25),
-  offset: z.coerce.number().int().min(0).default(0),
+  offset: z.coerce.number().int().min(0).optional(),
+}).transform((query) => {
+  const offset = query.offset ?? ((query.page ?? 1) - 1) * query.limit;
+  return { ...query, offset };
+}).superRefine((query, ctx) => {
+  if (query.from && query.to && query.from > query.to) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['from'], message: 'from must be before or equal to to' });
+  }
 });
+
+export function encodeFilterValue(value) {
+  return encodeURIComponent(String(value).trim());
+}
+
+export function ilikeFilter(value) {
+  return `ilike.*${encodeFilterValue(value)}*`;
+}
+
+export function buildPageMeta(query, total) {
+  const normalizedTotal = Number.isFinite(total) ? total : null;
+  return {
+    limit: query.limit,
+    offset: query.offset,
+    page: Math.floor(query.offset / query.limit) + 1,
+    total: normalizedTotal,
+    has_more: normalizedTotal === null ? null : query.offset + query.limit < normalizedTotal,
+  };
+}
 
 export async function runEndpoint(req, res, methods, key, handler) {
   const reqId = requestId(req);
   if (preflight(req, res, methods.join(','))) return;
   if (!guardMethod(req, res, reqId, methods)) return;
-  if (!guardRateLimit(req, res, reqId, key, { limit: 120, windowMs: 60_000 })) return;
+  if (!(await guardRateLimit(req, res, reqId, key, { limit: 100, windowMs: 60_000 }))) return;
 
   try {
     await handler(req, res, reqId);

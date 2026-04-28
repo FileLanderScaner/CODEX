@@ -5,7 +5,7 @@ export default function AdBanner() {
   return (
     <View style={styles.banner}>
       <Text selectable style={styles.label}>Publicidad</Text>
-      <Text selectable style={styles.text}>Promo simulada: 10% menos en tu proxima compra semanal</Text>
+      <Text selectable style={styles.text}>Espacio reservado para comercios verificados.</Text>
     </View>
   );
 }

@@ -52,4 +52,13 @@ PAYPAL_ENV
 PAYPAL_CLIENT_ID
 PAYPAL_CLIENT_SECRET
 PAYPAL_WEBHOOK_ID
+PAYPAL_MONTHLY_PLAN_ID
+PAYPAL_YEARLY_PLAN_ID
+
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
 ```
+
+## Seguridad HTTP
+
+`vercel.json` aplica CSP, HSTS, `X-Frame-Options`, `nosniff`, `Referrer-Policy` y `Permissions-Policy`. La CSP permite Supabase, PayPal y Upstash como destinos controlados.

@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const limit = rateLimit(req, 'premium-status', { limit: 120, windowMs: 60_000 });
+    const limit = await rateLimit(req, 'premium-status', { limit: 100, windowMs: 60_000 });
     if (!limit.ok) {
       res.status(429).json({ error: 'Rate limit exceeded' });
       return;

@@ -64,8 +64,6 @@ export async function upsertProfile(user) {
   const profile = {
     id: user.id,
     email: user.email,
-    display_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
-    provider: user.app_metadata?.provider || 'email',
   };
 
   await supabase.from('profiles').upsert(profile);
@@ -99,13 +97,14 @@ export async function saveCloudFavorite(user, product, enabled) {
   if (enabled) {
     await supabase.from('user_favorites').upsert({
       user_id: user.id,
+      product: normalized,
       normalized_product: normalized,
-    });
+    }, { onConflict: 'user_id,normalized_product' });
   } else {
     await supabase
-      .from('user_favorites')
-      .delete()
-      .eq('user_id', user.id)
+    .from('user_favorites')
+    .delete()
+    .eq('user_id', user.id)
       .eq('normalized_product', normalized);
   }
 }
@@ -119,11 +118,13 @@ export async function createCloudAlert(user, product, neighborhood, targetPrice)
     .from('price_alerts')
     .upsert({
       user_id: user.id,
+      product: normalizeProduct(product),
       normalized_product: normalizeProduct(product),
-      neighborhood: neighborhood || null,
+      neighborhood: neighborhood || 'Montevideo',
       target_price: targetPrice || null,
+      currency: 'UYU',
       active: true,
-    })
+    }, { onConflict: 'user_id,normalized_product,neighborhood' })
     .select()
     .single();
 

@@ -11,9 +11,8 @@ export async function loadProductLinks(product) {
   const { data, error } = await supabase
     .from('product_links')
     .select('*')
-    .eq('normalized_product', normalizeProduct(product))
-    .eq('active', true)
-    .order('kind', { ascending: false })
+    .eq('product', normalizeProduct(product))
+    .order('created_at', { ascending: false })
     .limit(4);
 
   if (error) {
@@ -34,7 +33,7 @@ export async function trackProductClick(link, source = 'result') {
     headers: { 'Content-Type': 'application/json', ...authHeaders },
     body: JSON.stringify({
       productLinkId: link.id,
-      product: link.normalized_product,
+      product: link.product,
       source,
     }),
   }).catch(() => null);

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import ActivityFeed from '../components/ActivityFeed';
-import AdBanner from '../components/AdBanner';
 import AuthPanel from '../components/AuthPanel';
 import PremiumCard from '../components/PremiumCard';
 import OfferOfDayCard from '../components/home/OfferOfDayCard';
@@ -11,8 +10,6 @@ import TopBar from '../components/ui/TopBar';
 import SearchBar from '../components/ui/SearchBar';
 import Chip from '../components/ui/Chip';
 import SurfaceCard from '../components/ui/SurfaceCard';
-import { popularProducts } from '../data/mockPrices';
-import { getApiUrl } from '../lib/config';
 import { ui } from '../lib/ui';
 import PaywallScreen from './PaywallScreen';
 import ResultsScreen from './ResultsScreen';
@@ -22,7 +19,6 @@ import { loadFavorites, toggleFavorite } from '../services/favorites-service';
 import {
   checkPremiumStatus,
   createCloudAlert,
-  getAuthHeaders,
   getSessionUser,
   loadCloudFavorites,
   saveCloudFavorite,
@@ -32,24 +28,20 @@ import {
 import { loadProductLinks } from '../services/commerce-service';
 import { getPopularDeals, normalizeProduct, searchPrices } from '../services/price-service';
 import { addCloudPrice, addCloudReport, addCloudShare, loadCloudPrices } from '../services/supabase-price-service';
+import { trackEvent } from '../services/tracking-service';
 import {
   addPoints,
   addSearchHistory,
-  addUserPrice,
   deleteLocalAlert,
   loadLocalAlerts,
   loadPoints,
   loadSearchHistory,
-  loadUserPrices,
   reportPrice,
   setLocalAlertActive,
-  upsertLocalAlert,
 } from '../services/user-price-service';
 import { deleteCloudAlert, loadCloudAlerts, setCloudAlertActive } from '../services/account-service';
 // keep signOut in the same module (explicit import kept separate to avoid big diffs)
 import { signOutAccount } from '../services/account-service';
-
-const SEARCHES_PER_INTERSTITIAL = 3;
 
 export default function PriceSearchScreen({ nav, activeTab }) {
   const [query, setQuery] = useState('');
@@ -58,14 +50,13 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const [results, setResults] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [history, setHistory] = useState([]);
-  const [userPrices, setUserPrices] = useState([]);
   const [cloudPrices, setCloudPrices] = useState([]);
-  const [cloudStatus, setCloudStatus] = useState('Modo local');
+  const [cloudStatus, setCloudStatus] = useState('Cargando precios reales');
+  const [pricesLoading, setPricesLoading] = useState(true);
   const [accountUser, setAccountUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
   const [productLinks, setProductLinks] = useState([]);
   const [points, setPoints] = useState(0);
-  const [searchCount, setSearchCount] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [showPremium, setShowPremium] = useState(false);
   const [sortKey, setSortKey] = useState('relevance');
@@ -88,19 +79,21 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     Promise.all([
       loadFavorites(),
       loadSearchHistory(),
-      loadUserPrices(),
       loadPoints(),
       loadLocalAlerts().catch(() => []),
       loadCloudPrices().catch(() => []),
-    ]).then(([storedFavorites, storedHistory, storedPrices, storedPoints, storedAlerts, storedCloudPrices]) => {
+    ]).then(([storedFavorites, storedHistory, storedPoints, storedAlerts, storedCloudPrices]) => {
       setFavorites(storedFavorites);
       setHistory(storedHistory);
-      setUserPrices(storedPrices);
       setCloudPrices(storedCloudPrices);
       setPoints(storedPoints);
       setAlerts(storedAlerts);
-      setCloudStatus(`Supabase activo: ${storedCloudPrices.length} precios`);
-    }).catch(() => null);
+      setCloudStatus(`Supabase activo: ${storedCloudPrices.length} observaciones reales`);
+      setPricesLoading(false);
+    }).catch((error) => {
+      setCloudStatus(error.message || 'No pudimos cargar precios reales');
+      setPricesLoading(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -168,14 +161,18 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         setIsPremium(premium);
       } else {
         setIsPremium(false);
-        // Keep local alerts as fallback
+        // Keep local alerts only for anonymous sessions; authenticated alerts persist in Supabase.
         setAlerts(await loadLocalAlerts().catch(() => []));
       }
     });
   }, []);
 
-  const allCommunityPrices = useMemo(() => [...cloudPrices, ...userPrices], [cloudPrices, userPrices]);
+  const allCommunityPrices = useMemo(() => [...cloudPrices], [cloudPrices]);
   const deals = useMemo(() => getPopularDeals(allCommunityPrices), [allCommunityPrices]);
+  const popularProducts = useMemo(
+    () => deals.map((deal) => deal.product).concat(allCommunityPrices.map((price) => price.product)).filter(Boolean).filter((product, index, list) => list.indexOf(product) === index).slice(0, 8),
+    [allCommunityPrices, deals],
+  );
 
   const runSearch = async (value = query, neighborhood = selectedNeighborhood) => {
     const nextQuery = normalizeProduct(value);
@@ -183,21 +180,26 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       return;
     }
 
-    const nextSearchCount = searchCount + 1;
-    setSearchCount(nextSearchCount);
     setQuery(nextQuery);
     setSearchedQuery(nextQuery);
-    setResults(searchPrices(nextQuery, allCommunityPrices, { neighborhood }));
+    const found = searchPrices(nextQuery, allCommunityPrices, { neighborhood });
+    setResults(found);
     setProductLinks(await loadProductLinks(nextQuery));
     setHistory(await addSearchHistory(nextQuery));
+    await trackEvent('search_product', { product: nextQuery, results: found.length, neighborhood }).catch(() => null);
+    if (found[0]) {
+      await trackEvent('view_best_price', {
+        product: found[0].product,
+        price_id: found[0].id,
+        price: found[0].price,
+        store: found[0].store,
+      }, found[0].price, found[0].currency).catch(() => null);
+    }
 
     if (nav?.goSearch) {
       nav.goSearch();
     }
 
-    if (!isPremium && nextSearchCount % SEARCHES_PER_INTERSTITIAL === 0) {
-      setFeedback('Anuncio interstitial (simulado): desbloquea Premium para eliminar publicidad.');
-    }
   };
 
   const handleNeighborhood = (neighborhood) => {
@@ -212,12 +214,22 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     const nextFavorites = await toggleFavorite(favorites, normalized);
     await saveCloudFavorite(accountUser, normalized, nextFavorites.includes(normalized)).catch(() => null);
     setFavorites(nextFavorites);
+    if (nextFavorites.includes(normalized)) {
+      await trackEvent('add_favorite', { product: normalized, authenticated: Boolean(accountUser) }).catch(() => null);
+    }
     setFeedback(nextFavorites.includes(normalized) ? 'Favorito guardado.' : 'Favorito eliminado.');
   };
 
-  const handleSharePoints = async (price, channel) => {
+  const handleSharePoints = async (price, channel, context = {}) => {
     const nextPoints = await addPoints(1);
-    await addCloudShare(price, channel).catch(() => null);
+    await addCloudShare({ ...price, savings: context.savings, shareUrl: context.url }, channel).catch(() => null);
+    await trackEvent(channel === 'whatsapp' ? 'click_whatsapp' : 'share', {
+      product: price?.product || searchedQuery,
+      price_id: price?.id || null,
+      store: price?.store || null,
+      channel,
+      url: context.url || null,
+    }, context.savings || null).catch(() => null);
     setPoints(nextPoints);
     setFeedback('+1 punto por compartir. Gracias por sumar a la comunidad.');
   };
@@ -233,17 +245,17 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     const nextFavorites = favorites.includes(normalized) ? favorites : await toggleFavorite(favorites, normalized);
     await saveCloudFavorite(accountUser, normalized, true).catch(() => null);
     const neighborhood = selectedNeighborhood === 'Todos' ? null : selectedNeighborhood;
-    if (accountUser) {
-      const created = await createCloudAlert(accountUser, normalized, neighborhood).catch(() => null);
-      if (created) {
-        setAlerts((current) => [created, ...current.filter((a) => a.id !== created.id)]);
-      }
-    } else {
-      const next = await upsertLocalAlert({ normalized_product: normalized, neighborhood, target_price: null }).catch(() => []);
-      setAlerts(next);
+    if (!accountUser) {
+      setFeedback('Inicia sesion para crear una alerta real guardada en Supabase.');
+      return;
+    }
+    const created = await createCloudAlert(accountUser, normalized, neighborhood).catch(() => null);
+    if (created) {
+      setAlerts((current) => [created, ...current.filter((a) => a.id !== created.id)]);
     }
     setFavorites(nextFavorites);
-    setFeedback(accountUser ? `Alerta creada para ${normalized}.` : `Alerta local simulada para ${normalized}. Entra con Google para sincronizarla.`);
+    await trackEvent('create_alert', { product: normalized, neighborhood, authenticated: Boolean(accountUser) }).catch(() => null);
+    setFeedback(`Alerta creada para ${normalized}.`);
   };
 
   const toggleAlert = async (alert, nextActive) => {
@@ -277,12 +289,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   };
 
   const openPremium = async () => {
-    const authHeaders = await getAuthHeaders();
-    await fetch(getApiUrl('/api/monetization-event'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeaders },
-      body: JSON.stringify({ type: 'premium_click', source: 'home_cta', value: deals.reduce((s, d) => s + d.savings, 0) }),
-    }).catch(() => null);
+    await trackEvent('premium_click', { source: 'home_cta' }, deals.reduce((s, d) => s + d.savings, 0)).catch(() => null);
     setShowPremium(true);
     if (Platform.OS === 'web') {
       nav?.navigate?.('/app/premium');
@@ -325,23 +332,17 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     setSavingPrice(true);
     setFeedback('');
     try {
-      const savedLocal = await addUserPrice({
-        product,
-        price,
-        store,
-        neighborhood: neighborhood || 'Cerca tuyo',
-      });
-      setUserPrices(savedLocal);
-
       const savedCloud = await addCloudPrice({
         product,
         price,
         store,
         neighborhood: neighborhood || 'Cerca tuyo',
       }).catch(() => null);
-      if (savedCloud) {
-        setCloudPrices((current) => [savedCloud, ...current].slice(0, 250));
+      if (!savedCloud) {
+        setFeedback('No pudimos guardar el precio en Supabase. Revisa sesion o conexion.');
+        return;
       }
+      setCloudPrices((current) => [savedCloud, ...current].slice(0, 250));
 
       const nextPoints = await addPoints(1);
       setPoints(nextPoints);
@@ -367,7 +368,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   }
 
   const renderHome = () => {
-    const topDeal = deals[0] || { product: 'aceite de girasol', savings: 340, cheapest: { price: 1250 }, expensive: { price: 1890 } };
+    const topDeal = deals[0] || null;
     const stores = Array.from(new Set(allCommunityPrices.map((item) => item.store))).slice(0, 2);
     const featured = deals.slice(0, 3);
 
@@ -393,22 +394,37 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
         <View style={{ gap: 10 }}>
           <Text selectable style={styles.sectionTitle}>Busqueda rapida</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-            {popularProducts.map((product) => (
-              <Chip key={product} label={product} active={false} onPress={() => runSearch(product)} />
-            ))}
-          </ScrollView>
+          {popularProducts.length ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+              {popularProducts.map((product) => (
+                <Chip key={product} label={product} active={false} onPress={() => runSearch(product)} />
+              ))}
+            </ScrollView>
+          ) : (
+            <SurfaceCard>
+              {pricesLoading ? <ActivityIndicator /> : null}
+              <Text selectable style={styles.emptyTitle}>Conectando precios reales</Text>
+              <Text selectable style={styles.emptyText}>{cloudStatus}</Text>
+            </SurfaceCard>
+          )}
         </View>
 
         <View style={{ gap: 10 }}>
           <Text selectable style={styles.sectionTitle}>Ahorro del dia</Text>
-          <OfferOfDayCard
-            title={String(topDeal.product || 'Oferta destacada').replace(/\b\w/g, (c) => c.toUpperCase())}
-            price={`$${Number(topDeal.cheapest?.price || 1250)}`}
-            oldPrice={`$${Number(topDeal.expensive?.price || 1890)}`}
-            subtitle={`Ahorra un ${Math.max(10, Math.round((topDeal.savings / Math.max(topDeal.expensive?.price || 1, 1)) * 100))}% hoy`}
-            onPress={() => runSearch(topDeal.product || 'aceite')}
-          />
+          {topDeal ? (
+            <OfferOfDayCard
+              title={String(topDeal.product).replace(/\b\w/g, (c) => c.toUpperCase())}
+              price={`$${Number(topDeal.cheapest?.price || 0)}`}
+              oldPrice={`$${Number(topDeal.expensive?.price || 0)}`}
+              subtitle={`Ahorro real $${topDeal.savings} en ${topDeal.cheapest?.store}`}
+              onPress={() => runSearch(topDeal.product)}
+            />
+          ) : (
+            <SurfaceCard>
+              <Text selectable style={styles.emptyTitle}>Todavia no hay ahorro comparable.</Text>
+              <Text selectable style={styles.emptyText}>Necesitamos al menos dos tiendas reales para el mismo producto. Estado: {cloudStatus}</Text>
+            </SurfaceCard>
+          )}
         </View>
 
         <View style={{ gap: 10 }}>
@@ -419,8 +435,13 @@ export default function PriceSearchScreen({ nav, activeTab }) {
             </Pressable>
           </View>
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            <SupermarketMiniCard name={stores[0] || 'Ta-Ta'} distanceLabel="a 300m" onPress={() => runSearch(query || 'leche')} />
-            <SupermarketMiniCard name={stores[1] || 'Disco'} distanceLabel="a 450m" onPress={() => runSearch(query || 'arroz')} />
+            {stores.length ? stores.map((store) => (
+              <SupermarketMiniCard key={store} name={store} distanceLabel="Montevideo" onPress={() => runSearch(query || popularProducts[0] || '')} />
+            )) : (
+              <SurfaceCard style={{ flex: 1 }}>
+                <Text selectable style={styles.emptyText}>Sin tiendas reales cargadas todavia.</Text>
+              </SurfaceCard>
+            )}
           </View>
         </View>
 
@@ -440,13 +461,11 @@ export default function PriceSearchScreen({ nav, activeTab }) {
             )) : (
               <SurfaceCard>
                 <Text selectable style={styles.emptyTitle}>Todavia no hay suficientes precios.</Text>
-                <Text selectable style={styles.emptyText}>Carga 1 precio para empezar a ver tendencias y mejores compras.</Text>
+                <Text selectable style={styles.emptyText}>Ejecuta una ingesta oficial o conecta Supabase para mostrar oportunidades reales.</Text>
               </SurfaceCard>
             )}
           </View>
         </View>
-
-        {!isPremium ? <AdBanner /> : null}
       </View>
     );
   };

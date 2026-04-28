@@ -1,2 +1,3 @@
-import { listHandler } from '../_handlers.js';
-export default listHandler('products');
+import { productsList } from '../_handlers.js';
+
+export default productsList;

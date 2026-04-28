@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const limit = rateLimit(req, 'reports', { limit: 20, windowMs: 60_000 });
+  const limit = await rateLimit(req, 'reports', { limit: 100, windowMs: 60_000 });
   if (!limit.ok) {
     res.status(429).json({ error: 'Rate limit exceeded' });
     return;
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         price_id: isUuid(body.priceId) ? body.priceId : null,
         user_id: user?.id || null,
-        normalized_product: normalizeProduct(body.product),
+        product: normalizeProduct(body.product),
         store: body.store || null,
         reason: body.reason || 'Precio incorrecto',
         status: 'open',

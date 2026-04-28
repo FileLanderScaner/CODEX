@@ -1,4 +1,4 @@
-import { handleOptions, recordPremiumOrder, setCors, updatePremiumProfile, verifyWebhookSignature } from './_utils.js';
+import { handleOptions, recordPremiumOrder, setCors, updatePremiumProfile, updateSubscriptionRecord, verifyWebhookSignature } from './_utils.js';
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) {
@@ -34,6 +34,31 @@ export default async function handler(req, res) {
 
       if (status === 'COMPLETED') {
         await updatePremiumProfile(userId, orderId);
+      }
+    }
+
+    if (eventType?.startsWith('BILLING.SUBSCRIPTION.')) {
+      const subscriptionId = resource.id;
+      const subscriptionUserId = resource.custom_id || userId;
+      const planId = resource.plan_id || null;
+      const planCode = planId && planId === process.env.PAYPAL_YEARLY_PLAN_ID ? 'premium_yearly' : 'premium_monthly';
+      const status = String(resource.status || eventType.replace('BILLING.SUBSCRIPTION.', '')).toLowerCase();
+      const cycle = resource.billing_info?.cycle_executions?.[0];
+      const nextBillingTime = resource.billing_info?.next_billing_time || null;
+
+      await updateSubscriptionRecord({
+        subscriptionId,
+        userId: subscriptionUserId,
+        planCode,
+        planId,
+        status,
+        eventType,
+        currentPeriodEnd: nextBillingTime,
+        metadata: { cycle },
+      });
+
+      if (subscriptionUserId && ['active', 'activated'].includes(status)) {
+        await updatePremiumProfile(subscriptionUserId, subscriptionId, { subscriptionId, planCode });
       }
     }
 

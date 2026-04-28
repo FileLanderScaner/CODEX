@@ -23,4 +23,4 @@ Las fuentes oficiales se ingieren como payload crudo, se normalizan a `price_obs
 
 ## Degradacion
 
-Si Supabase o API no estan configurados, la app mantiene busqueda local con `data/mockPrices.js`. Esto no es demo accidental: es modo degradado documentado.
+Si Supabase o API no estan configurados, la app muestra estado vacio/error operativo. No existe fallback local de precios.

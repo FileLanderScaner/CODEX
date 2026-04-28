@@ -19,4 +19,5 @@ jobs:
       - run: npm run test:integration
       - run: npm run test:contract
       - run: npm run test:security
+      - run: npm run test:coverage
       - run: npm run build

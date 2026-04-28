@@ -1,4 +1,4 @@
-import { mockPrices } from '../data/mockPrices';
+import { getApiUrl, getAppUrl } from '../lib/config';
 
 export const normalizeProduct = (value) =>
   String(value || '')
@@ -15,103 +15,142 @@ export const formatProductName = (value) =>
     .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
     .join(' ');
 
-export function getAllPrices(extraPrices = []) {
-  return [...extraPrices, ...mockPrices].map((item) => ({
-    trustScore: 82,
-    status: 'approved',
-    reports: 0,
-    category: 'Supermercado',
-    unit: 'unidad',
-    brand: 'Generico',
-    ...item,
-    product: normalizeProduct(item.product),
-    normalizedProduct: normalizeProduct(item.product),
-  }));
+export function mapObservation(row) {
+  const normalized = normalizeProduct(row.normalized_product || row.product_name || row.product || row.products?.name);
+  return {
+    id: row.id,
+    product: normalized,
+    normalizedProduct: normalized,
+    displayName: row.product_name || row.display_name || row.products?.name || formatProductName(normalized),
+    brand: row.products?.brands?.name || row.raw_payload?.brand || row.brand || '',
+    category: row.products?.categories?.name || row.category || 'Supermercado',
+    unit: row.unit || 'unidad',
+    store: row.store_name || row.stores?.name || row.store || '',
+    neighborhood: row.region_name || row.regions?.name || row.neighborhood || 'Montevideo',
+    region: row.region_name || row.regions?.name || '',
+    price: Number(row.price),
+    currency: row.currency || 'UYU',
+    updatedAt: row.observed_at || row.updated_at || row.created_at || '',
+    source: row.source_code || row.source || 'official',
+    status: row.moderation_status || row.status || 'approved',
+    reports: row.reports || 0,
+    trustScore: row.quality_score || row.trust_score || 90,
+  };
 }
 
-export function searchPrices(query, extraPrices = [], filters = {}) {
-  const normalizedQuery = normalizeProduct(query);
-  const allPrices = getAllPrices(extraPrices);
+export async function fetchOfficialPrices(params = {}) {
+  const query = new URLSearchParams();
+  Object.entries({ country: 'UY', region: 'Montevideo', limit: 100, ...params }).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== '') query.set(key, String(value));
+  });
 
-  if (!normalizedQuery) {
-    return [];
+  const response = await fetch(getApiUrl(`/api/v1/prices?${query.toString()}`), {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || 'No pudimos cargar precios reales.');
   }
 
-  return allPrices
+  return {
+    data: (payload.data || []).map(mapObservation).filter((item) => item.id && item.product && item.store && Number.isFinite(item.price)),
+    pagination: payload.pagination || null,
+  };
+}
+
+export function getAllPrices(prices = []) {
+  return prices
+    .map(mapObservation)
+    .filter((item) => item.id && item.product && item.store && Number.isFinite(item.price) && item.status !== 'hidden');
+}
+
+export function searchPrices(query, prices = [], filters = {}) {
+  const normalizedQuery = normalizeProduct(query);
+  if (!normalizedQuery) return [];
+
+  return getAllPrices(prices)
     .filter((item) => {
       const haystack = normalizeProduct(`${item.product} ${item.displayName} ${item.store} ${item.neighborhood} ${item.brand}`);
       const matchesQuery = haystack.includes(normalizedQuery);
       const matchesNeighborhood = !filters.neighborhood || filters.neighborhood === 'Todos' || item.neighborhood === filters.neighborhood;
-      return matchesQuery && matchesNeighborhood && item.status !== 'hidden';
+      return matchesQuery && matchesNeighborhood;
     })
-    .sort((a, b) => a.price - b.price);
+    .sort((a, b) => Number(a.price) - Number(b.price));
 }
 
 export function getCheapest(prices) {
-  return prices.length ? prices[0] : null;
+  const sorted = getAllPrices(prices).sort((a, b) => Number(a.price) - Number(b.price));
+  return sorted.length ? sorted[0] : null;
+}
+
+export function getMostExpensive(prices) {
+  const sorted = getAllPrices(prices).sort((a, b) => Number(a.price) - Number(b.price));
+  return sorted.length ? sorted[sorted.length - 1] : null;
 }
 
 export function getSavingsOpportunity(prices) {
-  if (prices.length < 2) {
-    return 0;
-  }
-
-  return prices[prices.length - 1].price - prices[0].price;
+  const cheapest = getCheapest(prices);
+  const mostExpensive = getMostExpensive(prices);
+  if (!cheapest || !mostExpensive || cheapest.id === mostExpensive.id) return 0;
+  return Math.max(0, Math.round(Number(mostExpensive.price) - Number(cheapest.price)));
 }
 
 export function getSavingsText(prices) {
   const difference = getSavingsOpportunity(prices);
-  return `Ahorro estimado: $${difference} frente al mas caro`;
+  return difference > 0 ? `Ahorro real: $${difference} frente al mas caro` : 'Sin diferencia real entre tiendas';
 }
 
 export function buildShareText(prices) {
-  const cheapest = getCheapest(prices);
-  if (!cheapest) {
-    return 'Estoy comparando precios con AhorroYA.';
-  }
+  const sorted = getAllPrices(prices).sort((a, b) => Number(a.price) - Number(b.price));
+  const cheapest = sorted[0];
+  const mostExpensive = sorted[sorted.length - 1];
+  if (!cheapest) return `Estoy buscando ahorros reales con AhorroYA: ${getAppUrl()}`;
 
-  const difference = getSavingsOpportunity(prices);
-  return `AhorroYA te muestra esto en segundos:\n${cheapest.displayName}: $${cheapest.price} en ${cheapest.store}.\nAhorro estimado: $${difference}.\nCompara antes de comprar.`;
+  const difference = getSavingsOpportunity(sorted);
+  const product = cheapest.displayName || formatProductName(cheapest.product);
+  const comparison = mostExpensive && mostExpensive.id !== cheapest.id ? ` vs ${mostExpensive.store}` : '';
+  const baseUrl = String(getAppUrl() || '').replace(/\/+$/, '');
+  const productUrl = `${baseUrl}/app/buscar?q=${encodeURIComponent(cheapest.product)}`;
+  return `Estoy ahorrando $${difference} en ${product} en ${cheapest.store}${comparison} usando AhorroYA: ${productUrl}`;
 }
 
 export function getPriceStats(prices) {
-  if (!prices.length) {
-    return null;
-  }
+  const sorted = getAllPrices(prices).sort((a, b) => Number(a.price) - Number(b.price));
+  if (!sorted.length) return null;
 
-  const total = prices.reduce((sum, item) => sum + Number(item.price), 0);
-  const average = Math.round(total / prices.length);
-  const cheapest = prices[0];
-  const mostExpensive = prices[prices.length - 1];
-  const spread = mostExpensive.price - cheapest.price;
+  const total = sorted.reduce((sum, item) => sum + Number(item.price), 0);
+  const average = Math.round(total / sorted.length);
+  const cheapest = sorted[0];
+  const mostExpensive = sorted[sorted.length - 1];
+  const spread = Math.max(0, Math.round(Number(mostExpensive.price) - Number(cheapest.price)));
   const trend = spread >= average * 0.15 ? 'mucho margen de ahorro' : 'estable';
 
-  return {
-    average,
-    trend,
-    count: prices.length,
-    spread,
-  };
+  return { average, trend, count: sorted.length, spread, cheapest, mostExpensive };
 }
 
-export function getPopularDeals(extraPrices = []) {
-  const grouped = getAllPrices(extraPrices).reduce((acc, item) => {
-    if (!acc[item.product]) {
-      acc[item.product] = [];
-    }
+export function getPopularDeals(prices = []) {
+  const grouped = getAllPrices(prices).reduce((acc, item) => {
+    if (!acc[item.product]) acc[item.product] = [];
     acc[item.product].push(item);
     return acc;
   }, {});
 
   return Object.entries(grouped)
-    .map(([product, prices]) => {
-      const sorted = prices.sort((a, b) => a.price - b.price);
+    .map(([product, productPrices]) => {
+      const sorted = productPrices.sort((a, b) => Number(a.price) - Number(b.price));
+      const cheapest = sorted[0];
+      const expensive = sorted[sorted.length - 1];
       return {
         product,
-        best: sorted[0],
+        cheapest,
+        expensive,
+        best: cheapest,
         savings: getSavingsOpportunity(sorted),
+        observations: sorted.length,
       };
     })
+    .filter((deal) => deal.cheapest && deal.expensive && deal.observations >= 2 && deal.savings > 0)
     .sort((a, b) => b.savings - a.savings)
-    .slice(0, 4);
+    .slice(0, 8);
 }

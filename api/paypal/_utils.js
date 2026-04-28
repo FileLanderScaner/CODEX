@@ -134,7 +134,46 @@ export async function verifyWebhookSignature({ req, event }) {
   return true;
 }
 
-export async function updatePremiumProfile(userId, paypalOrderId) {
+export function paypalPlanId(plan) {
+  const normalized = plan === 'yearly' || plan === 'premium_yearly' ? 'premium_yearly' : 'premium_monthly';
+  const planId = normalized === 'premium_yearly' ? process.env.PAYPAL_YEARLY_PLAN_ID : process.env.PAYPAL_MONTHLY_PLAN_ID;
+  if (!planId) {
+    throw new Error(`Missing PayPal plan id for ${normalized}`);
+  }
+  return { planCode: normalized, planId };
+}
+
+export async function createPayPalSubscription({ user, plan }) {
+  const { planCode, planId } = paypalPlanId(plan);
+  const subscription = await paypalFetch('/v1/billing/subscriptions', {
+    method: 'POST',
+    body: JSON.stringify({
+      plan_id: planId,
+      custom_id: user.id,
+      subscriber: {
+        email_address: user.email,
+      },
+      application_context: {
+        brand_name: 'AhorroYA',
+        locale: 'es-UY',
+        shipping_preference: 'NO_SHIPPING',
+        user_action: 'SUBSCRIBE_NOW',
+        return_url: `${process.env.APP_URL || process.env.EXPO_PUBLIC_APP_URL || 'https://ahorroya.app'}/premium/success`,
+        cancel_url: `${process.env.APP_URL || process.env.EXPO_PUBLIC_APP_URL || 'https://ahorroya.app'}/premium/cancel`,
+      },
+    }),
+  });
+
+  return {
+    id: subscription.id,
+    status: subscription.status,
+    planCode,
+    planId,
+    approvalUrl: subscription.links?.find((link) => link.rel === 'approve')?.href || null,
+  };
+}
+
+export async function updatePremiumProfile(userId, paypalOrderId, options = {}) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -143,9 +182,12 @@ export async function updatePremiumProfile(userId, paypalOrderId) {
   }
 
   const premiumUntil = new Date();
-  premiumUntil.setMonth(premiumUntil.getMonth() + 1);
+  if (options.planCode === 'premium_yearly') {
+    premiumUntil.setFullYear(premiumUntil.getFullYear() + 1);
+  } else {
+    premiumUntil.setMonth(premiumUntil.getMonth() + 1);
+  }
 
-  // Upsert: if the profile does not exist yet, create it.
   const response = await fetch(`${supabaseUrl}/rest/v1/profiles`, {
     method: 'POST',
     headers: {
@@ -157,7 +199,7 @@ export async function updatePremiumProfile(userId, paypalOrderId) {
     body: JSON.stringify({
       id: userId,
       plan: 'premium',
-      paypal_order_id: paypalOrderId,
+      paypal_subscription_id: options.subscriptionId || paypalOrderId || null,
       premium_until: premiumUntil.toISOString(),
       is_premium: true,
     }),
@@ -166,6 +208,40 @@ export async function updatePremiumProfile(userId, paypalOrderId) {
   if (!response.ok) {
     throw new Error('Payment captured, but Supabase profile update failed');
   }
+}
+
+export async function updateSubscriptionRecord({ subscriptionId, userId, planCode, planId, status, eventType, currentPeriodEnd, metadata = {} }) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey || !subscriptionId) return;
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/subscriptions`, {
+    method: 'POST',
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=representation',
+    },
+    body: JSON.stringify({
+      user_id: userId || null,
+      provider: 'paypal',
+      provider_subscription_id: subscriptionId,
+      provider_plan_id: planId || null,
+      plan_code: planCode || 'premium_monthly',
+      status,
+      current_period_end: currentPeriodEnd || null,
+      last_event_type: eventType || null,
+      metadata,
+      updated_at: new Date().toISOString(),
+    }),
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(data?.message || 'Subscription update failed');
+  }
+  return data?.[0] || null;
 }
 
 export async function recordPremiumOrder({ orderId, userId, email, amount, currency, status }) {

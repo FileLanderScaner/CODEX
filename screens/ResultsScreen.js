@@ -4,17 +4,10 @@ import ProductLinks from '../components/ProductLinks';
 import Chip from '../components/ui/Chip';
 import SurfaceCard from '../components/ui/SurfaceCard';
 import { ui } from '../lib/ui';
-import { buildShareText, getCheapest, getPriceStats, getSavingsText } from '../services/price-service';
+import { buildShareText, getCheapest, getPriceStats, getSavingsOpportunity, getSavingsText } from '../services/price-service';
 
 function stableDistanceKm(seed) {
-  // Deterministic pseudo-distance for UX (until we have real geo).
-  let hash = 0;
-  const str = String(seed || '');
-  for (let i = 0; i < str.length; i += 1) {
-    hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
-  }
-  const km = 0.4 + (hash % 140) / 100; // 0.4km..1.79km
-  return Math.round(km * 10) / 10;
+  return null;
 }
 
 function sortResults(results, sortKey) {
@@ -23,7 +16,7 @@ function sortResults(results, sortKey) {
     return list.sort((a, b) => Number(a.price) - Number(b.price));
   }
   if (sortKey === 'distance') {
-    return list.sort((a, b) => stableDistanceKm(`${a.store}-${a.product}`) - stableDistanceKm(`${b.store}-${b.product}`));
+    return list.sort((a, b) => String(a.neighborhood || '').localeCompare(String(b.neighborhood || '')));
   }
   return list;
 }
@@ -56,14 +49,14 @@ export default function ResultsScreen({
     } catch (_error) {
       Alert.alert('Compartir', message);
     } finally {
-      onSharePoints(cheapest, 'native');
+      onSharePoints(cheapest, 'native', { savings: getSavingsOpportunity(sorted), url: message.match(/https?:\/\/\S+/)?.[0] || '' });
     }
   };
 
   const handleWhatsApp = async () => {
     const message = buildShareText(sorted);
     await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(message)}`);
-    onSharePoints(cheapest, 'whatsapp');
+    onSharePoints(cheapest, 'whatsapp', { savings: getSavingsOpportunity(sorted), url: message.match(/https?:\/\/\S+/)?.[0] || '' });
   };
 
   const handleCopy = async () => {
@@ -126,7 +119,7 @@ export default function ResultsScreen({
           {sorted.map((item, index) => {
             const diff = Number(item.price) - Number(cheapest?.price || item.price);
             const best = index === 0;
-            const km = stableDistanceKm(`${item.store}-${item.product}`);
+            const regionLabel = item.neighborhood || item.region || 'Zona no informada';
 
             return (
               <SurfaceCard key={item.id} style={[styles.storeCard, best && styles.bestCard]}>
@@ -138,7 +131,7 @@ export default function ResultsScreen({
                     <Text selectable style={styles.storeName} numberOfLines={1}>{item.store}</Text>
                     <Text selectable style={styles.productName} numberOfLines={1}>{item.displayName}</Text>
                   </View>
-                  <Text selectable style={styles.distance}>{km.toFixed(1)}KM</Text>
+                  <Text selectable style={styles.distance}>{regionLabel}</Text>
                 </View>
 
                 <View style={styles.storeBottom}>
@@ -189,7 +182,7 @@ export default function ResultsScreen({
         >
           <Text style={styles.mapBtnText}>Ver en el mapa</Text>
         </Pressable>
-        <Text selectable style={styles.mapHint}>Encuentra el precio mas bajo en tu camino diario.</Text>
+        <Text selectable style={styles.mapHint}>Ubicacion basada en region informada por la fuente oficial.</Text>
       </SurfaceCard>
 
       {selected ? (

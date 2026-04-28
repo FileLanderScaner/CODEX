@@ -1,6 +1,20 @@
 import { z } from 'zod';
+import { createPayPalSubscription } from '../paypal/_utils.js';
 import { runPricingJob } from '../../src/services/pricing/jobs.js';
-import { json, paginationSchema, requireRole, requireUser, runEndpoint, supabaseRest, validate, cronAuthorized } from './_utils.js';
+import {
+  buildPageMeta,
+  encodeFilterValue,
+  ilikeFilter,
+  json,
+  paginationSchema,
+  requireRole,
+  requireUser,
+  runEndpoint,
+  supabaseRest,
+  supabaseRestWithMeta,
+  validate,
+  cronAuthorized,
+} from './_utils.js';
 
 const communityPriceSchema = z.object({
   product: z.string().min(1),
@@ -20,11 +34,195 @@ const alertSchema = z.object({
   currency: z.string().length(3).default('UYU'),
 });
 
+const uuidSchema = z.string().uuid();
+
+const favoriteSchema = z.object({
+  product: z.string().min(1).optional(),
+  price_id: uuidSchema.optional(),
+  priceId: uuidSchema.optional(),
+}).refine((body) => body.product || body.price_id || body.priceId, {
+  message: 'product or priceId is required',
+});
+
+const reportSchema = z.object({
+  price_id: uuidSchema.optional(),
+  priceId: uuidSchema.optional(),
+  product: z.string().min(1).optional(),
+  store: z.string().min(1).optional(),
+  reason: z.string().min(3).max(500),
+});
+
+const billingCreateSchema = z.object({
+  plan: z.enum(['premium_monthly', 'premium_yearly', 'monthly', 'yearly']).default('premium_monthly'),
+});
+
+const approvePriceSchema = z.object({
+  id: uuidSchema,
+});
+
+const importOptionsSchema = z.object({
+  dryRun: z.coerce.boolean().optional(),
+  url: z.string().url().optional(),
+  content: z.string().optional(),
+  fixturePath: z.string().min(1).optional(),
+}).passthrough();
+
 export function listHandler(table, select = '*') {
   return (req, res) => runEndpoint(req, res, ['GET'], table, async (_req, _res, reqId) => {
     const query = validate(paginationSchema, req.query);
-    const rows = await supabaseRest(`${table}?select=${encodeURIComponent(select)}&limit=${query.limit}&offset=${query.offset}`);
-    json(res, 200, { data: rows }, reqId);
+    const { data, total } = await supabaseRestWithMeta(`${table}?select=${encodeURIComponent(select)}&limit=${query.limit}&offset=${query.offset}`);
+    json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
+  });
+}
+
+function dateRangeFilters(query, column = 'observed_at') {
+  const filters = [];
+  if (query.date) {
+    const nextDate = new Date(`${query.date}T00:00:00.000Z`);
+    nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+    filters.push(`${column}=gte.${encodeFilterValue(`${query.date}T00:00:00.000Z`)}`);
+    filters.push(`${column}=lt.${encodeFilterValue(nextDate.toISOString())}`);
+    return filters;
+  }
+  if (query.from) {
+    filters.push(`${column}=gte.${encodeFilterValue(`${query.from}T00:00:00.000Z`)}`);
+  }
+  if (query.to) {
+    filters.push(`${column}=lte.${encodeFilterValue(`${query.to}T23:59:59.999Z`)}`);
+  }
+  return filters;
+}
+
+function buildProductsPath(query) {
+  const hasPriceFilters = Boolean(query.country || query.region || query.currency || query.date || query.from || query.to);
+  const brandSelect = query.brand ? 'brands!inner(name,normalized_name)' : 'brands(name,normalized_name)';
+  const categorySelect = query.category ? 'categories!inner(name,slug)' : 'categories(name,slug)';
+  const observationSelect = hasPriceFilters ? ',price_observations!inner(id)' : '';
+  const params = [
+    `select=${encodeURIComponent(`*,${brandSelect},${categorySelect}${observationSelect}`)}`,
+    'moderation_status=eq.approved',
+    `limit=${query.limit}`,
+    `offset=${query.offset}`,
+    'order=name.asc',
+  ];
+
+  if (query.q) {
+    params.push(`or=${encodeURIComponent(`(name.ilike.*${query.q}*,normalized_name.ilike.*${query.q}*)`)}`);
+  }
+  if (query.brand) params.push(`brands.normalized_name=${ilikeFilter(query.brand)}`);
+  if (query.category) {
+    params.push(`or=${encodeURIComponent(`(categories.slug.eq.${query.category},categories.name.ilike.*${query.category}*)`)}`);
+  }
+  if (query.country) params.push(`price_observations.country_code=eq.${encodeFilterValue(query.country)}`);
+  if (query.currency) params.push(`price_observations.currency=eq.${encodeFilterValue(query.currency)}`);
+  if (query.region) params.push(`price_observations.region_name=${ilikeFilter(query.region)}`);
+  params.push(...dateRangeFilters(query, 'price_observations.observed_at'));
+
+  return `products?${params.join('&')}`;
+}
+
+function buildPricesPath(query) {
+  const productSelect = query.brand ? 'products!inner(name,brands!inner(name,normalized_name),categories(name,slug))' : 'products(name,brands(name),categories(name,slug))';
+  const params = [
+    `select=${encodeURIComponent(`*,${productSelect},stores(name),regions(name)`)}`,
+    'moderation_status=eq.approved',
+    `limit=${query.limit}`,
+    `offset=${query.offset}`,
+    'order=observed_at.desc',
+  ];
+
+  if (query.q) params.push(`normalized_product=${ilikeFilter(query.q)}`);
+  if (query.country) params.push(`country_code=eq.${encodeFilterValue(query.country)}`);
+  if (query.currency) params.push(`currency=eq.${encodeFilterValue(query.currency)}`);
+  if (query.region) params.push(`region_name=${ilikeFilter(query.region)}`);
+  if (query.brand) params.push(`products.brands.normalized_name=${ilikeFilter(query.brand)}`);
+  params.push(...dateRangeFilters(query));
+
+  return `price_observations?${params.join('&')}`;
+}
+
+function buildStoresPath(query) {
+  const hasLocationFilters = Boolean(query.region);
+  const hasObservationFilters = Boolean(query.currency || query.brand || query.date || query.from || query.to);
+  const locationSelect = hasLocationFilters ? ',store_locations!inner(regions!inner(name))' : ',store_locations(regions(name))';
+  const observationSelect = hasObservationFilters ? ',price_observations!inner(products!inner(brands!inner(name,normalized_name)))' : '';
+  const params = [
+    `select=${encodeURIComponent(`*${locationSelect}${observationSelect}`)}`,
+    `limit=${query.limit}`,
+    `offset=${query.offset}`,
+    'order=name.asc',
+  ];
+
+  if (query.q) {
+    params.push(`or=${encodeURIComponent(`(name.ilike.*${query.q}*,normalized_name.ilike.*${query.q}*)`)}`);
+  }
+  if (query.country) params.push(`country_code=eq.${encodeFilterValue(query.country)}`);
+  if (query.region) params.push(`store_locations.regions.name=${ilikeFilter(query.region)}`);
+  if (query.currency) params.push(`price_observations.currency=eq.${encodeFilterValue(query.currency)}`);
+  if (query.brand) params.push(`price_observations.products.brands.normalized_name=${ilikeFilter(query.brand)}`);
+  params.push(...dateRangeFilters(query, 'price_observations.observed_at'));
+
+  return `stores?${params.join('&')}`;
+}
+
+function buildCategoriesPath(query) {
+  const hasProductFilters = Boolean(query.brand);
+  const hasObservationFilters = Boolean(query.country || query.region || query.currency || query.date || query.from || query.to);
+  let productSelect = '';
+  if (hasProductFilters || hasObservationFilters) {
+    const brandSelect = hasProductFilters ? 'brands!inner(name,normalized_name)' : 'brands(name,normalized_name)';
+    const observationSelect = hasObservationFilters ? ',price_observations!inner(id)' : '';
+    productSelect = `,products!inner(${brandSelect}${observationSelect})`;
+  }
+  const params = [
+    `select=${encodeURIComponent(`*${productSelect}`)}`,
+    `limit=${query.limit}`,
+    `offset=${query.offset}`,
+    'order=name.asc',
+  ];
+
+  if (query.q || query.category) {
+    const term = query.q || query.category;
+    params.push(`or=${encodeURIComponent(`(name.ilike.*${term}*,slug.ilike.*${term}*)`)}`);
+  }
+  if (query.brand) params.push(`products.brands.normalized_name=${ilikeFilter(query.brand)}`);
+  if (query.country) params.push(`products.price_observations.country_code=eq.${encodeFilterValue(query.country)}`);
+  if (query.currency) params.push(`products.price_observations.currency=eq.${encodeFilterValue(query.currency)}`);
+  if (query.region) params.push(`products.price_observations.region_name=${ilikeFilter(query.region)}`);
+  params.push(...dateRangeFilters(query, 'products.price_observations.observed_at'));
+
+  return `categories?${params.join('&')}`;
+}
+
+export function productsList(req, res) {
+  return runEndpoint(req, res, ['GET'], 'products', async (_req, _res, reqId) => {
+    const query = validate(paginationSchema, req.query);
+    const { data, total } = await supabaseRestWithMeta(buildProductsPath(query));
+    json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
+  });
+}
+
+export function priceObservationsList(req, res) {
+  return runEndpoint(req, res, ['GET'], 'price-observations', async (_req, _res, reqId) => {
+    const query = validate(paginationSchema, req.query);
+    const { data, total } = await supabaseRestWithMeta(buildPricesPath(query));
+    json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
+  });
+}
+
+export function storesList(req, res) {
+  return runEndpoint(req, res, ['GET'], 'stores', async (_req, _res, reqId) => {
+    const query = validate(paginationSchema, req.query);
+    const { data, total } = await supabaseRestWithMeta(buildStoresPath(query));
+    json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
+  });
+}
+
+export function categoriesList(req, res) {
+  return runEndpoint(req, res, ['GET'], 'categories', async (_req, _res, reqId) => {
+    const query = validate(paginationSchema, req.query);
+    const { data, total } = await supabaseRestWithMeta(buildCategoriesPath(query));
+    json(res, 200, { data, pagination: buildPageMeta(query, total) }, reqId);
   });
 }
 
@@ -92,10 +290,14 @@ export function userCollection(table, bodyMapper = (body) => body) {
       await supabaseRest(`${table}?id=eq.${encodeURIComponent(id)}&user_id=eq.${user.id}`, { method: 'DELETE' });
       return json(res, 204, {}, reqId);
     }
-    const body = table === 'price_alerts' ? validate(alertSchema, req.body) : req.body;
+    const schema = table === 'price_alerts' ? alertSchema : favoriteSchema;
+    const body = validate(schema, req.body);
+    const mappedBody = table === 'user_favorites'
+      ? { product: body.product || null, price_id: body.price_id || body.priceId || null }
+      : bodyMapper(body);
     const rows = await supabaseRest(table, {
       method: 'POST',
-      body: JSON.stringify({ user_id: user.id, ...bodyMapper(body) }),
+      body: JSON.stringify({ user_id: user.id, ...mappedBody }),
     });
     return json(res, 201, { data: rows?.[0] || null }, reqId);
   });
@@ -104,7 +306,18 @@ export function userCollection(table, bodyMapper = (body) => body) {
 export function reports(req, res) {
   return runEndpoint(req, res, ['POST'], 'reports', async (_req, _res, reqId) => {
     const user = await requireUser(req);
-    const rows = await supabaseRest('reports', { method: 'POST', body: JSON.stringify({ user_id: user.id, ...req.body, status: 'open' }) });
+    const body = validate(reportSchema, req.body);
+    const rows = await supabaseRest('reports', {
+      method: 'POST',
+      body: JSON.stringify({
+        user_id: user.id,
+        price_id: body.price_id || body.priceId || null,
+        product: body.product || null,
+        store: body.store || null,
+        reason: body.reason,
+        status: 'open',
+      }),
+    });
     json(res, 201, { data: rows?.[0] || null }, reqId);
   });
 }
@@ -112,11 +325,25 @@ export function reports(req, res) {
 export function billingCreate(req, res) {
   return runEndpoint(req, res, ['POST'], 'billing-create', async (_req, _res, reqId) => {
     const user = await requireUser(req);
+    const body = validate(billingCreateSchema, req.body);
+    if (!user.email) {
+      const error = new Error('User email is required for PayPal subscription');
+      error.statusCode = 400;
+      throw error;
+    }
+    const paypalSubscription = await createPayPalSubscription({ user, plan: body.plan });
     const rows = await supabaseRest('subscriptions', {
       method: 'POST',
-      body: JSON.stringify({ user_id: user.id, provider: 'paypal', plan_code: req.body?.plan || 'premium_monthly', status: 'pending' }),
+      body: JSON.stringify({
+        user_id: user.id,
+        provider: 'paypal',
+        provider_subscription_id: paypalSubscription.id,
+        provider_plan_id: paypalSubscription.planId,
+        plan_code: paypalSubscription.planCode,
+        status: paypalSubscription.status?.toLowerCase() || 'approval_pending',
+      }),
     });
-    json(res, 201, { data: rows?.[0] || null }, reqId);
+    json(res, 201, { data: { ...(rows?.[0] || {}), approval_url: paypalSubscription.approvalUrl } }, reqId);
   });
 }
 
@@ -139,7 +366,7 @@ export function adminList(table) {
 export function approvePrice(req, res) {
   return runEndpoint(req, res, ['POST'], 'admin-approve-price', async (_req, _res, reqId) => {
     await requireRole(req, ['admin', 'moderator']);
-    const id = req.body?.id;
+    const { id } = validate(approvePriceSchema, req.body);
     const rows = await supabaseRest(`prices?id=eq.${encodeURIComponent(id)}`, {
       method: 'PATCH',
       body: JSON.stringify({ status: 'approved' }),
@@ -162,7 +389,8 @@ export function internalImport(req, res) {
     if (!cronAuthorized(req)) {
       await requireRole(req, ['admin', 'internal_job']);
     }
-    const result = await runPricingJob(req.query.source, req.body || {});
+    const options = validate(importOptionsSchema, req.body);
+    const result = await runPricingJob(req.query.source, options);
     json(res, 202, { data: result }, reqId);
   });
 }

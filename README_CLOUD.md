@@ -53,7 +53,7 @@ ALLOWED_ORIGINS
 
 ## Fuentes de datos
 
-- `data/mockPrices.js`: fallback local y demo.
+- Precios reales: `/api/v1/prices` conectado a Supabase; sin fallback mock local.
 - `services/supabase-price-service.js`: lectura y escritura cloud de precios.
 - `services/account-service.js`: sesion, perfil, favoritos y alertas.
 - `api/*.js`: capa segura para escrituras, monetizacion y perfil.
