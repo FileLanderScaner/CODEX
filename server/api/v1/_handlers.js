@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { createPayPalSubscription } from '../paypal/_utils.js';
-import { runPricingJob } from '../../../src/services/pricing/jobs.js';
 import {
   buildPageMeta,
   encodeFilterValue,
@@ -390,6 +389,7 @@ export function internalImport(req, res) {
       await requireRole(req, ['admin', 'internal_job']);
     }
     const options = validate(importOptionsSchema, req.body);
+    const { runPricingJob } = await import('../../../src/services/pricing/jobs.js');
     const result = await runPricingJob(req.query.source, options);
     json(res, 202, { data: result }, reqId);
   });
