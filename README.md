@@ -1,66 +1,82 @@
 # AhorroYA
 
-App Expo / React Native para comparar precios de supermercados en Uruguay/LatAm, cargar precios comunitarios, compartir ahorros y vender Premium.
+Comparador de precios para supermercados de Montevideo con busqueda, favoritos, alertas, carga comunitaria de precios, autenticacion y Premium.
 
-## Funcionalidades actuales
-
-- Busqueda de producto y filtro por barrio.
-- Precios reales en Supabase con fallback local.
-- Carga comunitaria de precios.
-- Productos con marca, unidad, categoria y confianza.
-- Precio mas barato destacado, promedio, tendencia y ahorro.
-- Favoritos locales y cloud.
-- Alertas cloud para usuarios logueados.
-- Login social con Supabase OAuth: Google y Facebook.
-- Share viral, WhatsApp, copiar texto e invitar amigo.
-- Reporte de precio incorrecto.
-- Puntos, ranking y badge de contribuidor.
-- Links recomendados por producto.
-- Tracking de clicks comerciales.
-- PayPal Live para Premium.
-- Eventos de monetizacion en Supabase.
-
-## Correr local
+## Ejecutar en 1 comando
 
 ```powershell
-cd C:\codex
-npm.cmd install
-npm.cmd run web
+cd C:\CODEX; npm install; npm run web
 ```
 
-## Produccion
-
-Web:
+Luego abrir:
 
 ```text
-https://project-6vgnm.vercel.app
+http://localhost:8081
 ```
 
-Build:
+## Que funciona
+
+- Frontend Expo Web / React Native con navegacion completa: inicio, busqueda, alertas, favoritos, perfil, detalle, QR, configuracion y Premium.
+- Datos persistentes locales con `AsyncStorage`.
+- Seed util de precios para Montevideo si no hay API/Supabase disponible.
+- Busqueda unificada de catalogos online para Disco, Devoto, Ta-Ta y Tienda Inglesa.
+- Links directos a catalogos oficiales por producto desde cada busqueda.
+- Backend serverless listo para Vercel en `/api`.
+- Supabase real cuando existen `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
+- Autenticacion fallback con usuario demo local cuando faltan credenciales.
+- PayPal real cuando existe `EXPO_PUBLIC_PAYPAL_CLIENT_ID`.
+- Premium fallback con checkout simulado cuando faltan credenciales PayPal.
+
+## Scripts
 
 ```powershell
-npm.cmd run build
+npm run web      # levanta la app web
+npm run build    # export web para Vercel
+npm run test     # suite Vitest
+npm run ci       # lint, typecheck, tests y build
 ```
 
-Deploy:
+## Variables opcionales
+
+Crear `.env` desde `.env.example` si se quieren servicios reales:
+
+```text
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_PAYPAL_CLIENT_ID=
+EXPO_PUBLIC_API_BASE_URL=
+EXPO_PUBLIC_APP_URL=
+EXPO_PUBLIC_PREMIUM_PRICE=4.99
+EXPO_PUBLIC_PREMIUM_CURRENCY=USD
+```
+
+Sin estas variables, la app no se bloquea: usa datos seed, sesion demo local, persistencia local y Premium simulado.
+
+## Catalogos online
+
+La busqueda combina tres fuentes:
+
+1. Precios persistidos en Supabase o fallback local.
+2. Endpoint `/api/v1/catalog/search?q=producto`, que intenta leer catalogos online por comercio.
+3. Links directos a los catalogos oficiales si un sitio bloquea scraping, cambia HTML o no expone precio estructurado.
+
+Los conectores actuales estan en `services/catalog-service.js`:
+
+- Disco: `https://www.disco.com.uy`
+- Devoto: `https://www.devoto.com.uy`
+- Ta-Ta: `https://www.tata.com.uy`
+- Tienda Inglesa: `https://www.tiendainglesa.com.uy`
+
+## Deploy en Vercel
+
+El proyecto incluye `vercel.json`.
 
 ```powershell
-npx.cmd vercel deploy --prod --yes
+npm run build
+npx vercel deploy --prod
 ```
 
-## Monetizacion
+Vercel debe usar:
 
-- Premium con PayPal Live.
-- Tracking de clicks en Premium.
-- Links recomendados por producto.
-- Tracking de clicks comerciales.
-- Base lista para patrocinados, afiliados y panel B2B.
-
-## Proximo crecimiento
-
-- Configurar Google/Facebook providers en Supabase con claves reales.
-- Agregar AdMob real en mobile.
-- Crear panel admin para comercios.
-- Agregar referidos con recompensa.
-- Agregar scraping/API de catalogos autorizados.
-- Convertir alertas cloud en push notifications.
+- Build command: `npm run build`
+- Output directory: `dist`

@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import PayPalButtons from '../components/PayPalButtons';
 import SurfaceCard from '../components/ui/SurfaceCard';
-import { config, getAppUrl, hasPayPalConfig } from '../lib/config';
+import { config, getAppUrl, hasPayPalConfig, hasSupabaseConfig } from '../lib/config';
 import { ui } from '../lib/ui';
-import { getAccessToken, signInWithProvider } from '../services/account-service';
+import { activateMockPremium, getAccessToken, signInWithFallback, signInWithProvider } from '../services/account-service';
 
 function FeatureRow({ title, subtitle }) {
   return (
@@ -85,8 +85,18 @@ export default function PaywallScreen({ user, onBack }) {
       {!hasPayPalConfig ? (
         <SurfaceCard style={styles.noticeCard} elevated={false}>
           <Text selectable style={styles.noticeText}>
-            Falta configurar PayPal para mostrar el boton real de pago. La app ya registra interes Premium.
+            Falta EXPO_PUBLIC_PAYPAL_CLIENT_ID. Modo demo activo: podes simular checkout y activar Premium local.
           </Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={async () => {
+              const result = await activateMockPremium(user);
+              setStatus(`Premium demo activo para ${result.user.email}.`);
+            }}
+            style={styles.mockPayButton}
+          >
+            <Text style={styles.mockPayButtonText}>Simular pago exitoso</Text>
+          </Pressable>
         </SurfaceCard>
       ) : null}
 
@@ -94,16 +104,17 @@ export default function PaywallScreen({ user, onBack }) {
         <SurfaceCard style={styles.noticeCard} elevated={false}>
           <Text selectable style={styles.noticeTitle}>Necesitas iniciar sesion</Text>
           <Text selectable style={styles.noticeText}>
-            Para que Premium quede asociado a tu cuenta, entra con Google o Facebook antes de pagar.
+            Para que Premium quede asociado a tu cuenta, entra antes de pagar. Sin Supabase se crea una sesion demo local.
           </Text>
           <View style={styles.noticeActions}>
-            <Pressable accessibilityRole="button" onPress={() => signInWithProvider('google')} style={styles.providerBtn}>
+            <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig ? signInWithProvider('google') : signInWithFallback()} style={styles.providerBtn}>
               <Text style={styles.providerBtnText}>Google</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" onPress={() => signInWithProvider('facebook')} style={styles.providerBtn}>
+            <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig ? signInWithProvider('facebook') : signInWithFallback('facebook@ahorroya.local')} style={styles.providerBtn}>
               <Text style={styles.providerBtnText}>Facebook</Text>
             </Pressable>
           </View>
+          {status ? <Text selectable style={styles.status}>{status}</Text> : null}
         </SurfaceCard>
       ) : (
         <SurfaceCard style={{ gap: 12 }}>
@@ -266,6 +277,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   providerBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  mockPayButton: {
+    minHeight: 46,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.primaryInk,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+  },
+  mockPayButtonText: {
     color: '#FFFFFF',
     fontWeight: '900',
   },

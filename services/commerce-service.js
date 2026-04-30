@@ -2,10 +2,12 @@ import { supabase } from '../lib/supabase';
 import { getApiUrl } from '../lib/config';
 import { normalizeProduct } from './price-service';
 import { getAuthHeaders } from './account-service';
+import { buildCatalogLinks } from './catalog-service';
 
 export async function loadProductLinks(product) {
+  const catalogLinks = buildCatalogLinks(product);
   if (!supabase || !product) {
-    return [];
+    return catalogLinks;
   }
 
   const { data, error } = await supabase
@@ -16,10 +18,10 @@ export async function loadProductLinks(product) {
     .limit(4);
 
   if (error) {
-    return [];
+    return catalogLinks;
   }
 
-  return data ?? [];
+  return [...(data ?? []), ...catalogLinks];
 }
 
 export async function trackProductClick(link, source = 'result') {

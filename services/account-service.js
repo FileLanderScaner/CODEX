@@ -1,10 +1,37 @@
 import { supabase } from '../lib/supabase';
 import { getApiUrl, getAppUrl } from '../lib/config';
 import { normalizeProduct } from './price-service';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  deleteLocalAlert,
+  loadLocalAlerts,
+  setLocalAlertActive,
+  upsertLocalAlert,
+} from './user-price-service';
+
+const LOCAL_USER_KEY = '@ahorroya:fallback-user';
+const LOCAL_PREMIUM_KEY = '@ahorroya:fallback-premium';
+const LOCAL_AUTH_EVENT = 'ahorroya-local-auth-change';
+
+function fallbackUser(provider = 'demo') {
+  return {
+    id: `local-${provider}-user`,
+    email: `${provider}@ahorroya.local`,
+    app_metadata: { provider },
+    user_metadata: { plan: 'free' },
+  };
+}
+
+function emitLocalAuthChange(user) {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(LOCAL_AUTH_EVENT, { detail: { user } }));
+  }
+}
 
 export async function getSessionUser() {
   if (!supabase) {
-    return null;
+    const stored = await AsyncStorage.getItem(LOCAL_USER_KEY);
+    return stored ? JSON.parse(stored) : null;
   }
 
   const { data } = await supabase.auth.getSession();
@@ -13,7 +40,8 @@ export async function getSessionUser() {
 
 export async function getAccessToken() {
   if (!supabase) {
-    return '';
+    const user = await getSessionUser();
+    return user ? `local-token-${user.id}` : '';
   }
 
   const { data } = await supabase.auth.getSession();
@@ -27,7 +55,12 @@ export async function getAuthHeaders() {
 
 export function subscribeToAuth(callback) {
   if (!supabase) {
-    return () => {};
+    if (typeof window === 'undefined') {
+      return () => {};
+    }
+    const onLocalAuth = (event) => callback(event.detail?.user ?? null);
+    window.addEventListener(LOCAL_AUTH_EVENT, onLocalAuth);
+    return () => window.removeEventListener(LOCAL_AUTH_EVENT, onLocalAuth);
   }
 
   const { data } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -38,7 +71,10 @@ export function subscribeToAuth(callback) {
 
 export async function signInWithProvider(provider) {
   if (!supabase) {
-    return;
+    const user = fallbackUser(provider);
+    await AsyncStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
+    emitLocalAuthChange(user);
+    return user;
   }
 
   const redirectTo = getAppUrl() || undefined;
@@ -50,10 +86,24 @@ export async function signInWithProvider(provider) {
   });
 }
 
+export async function signInWithFallback(email = 'demo@ahorroya.local') {
+  if (supabase) {
+    return;
+  }
+
+  const user = { ...fallbackUser('email'), email };
+  await AsyncStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
+  emitLocalAuthChange(user);
+  return user;
+}
+
 export async function signOutAccount() {
   if (supabase) {
     await supabase.auth.signOut();
+    return;
   }
+  await AsyncStorage.removeItem(LOCAL_USER_KEY);
+  emitLocalAuthChange(null);
 }
 
 export async function upsertProfile(user) {
@@ -111,7 +161,14 @@ export async function saveCloudFavorite(user, product, enabled) {
 
 export async function createCloudAlert(user, product, neighborhood, targetPrice) {
   if (!supabase || !user || !product) {
-    return null;
+    if (!user || !product) return null;
+    const normalized = normalizeProduct(product);
+    const next = await upsertLocalAlert({
+      normalized_product: normalized,
+      neighborhood: neighborhood || 'Montevideo',
+      target_price: targetPrice || null,
+    });
+    return next[0] || null;
   }
 
   const { data, error } = await supabase
@@ -137,7 +194,7 @@ export async function createCloudAlert(user, product, neighborhood, targetPrice)
 
 export async function loadCloudAlerts(user) {
   if (!supabase || !user) {
-    return [];
+    return user ? loadLocalAlerts() : [];
   }
 
   const { data, error } = await supabase
@@ -156,7 +213,12 @@ export async function loadCloudAlerts(user) {
 
 export async function setCloudAlertActive(user, alertId, active) {
   if (!supabase || !user || !alertId) {
-    return null;
+    if (!user || !alertId) return null;
+    const current = await loadLocalAlerts();
+    const alert = current.find((item) => item.id === alertId || item.key === alertId);
+    if (!alert) return null;
+    const next = await setLocalAlertActive(alert.key, active);
+    return next.find((item) => item.key === alert.key) || null;
   }
 
   const { data, error } = await supabase
@@ -176,7 +238,12 @@ export async function setCloudAlertActive(user, alertId, active) {
 
 export async function deleteCloudAlert(user, alertId) {
   if (!supabase || !user || !alertId) {
-    return false;
+    if (!user || !alertId) return false;
+    const current = await loadLocalAlerts();
+    const alert = current.find((item) => item.id === alertId || item.key === alertId);
+    if (!alert) return false;
+    await deleteLocalAlert(alert.key);
+    return true;
   }
 
   const { error } = await supabase
@@ -193,6 +260,10 @@ export async function checkPremiumStatus(user) {
     return false;
   }
 
+  if (!supabase) {
+    return AsyncStorage.getItem(LOCAL_PREMIUM_KEY).then((value) => value === 'active');
+  }
+
   const headers = await getAuthHeaders();
   const response = await fetch(getApiUrl('/api/me'), {
     method: 'GET',
@@ -204,4 +275,11 @@ export async function checkPremiumStatus(user) {
 
   const data = await response.json();
   return Boolean(data?.premium?.isPremium);
+}
+
+export async function activateMockPremium(user) {
+  const activeUser = user || await signInWithFallback();
+  await AsyncStorage.setItem(LOCAL_PREMIUM_KEY, 'active');
+  emitLocalAuthChange(activeUser);
+  return { isPremium: true, user: activeUser };
 }

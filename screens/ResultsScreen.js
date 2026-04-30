@@ -30,6 +30,7 @@ export default function ResultsScreen({
   onReportPrice,
   onCreateAlert,
   productLinks,
+  catalogStatus,
   sortKey = 'relevance',
   selectedNeighborhood,
   onNeighborhood,
@@ -172,6 +173,13 @@ export default function ResultsScreen({
           <Text selectable style={styles.emptyText}>Agrega un precio abajo y quedara guardado para todos.</Text>
         </SurfaceCard>
       )}
+
+      {catalogStatus ? (
+        <SurfaceCard style={styles.catalogCard} elevated={false}>
+          <Text selectable style={styles.catalogTitle}>Catalogos online</Text>
+          <Text selectable style={styles.catalogText}>{catalogStatus}</Text>
+        </SurfaceCard>
+      ) : null}
 
       <SurfaceCard style={styles.mapCard}>
         <View style={styles.mapPreview} />
@@ -419,6 +427,22 @@ const styles = StyleSheet.create({
     color: '#667085',
     fontSize: 14,
     lineHeight: 20,
+  },
+  catalogCard: {
+    backgroundColor: '#F0F9FF',
+    borderColor: '#BAE6FD',
+    gap: 6,
+  },
+  catalogTitle: {
+    color: '#075985',
+    fontWeight: '900',
+    fontSize: 15,
+  },
+  catalogText: {
+    color: '#0C4A6E',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '700',
   },
   rowBetween: {
     flexDirection: 'row',

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import ActivityFeed from '../components/ActivityFeed';
+import AdBanner from '../components/AdBanner';
 import AuthPanel from '../components/AuthPanel';
 import PremiumCard from '../components/PremiumCard';
 import OfferOfDayCard from '../components/home/OfferOfDayCard';
@@ -26,6 +27,7 @@ import {
   upsertProfile,
 } from '../services/account-service';
 import { loadProductLinks } from '../services/commerce-service';
+import { loadUnifiedCatalogPrices, mergeCatalogPrices } from '../services/catalog-service';
 import { loadGrowthMetrics } from '../services/growth-service';
 import {
   buildShareText,
@@ -45,6 +47,7 @@ import {
   loadSearchHistory,
   reportPrice,
   setLocalAlertActive,
+  upsertLocalAlert,
 } from '../services/user-price-service';
 import { deleteCloudAlert, loadCloudAlerts, setCloudAlertActive } from '../services/account-service';
 // keep signOut in the same module (explicit import kept separate to avoid big diffs)
@@ -75,7 +78,9 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const [favorites, setFavorites] = useState([]);
   const [history, setHistory] = useState([]);
   const [cloudPrices, setCloudPrices] = useState([]);
+  const [catalogPrices, setCatalogPrices] = useState([]);
   const [cloudStatus, setCloudStatus] = useState('Cargando precios reales');
+  const [catalogStatus, setCatalogStatus] = useState('Catalogos online listos');
   const [growthMetrics, setGrowthMetrics] = useState(null);
   const [pricesLoading, setPricesLoading] = useState(true);
   const [accountUser, setAccountUser] = useState(null);
@@ -216,7 +221,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     });
   }, []);
 
-  const allCommunityPrices = useMemo(() => [...cloudPrices], [cloudPrices]);
+  const allCommunityPrices = useMemo(() => mergeCatalogPrices(cloudPrices, catalogPrices), [cloudPrices, catalogPrices]);
   const deals = useMemo(() => getPopularDeals(allCommunityPrices), [allCommunityPrices]);
   const socialProof = useMemo(() => ({
     comparisons: growthMetrics?.funnel?.searches ?? 0,
@@ -243,10 +248,26 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     setSearchedQuery(nextQuery);
     const startedAt = Date.now();
     const attribution = shareAttributionFromQuery(currentQuery);
-    const found = searchPrices(nextQuery, allCommunityPrices, { neighborhood });
+    const localFound = searchPrices(nextQuery, allCommunityPrices, { neighborhood });
     const firstResultMs = Date.now() - startedAt;
+    setResults(localFound);
+    setCatalogStatus('Consultando catalogos online de Disco, Devoto, Ta-Ta y Tienda Inglesa...');
+    const [catalogPayload, nextProductLinks] = await Promise.all([
+      loadUnifiedCatalogPrices(nextQuery).catch(() => ({ data: [], sources: [], links: [] })),
+      loadProductLinks(nextQuery),
+    ]);
+    const mergedCatalogPrices = mergeCatalogPrices(localFound, catalogPayload.data || []);
+    setCatalogPrices((current) => mergeCatalogPrices(current, catalogPayload.data || []).slice(0, 120));
+    const found = searchPrices(nextQuery, mergedCatalogPrices, { neighborhood });
     setResults(found);
-    setProductLinks(await loadProductLinks(nextQuery));
+    setProductLinks([...(catalogPayload.links || []), ...nextProductLinks].filter((link, index, list) => (
+      list.findIndex((item) => item.url === link.url) === index
+    )));
+    const liveSources = (catalogPayload.sources || []).filter((source) => source.status === 'ok').map((source) => source.store);
+    const linkedSources = (catalogPayload.sources || []).filter((source) => source.searchUrl).length;
+    setCatalogStatus(liveSources.length
+      ? `Catalogos online actualizados: ${liveSources.join(', ')}`
+      : `Catalogos vinculados: ${linkedSources || 4} comercios. Usando precios persistidos mientras el catalogo no expone precio legible.`);
     setHistory(await addSearchHistory(nextQuery));
     await trackEvent('search_product', {
       product: nextQuery,
@@ -327,7 +348,10 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     await saveCloudFavorite(accountUser, normalized, true).catch(() => null);
     const neighborhood = selectedNeighborhood === 'Todos' ? null : selectedNeighborhood;
     if (!accountUser) {
-      setFeedback('Inicia sesion para crear una alerta real guardada en Supabase.');
+      const nextAlerts = await upsertLocalAlert({ normalized_product: normalized, neighborhood: neighborhood || 'Montevideo' });
+      setAlerts(nextAlerts);
+      setFavorites(nextFavorites);
+      setFeedback(`Alerta local creada para ${normalized}. Inicia sesion para sincronizarla.`);
       return;
     }
     const created = await createCloudAlert(accountUser, normalized, neighborhood).catch(() => null);
@@ -610,6 +634,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         onReportPrice={handleReportPrice}
         onCreateAlert={handleCreateAlert}
         productLinks={productLinks}
+        catalogStatus={catalogStatus}
         sortKey={sortKey}
         selectedNeighborhood={selectedNeighborhood}
         onNeighborhood={handleNeighborhood}
@@ -740,17 +765,18 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       {favorites.length ? (
         <View style={{ gap: 12 }}>
           {favorites.map((fav) => (
-            <Pressable key={fav} accessibilityRole="button" onPress={() => runSearch(fav)}>
-              <SurfaceCard style={{ gap: 10 }}>
-                <View style={styles.rowBetween}>
-                  <Text selectable style={styles.favTitle}>{fav}</Text>
-                  <Pressable accessibilityRole="button" onPress={() => handleFavorite(fav)} style={styles.heartBtn}>
-                    <Text style={styles.heartBtnText}>F</Text>
-                  </Pressable>
-                </View>
-                <Text selectable style={styles.emptyText}>Toca para ver comparacion y crear alerta.</Text>
-              </SurfaceCard>
-            </Pressable>
+            <SurfaceCard key={fav} style={{ gap: 10 }}>
+              <View style={styles.rowBetween}>
+                <Text selectable style={styles.favTitle}>{fav}</Text>
+                <Pressable accessibilityRole="button" onPress={() => handleFavorite(fav)} style={styles.heartBtn}>
+                  <Text style={styles.heartBtnText}>F</Text>
+                </Pressable>
+              </View>
+              <Text selectable style={styles.emptyText}>Toca para ver comparacion y crear alerta.</Text>
+              <Pressable accessibilityRole="button" onPress={() => runSearch(fav)} style={styles.secondaryCta}>
+                <Text style={styles.secondaryCtaText}>Ver comparacion</Text>
+              </Pressable>
+            </SurfaceCard>
           ))}
         </View>
       ) : (
@@ -1123,6 +1149,21 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '900',
     fontSize: 16,
+  },
+  secondaryCta: {
+    minHeight: 44,
+    paddingHorizontal: 14,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.surfaceLow,
+    borderWidth: 1,
+    borderColor: ui.colors.outline,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryCtaText: {
+    color: ui.colors.primaryInk,
+    fontWeight: '900',
+    fontSize: 14,
   },
   emptyTitle: {
     color: ui.colors.text,

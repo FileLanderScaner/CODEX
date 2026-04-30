@@ -1,19 +1,17 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { hasSupabaseConfig } from '../lib/config';
-import { signInWithProvider, signOutAccount } from '../services/account-service';
+import { signInWithFallback, signInWithProvider, signOutAccount } from '../services/account-service';
 
 export default function AuthPanel({ user, isPremium }) {
-  if (!hasSupabaseConfig) {
-    return null;
-  }
-
   if (user) {
     return (
       <View style={styles.card}>
         <View style={styles.copy}>
           <Text selectable style={styles.title}>{user.email || 'Cuenta conectada'}</Text>
-          <Text selectable style={styles.text}>{isPremium ? 'Premium activo' : 'Favoritos y alertas guardados en la nube'}</Text>
+          <Text selectable style={styles.text}>
+            {isPremium ? 'Premium activo' : hasSupabaseConfig ? 'Favoritos y alertas guardados en la nube' : 'Sesion local activa con persistencia en este dispositivo'}
+          </Text>
         </View>
         <Pressable accessibilityRole="button" onPress={signOutAccount} style={styles.secondaryButton}>
           <Text style={styles.secondaryButtonText}>Salir</Text>
@@ -26,13 +24,15 @@ export default function AuthPanel({ user, isPremium }) {
     <View style={styles.card}>
       <View style={styles.copy}>
         <Text selectable style={styles.title}>Guarda tus alertas</Text>
-        <Text selectable style={styles.text}>Entra con Google o Facebook para sincronizar favoritos, ranking y Premium.</Text>
+        <Text selectable style={styles.text}>
+          {hasSupabaseConfig ? 'Entra con Google o Facebook para sincronizar favoritos, ranking y Premium.' : 'Modo fallback activo: entra con una cuenta demo para guardar favoritos, alertas y Premium local.'}
+        </Text>
       </View>
       <View style={styles.actions}>
-        <Pressable accessibilityRole="button" onPress={() => signInWithProvider('google')} style={styles.button}>
+        <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig ? signInWithProvider('google') : signInWithFallback()} style={styles.button}>
           <Text style={styles.buttonText}>Google</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => signInWithProvider('facebook')} style={styles.button}>
+        <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig ? signInWithProvider('facebook') : signInWithFallback('facebook@ahorroya.local')} style={styles.button}>
           <Text style={styles.buttonText}>Facebook</Text>
         </Pressable>
       </View>

@@ -21,7 +21,7 @@ export default function ProductLinks({ links = [] }) {
           <View style={styles.copy}>
             <Text selectable style={styles.name}>{link.title}</Text>
             <Text selectable style={styles.meta}>
-              {link.store} · {link.kind === 'sponsored' ? 'Patrocinado' : link.kind === 'affiliate' ? 'Afiliado' : 'Oferta'}
+              {link.store} · {link.kind === 'sponsored' ? 'Patrocinado' : link.kind === 'affiliate' ? 'Afiliado' : link.kind === 'catalog' ? 'Catalogo online' : 'Oferta'}
             </Text>
           </View>
           <Text style={styles.cta}>Ver</Text>

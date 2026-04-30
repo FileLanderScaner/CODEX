@@ -7,6 +7,7 @@ import billingCreate from '../server/api/v1/billing/subscriptions/create.js';
 import billingMe from '../server/api/v1/billing/me.js';
 import billingPaypalWebhook from '../server/api/v1/billing/webhooks/paypal.js';
 import categories from '../server/api/v1/categories.js';
+import catalogSearch from '../server/api/v1/catalog-search.js';
 import favorites from '../server/api/v1/favorites.js';
 import growthContent from '../server/api/v1/growth-content.js';
 import growthMetrics from '../server/api/v1/growth-metrics.js';
@@ -41,6 +42,7 @@ const exactRoutes = new Map([
   ['v1/billing/subscriptions/create', billingCreate],
   ['v1/billing/webhooks/paypal', billingPaypalWebhook],
   ['v1/categories', categories],
+  ['v1/catalog/search', catalogSearch],
   ['v1/favorites', favorites],
   ['v1/growth/content', growthContent],
   ['v1/growth/metrics', growthMetrics],

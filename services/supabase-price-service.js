@@ -1,19 +1,39 @@
 import { getApiUrl } from '../lib/config';
 import { fetchOfficialPrices, formatProductName, mapObservation, normalizeProduct } from './price-service';
 import { getAuthHeaders } from './account-service';
+import { MONTEVIDEO_SEED_PRICES } from '../data/seed-prices';
+import { addUserPrice, loadUserPrices } from './user-price-service';
 
 export async function ensureSupabaseUser() {
   return null;
 }
 
 export async function loadCloudPrices(params = {}) {
-  const { data } = await fetchOfficialPrices(params);
-  return data;
+  try {
+    const { data } = await fetchOfficialPrices(params);
+    if (data?.length) {
+      return data;
+    }
+  } catch (_error) {
+    // Expo web does not run Vercel functions locally; keep the product usable with persisted seed data.
+  }
+
+  const localPrices = await loadUserPrices().catch(() => []);
+  return [...localPrices, ...MONTEVIDEO_SEED_PRICES];
 }
 
 export async function addCloudPrice(price) {
   const product = normalizeProduct(price.product);
   const authHeaders = await getAuthHeaders();
+  const fallbackSave = async () => {
+    const localPrices = await addUserPrice({
+      ...price,
+      product,
+      neighborhood: price.neighborhood || 'Cerca tuyo',
+    });
+    return localPrices[0] || null;
+  };
+
   const response = await fetch(getApiUrl('/api/v1/prices/community'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders },
@@ -27,14 +47,14 @@ export async function addCloudPrice(price) {
       neighborhood: price.neighborhood?.trim() || 'Cerca tuyo',
       price: Number(price.price),
     }),
-  });
+  }).catch(() => null);
 
-  if (!response.ok) {
-    return null;
+  if (!response?.ok) {
+    return fallbackSave();
   }
 
   const data = await response.json();
-  return data?.data ? mapObservation(data.data) : null;
+  return data?.data ? mapObservation(data.data) : fallbackSave();
 }
 
 export async function addCloudShare(price, channel = 'share') {
