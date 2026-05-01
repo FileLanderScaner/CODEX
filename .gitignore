@@ -28,3 +28,10 @@ Thumbs.db
 # Metro
 .metro-health-check*
 .vercel
+
+# Credentials - DO NOT COMMIT
+# Google OAuth client secret JSON files and local secrets
+client_secret_*.json
+secrets/
+*.credentials.json
+

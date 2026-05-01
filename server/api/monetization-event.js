@@ -6,7 +6,24 @@ import { getUserFromAccessToken } from './supabase/_auth.js';
 import { insertMonetizationEvent } from './_monetization.js';
 
 const eventSchema = z.object({
-  eventName: z.enum(['search_product', 'view_best_price', 'share', 'share_click', 'click_whatsapp', 'add_favorite', 'create_alert', 'premium_click', 'landing_view', 'open_app']),
+  eventName: z.enum([
+    'search_submitted',
+    'search_product',
+    'cheapest_price_shown',
+    'view_best_price',
+    'commerce_clicked',
+    'fallback_used',
+    'premium_started',
+    'premium_completed',
+    'share',
+    'share_click',
+    'click_whatsapp',
+    'add_favorite',
+    'create_alert',
+    'premium_click',
+    'landing_view',
+    'open_app',
+  ]),
   amount: z.coerce.number().optional().nullable(),
   currency: z.string().length(3).optional().default('UYU'),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),

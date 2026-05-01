@@ -11,6 +11,7 @@ import TopBar from '../components/ui/TopBar';
 import SearchBar from '../components/ui/SearchBar';
 import Chip from '../components/ui/Chip';
 import SurfaceCard from '../components/ui/SurfaceCard';
+import { MONTEVIDEO_SEED_PRICES } from '../data/seed-prices';
 import { ui } from '../lib/ui';
 import PaywallScreen from './PaywallScreen';
 import ResultsScreen from './ResultsScreen';
@@ -22,6 +23,7 @@ import {
   createCloudAlert,
   getSessionUser,
   loadCloudFavorites,
+  migrateLocalStateToCloud,
   saveCloudFavorite,
   subscribeToAuth,
   upsertProfile,
@@ -29,6 +31,8 @@ import {
 import { loadProductLinks } from '../services/commerce-service';
 import { loadUnifiedCatalogPrices, mergeCatalogPrices } from '../services/catalog-service';
 import { loadGrowthMetrics } from '../services/growth-service';
+import { getPremiumLocalSuggestions } from '../services/local-commerce-service';
+import { buildPriceComparison } from '../services/price-engine';
 import {
   buildShareText,
   filterMontevideoLaunchPrices,
@@ -38,6 +42,7 @@ import {
 } from '../services/price-service';
 import { addCloudPrice, addCloudReport, addCloudShare, loadCloudPrices } from '../services/supabase-price-service';
 import { trackEvent } from '../services/tracking-service';
+import { getIntentLabel, resolveSearchIntent } from '../services/search-intent-service';
 import {
   addPoints,
   addSearchHistory,
@@ -75,17 +80,22 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const [searchedQuery, setSearchedQuery] = useState('');
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('Todos');
   const [results, setResults] = useState([]);
+  const [loadingCatalogs, setLoadingCatalogs] = useState(false);
+  const [partialResults, setPartialResults] = useState([]);
+  const [finalResults, setFinalResults] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [history, setHistory] = useState([]);
   const [cloudPrices, setCloudPrices] = useState([]);
   const [catalogPrices, setCatalogPrices] = useState([]);
   const [cloudStatus, setCloudStatus] = useState('Cargando precios reales');
   const [catalogStatus, setCatalogStatus] = useState('Catalogos online listos');
+  const [catalogSources, setCatalogSources] = useState([]);
   const [growthMetrics, setGrowthMetrics] = useState(null);
   const [pricesLoading, setPricesLoading] = useState(true);
   const [accountUser, setAccountUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
   const [productLinks, setProductLinks] = useState([]);
+  const [premiumLocalSuggestions, setPremiumLocalSuggestions] = useState(null);
   const [points, setPoints] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [showPremium, setShowPremium] = useState(false);
@@ -105,6 +115,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const currentPath = Platform.OS === 'web' ? (nav?.path || '/app') : '/app';
   const currentQuery = Platform.OS === 'web' ? (nav?.query || {}) : {};
   const trackedInboundShareRef = useRef(new Set());
+  const searchSeqRef = useRef(0);
 
   useEffect(() => {
     Promise.all([
@@ -182,6 +193,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       setAccountUser(user);
       if (user) {
         await upsertProfile(user).catch(() => null);
+        await migrateLocalStateToCloud(user).catch(() => null);
         const [cloudFavorites, premium] = await Promise.all([
           loadCloudFavorites(user),
           checkPremiumStatus(user),
@@ -201,6 +213,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       setAccountUser(user);
       if (user) {
         await upsertProfile(user).catch(() => null);
+        await migrateLocalStateToCloud(user).catch(() => null);
         const [cloudFavorites, premium] = await Promise.all([
           loadCloudFavorites(user),
           checkPremiumStatus(user),
@@ -222,6 +235,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   }, []);
 
   const allCommunityPrices = useMemo(() => mergeCatalogPrices(cloudPrices, catalogPrices), [cloudPrices, catalogPrices]);
+  const localSearchPrices = useMemo(() => mergeCatalogPrices(MONTEVIDEO_SEED_PRICES, cloudPrices), [cloudPrices]);
   const deals = useMemo(() => getPopularDeals(allCommunityPrices), [allCommunityPrices]);
   const socialProof = useMemo(() => ({
     comparisons: growthMetrics?.funnel?.searches ?? 0,
@@ -235,59 +249,123 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
   useEffect(() => {
     if (!searchedQuery || !allCommunityPrices.length) return;
-    setResults(searchPrices(searchedQuery, allCommunityPrices, { neighborhood: selectedNeighborhood }));
-  }, [allCommunityPrices, searchedQuery, selectedNeighborhood]);
+    const comparison = buildPriceComparison({
+      query: searchedQuery,
+      seedPrices: localSearchPrices,
+      catalogPrices,
+      neighborhood: selectedNeighborhood,
+    });
+    setPartialResults(comparison.partialResults);
+    setFinalResults(comparison.finalResults);
+    setResults(comparison.finalResults);
+  }, [allCommunityPrices, catalogPrices, localSearchPrices, searchedQuery, selectedNeighborhood]);
 
   const runSearch = async (value = query, neighborhood = selectedNeighborhood) => {
-    const nextQuery = normalizeProduct(value);
+    const intent = resolveSearchIntent(value);
+    const nextQuery = intent.query;
     if (!nextQuery) {
       return;
     }
 
+    const searchSeq = searchSeqRef.current + 1;
+    searchSeqRef.current = searchSeq;
     setQuery(nextQuery);
     setSearchedQuery(nextQuery);
+    setPremiumLocalSuggestions(getPremiumLocalSuggestions(nextQuery));
     const startedAt = Date.now();
     const attribution = shareAttributionFromQuery(currentQuery);
-    const localFound = searchPrices(nextQuery, allCommunityPrices, { neighborhood });
+    const localFound = searchPrices(nextQuery, localSearchPrices, { neighborhood });
+    const initialComparison = buildPriceComparison({
+      query: nextQuery,
+      seedPrices: localFound,
+      catalogPrices: [],
+      neighborhood,
+    });
     const firstResultMs = Date.now() - startedAt;
-    setResults(localFound);
-    setCatalogStatus('Consultando catalogos online de Disco, Devoto, Ta-Ta y Tienda Inglesa...');
+    setPartialResults(initialComparison.partialResults);
+    setFinalResults(initialComparison.finalResults);
+    setResults(initialComparison.finalResults);
+    setLoadingCatalogs(true);
+    setCatalogSources([]);
+    setCatalogStatus(`${getIntentLabel(intent)} Consultando supermercados, farmacias, marketplace y delivery...`.trim());
+    await trackEvent('search_submitted', {
+      product: nextQuery,
+      neighborhood,
+      city: 'Montevideo',
+      attribution,
+    }).catch(() => null);
+
     const [catalogPayload, nextProductLinks] = await Promise.all([
-      loadUnifiedCatalogPrices(nextQuery).catch(() => ({ data: [], sources: [], links: [] })),
-      loadProductLinks(nextQuery),
+      loadUnifiedCatalogPrices(nextQuery).catch(() => ({ data: [], sources: [], commerceResults: [], links: [] })),
+      loadProductLinks(nextQuery).catch(() => []),
     ]);
-    const mergedCatalogPrices = mergeCatalogPrices(localFound, catalogPayload.data || []);
-    setCatalogPrices((current) => mergeCatalogPrices(current, catalogPayload.data || []).slice(0, 120));
-    const found = searchPrices(nextQuery, mergedCatalogPrices, { neighborhood });
-    setResults(found);
-    setProductLinks([...(catalogPayload.links || []), ...nextProductLinks].filter((link, index, list) => (
+
+    if (searchSeqRef.current !== searchSeq) {
+      return;
+    }
+
+    const catalogData = catalogPayload.data || [];
+    const comparison = buildPriceComparison({
+      query: nextQuery,
+      seedPrices: localFound,
+      catalogPrices: catalogData,
+      commerceResults: catalogPayload.commerceResults || catalogPayload.sources || [],
+      neighborhood,
+    });
+    setCatalogPrices((current) => mergeCatalogPrices(current, catalogData).slice(0, 120));
+    setPartialResults(initialComparison.finalResults);
+    setFinalResults(comparison.finalResults);
+    setResults(comparison.finalResults);
+    const dedupedLinks = [...(catalogPayload.links || []), ...nextProductLinks].filter((link, index, list) => (
       list.findIndex((item) => item.url === link.url) === index
-    )));
-    const liveSources = (catalogPayload.sources || []).filter((source) => source.status === 'ok').map((source) => source.store);
-    const linkedSources = (catalogPayload.sources || []).filter((source) => source.searchUrl).length;
+    ));
+    setProductLinks(dedupedLinks);
+    const liveSources = (catalogPayload.sources || []).filter((source) => source.status === 'ok').map((source) => source.store || source.commerce);
+    const fallbackSources = (catalogPayload.sources || []).filter((source) => source.status !== 'ok');
+    const linkedSources = Math.max(
+      (catalogPayload.sources || []).filter((source) => source.searchUrl || source.fallbackUrl).length,
+      dedupedLinks.length,
+    );
     setCatalogStatus(liveSources.length
-      ? `Catalogos online actualizados: ${liveSources.join(', ')}`
-      : `Catalogos vinculados: ${linkedSources || 4} comercios. Usando precios persistidos mientras el catalogo no expone precio legible.`);
+      ? `Catalogos online actualizados: ${liveSources.join(', ')}. Consulta: ${new Date(catalogPayload.generatedAt || Date.now()).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' })}`
+      : `Catalogos vinculados: ${linkedSources || 4} comercios. Si no hay precio legible, abrimos la busqueda oficial.`);
+    setCatalogSources(catalogPayload.sources || []);
+    if (fallbackSources.length) {
+      await trackEvent('fallback_used', {
+        product: nextQuery,
+        stores: fallbackSources.map((source) => source.store || source.commerce),
+        cacheStatus: catalogPayload.cacheStatus || null,
+      }).catch(() => null);
+    }
     setHistory(await addSearchHistory(nextQuery));
     await trackEvent('search_product', {
       product: nextQuery,
-      results: found.length,
+      results: comparison.finalResults.length,
       neighborhood,
       city: 'Montevideo',
       time_to_first_result_ms: firstResultMs,
       attribution,
     }).catch(() => null);
-    if (found[0]) {
+    const bestShown = comparison.finalResults.find((item) => item.bestOffer)?.bestOffer || null;
+    if (bestShown) {
       await trackEvent('view_best_price', {
-        product: found[0].product,
-        price_id: found[0].id,
-        price: found[0].price,
-        store: found[0].store,
+        product: bestShown.product,
+        price_id: bestShown.id,
+        price: bestShown.price,
+        store: bestShown.store,
         city: 'Montevideo',
         time_to_first_result_ms: firstResultMs,
         attribution,
-      }, found[0].price, found[0].currency).catch(() => null);
+      }, bestShown.price, bestShown.currency).catch(() => null);
+      await trackEvent('cheapest_price_shown', {
+        product: bestShown.product,
+        price_id: bestShown.id,
+        price: bestShown.price,
+        store: bestShown.store,
+        compared_commerces: comparison.finalResults[0]?.commerceCount || 0,
+      }, bestShown.price, bestShown.currency).catch(() => null);
     }
+    setLoadingCatalogs(false);
 
     if (nav?.goSearch) {
       nav.goSearch();
@@ -298,7 +376,15 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const handleNeighborhood = (neighborhood) => {
     setSelectedNeighborhood(neighborhood);
     if (searchedQuery) {
-      setResults(searchPrices(searchedQuery, allCommunityPrices, { neighborhood }));
+      const comparison = buildPriceComparison({
+        query: searchedQuery,
+        seedPrices: localSearchPrices,
+        catalogPrices,
+        neighborhood,
+      });
+      setPartialResults(comparison.partialResults);
+      setFinalResults(comparison.finalResults);
+      setResults(comparison.finalResults);
     }
   };
 
@@ -628,6 +714,12 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       <ResultsScreen
         searchedQuery={searchedQuery}
         results={results}
+        loadingCatalogs={loadingCatalogs}
+        partialResults={partialResults}
+        finalResults={finalResults}
+        premiumLocalSuggestions={premiumLocalSuggestions}
+        isPremium={isPremium}
+        onOpenPremium={openPremium}
         favorites={favorites}
         onFavorite={handleFavorite}
         onSharePoints={handleSharePoints}
@@ -635,6 +727,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         onCreateAlert={handleCreateAlert}
         productLinks={productLinks}
         catalogStatus={catalogStatus}
+        catalogSources={catalogSources}
         sortKey={sortKey}
         selectedNeighborhood={selectedNeighborhood}
         onNeighborhood={handleNeighborhood}

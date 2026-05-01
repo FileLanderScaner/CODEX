@@ -3,6 +3,7 @@ import { getApiUrl } from '../lib/config';
 import { normalizeProduct } from './price-service';
 import { getAuthHeaders } from './account-service';
 import { buildCatalogLinks } from './catalog-service';
+import { trackEvent } from './tracking-service';
 
 export async function loadProductLinks(product) {
   const catalogLinks = buildCatalogLinks(product);
@@ -28,6 +29,13 @@ export async function trackProductClick(link, source = 'result') {
   if (!link) {
     return;
   }
+
+  await trackEvent('commerce_clicked', {
+    product: link.product || null,
+    store: link.store || null,
+    url: link.url || null,
+    source,
+  }).catch(() => null);
 
   const authHeaders = await getAuthHeaders();
   await fetch(getApiUrl('/api/product-click'), {

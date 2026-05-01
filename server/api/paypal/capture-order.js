@@ -1,6 +1,11 @@
 import { enforceOrigin, handleOptions, paypalFetch, recordPremiumOrder, setCors, updatePremiumProfile } from './_utils.js';
 import { getBearerToken } from '../_security.js';
 import { getUserFromAccessToken } from '../supabase/_auth.js';
+import { z } from 'zod';
+
+const captureOrderSchema = z.object({
+  orderId: z.string().min(6).max(128),
+});
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) {
@@ -28,12 +33,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const { orderId } = req.body || {};
-
-    if (!orderId) {
-      res.status(400).json({ error: 'Missing orderId' });
-      return;
-    }
+    const { orderId } = captureOrderSchema.parse(req.body || {});
 
     const capture = await paypalFetch(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
       method: 'POST',

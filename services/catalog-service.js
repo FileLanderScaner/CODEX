@@ -1,6 +1,10 @@
 import { getApiUrl } from '../lib/config';
 import { MONTEVIDEO_SEED_PRICES } from '../data/seed-prices';
 import { formatProductName, normalizeProduct, normalizeStoreKey } from './price-service';
+import { canonicalizeProductQuery } from './search-intent-service';
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_PREFIX = '@ahorroya:catalog-search:';
 
 export const CATALOG_STORES = [
   {
@@ -43,6 +47,34 @@ export const CATALOG_STORES = [
       `https://www.tiendainglesa.com.uy/supermercado/busqueda?0,0,${encodeURIComponent(query)},0`,
       `https://www.tiendainglesa.com.uy/busqueda?0,0,${encodeURIComponent(query)},0`,
     ],
+  },
+  {
+    key: 'farmashop',
+    store: 'Farmashop',
+    baseUrl: 'https://www.farmashop.com.uy',
+    searchUrl: (query) => `https://www.farmashop.com.uy/search?text=${encodeURIComponent(query)}`,
+    apiUrls: () => [],
+  },
+  {
+    key: 'sanroque',
+    store: 'San Roque',
+    baseUrl: 'https://www.sanroque.com.uy',
+    searchUrl: (query) => `https://www.sanroque.com.uy/search?text=${encodeURIComponent(query)}`,
+    apiUrls: () => [],
+  },
+  {
+    key: 'mercadolibre',
+    store: 'Mercado Libre',
+    baseUrl: 'https://www.mercadolibre.com.uy',
+    searchUrl: (query) => `https://listado.mercadolibre.com.uy/${encodeURIComponent(query)}`,
+    apiUrls: () => [],
+  },
+  {
+    key: 'pedidosyamarket',
+    store: 'PedidosYa Market',
+    baseUrl: 'https://www.pedidosya.com.uy',
+    searchUrl: (query) => `https://www.pedidosya.com.uy/search/${encodeURIComponent(query)}`,
+    apiUrls: () => [],
   },
 ];
 
@@ -213,10 +245,22 @@ async function fetchWithTimeout(url, options = {}) {
 
 async function fetchAdapterCatalog(adapter, query) {
   const normalizedQuery = normalizeProduct(query);
-  if (!normalizedQuery) return { store: adapter.store, data: [], status: 'empty_query' };
+  if (!normalizedQuery) {
+    return {
+      commerce: adapter.store,
+      store: adapter.store,
+      results: [],
+      data: [],
+      fallbackUrl: adapter.searchUrl(''),
+      searchUrl: adapter.searchUrl(''),
+      status: 'empty_query',
+      errors: [],
+    };
+  }
 
   const data = [];
   const errors = [];
+  let status = 'linked';
 
   for (const url of adapter.apiUrls?.(normalizedQuery) || []) {
     try {
@@ -250,17 +294,48 @@ async function fetchAdapterCatalog(adapter, query) {
     }
   }
 
+  if (data.length) {
+    status = 'ok';
+  } else if (errors.some((error) => /AbortError|timeout/i.test(error))) {
+    status = 'timeout';
+  } else if (errors.length) {
+    status = 'error';
+  }
+
+  const fallbackUrl = adapter.searchUrl(normalizedQuery);
+  const results = dedupePrices(data).slice(0, 12);
   return {
+    commerce: adapter.store,
     store: adapter.store,
-    status: data.length ? 'ok' : 'linked',
-    searchUrl: adapter.searchUrl(normalizedQuery),
-    data: dedupePrices(data).slice(0, 12),
+    status,
+    fallbackUrl,
+    searchUrl: fallbackUrl,
+    results,
+    data: results,
     errors,
   };
 }
 
+export async function searchCatalogCommerce(adapter, query) {
+  try {
+    return await fetchAdapterCatalog(adapter, query);
+  } catch (error) {
+    const normalizedQuery = normalizeProduct(query);
+    return {
+      commerce: adapter.store,
+      store: adapter.store,
+      status: error?.name === 'AbortError' ? 'timeout' : 'error',
+      fallbackUrl: adapter.searchUrl(normalizedQuery),
+      searchUrl: adapter.searchUrl(normalizedQuery),
+      results: [],
+      data: [],
+      errors: [error?.message || String(error)],
+    };
+  }
+}
+
 export function buildCatalogLinks(product) {
-  const query = normalizeProduct(product);
+  const query = canonicalizeProductQuery(product);
   if (!query) return [];
   return CATALOG_STORES.map((adapter) => ({
     id: `catalog-link-${adapter.key}-${query}`,
@@ -273,7 +348,7 @@ export function buildCatalogLinks(product) {
 }
 
 export function buildCatalogFallbackPrices(product) {
-  const query = normalizeProduct(product);
+  const query = canonicalizeProductQuery(product);
   if (!query) return [];
   return MONTEVIDEO_SEED_PRICES
     .filter((price) => normalizeProduct(`${price.product} ${price.displayName} ${price.brand}`).includes(query))
@@ -286,43 +361,108 @@ export function buildCatalogFallbackPrices(product) {
 }
 
 export async function fetchUnifiedCatalogPrices(product) {
-  const query = normalizeProduct(product);
+  const query = canonicalizeProductQuery(product);
   if (!query) {
     return { data: [], sources: [], links: [] };
   }
-  const settled = await Promise.all(CATALOG_STORES.map((adapter) => fetchAdapterCatalog(adapter, query)));
-  const data = dedupePrices(settled.flatMap((source) => source.data)).slice(0, 48);
+  const settled = await Promise.allSettled(CATALOG_STORES.map((adapter) => searchCatalogCommerce(adapter, query)));
+  const commerceResults = settled.map((result, index) => {
+    if (result.status === 'fulfilled') return result.value;
+    const adapter = CATALOG_STORES[index];
+    return {
+      commerce: adapter.store,
+      store: adapter.store,
+      status: 'error',
+      fallbackUrl: adapter.searchUrl(query),
+      searchUrl: adapter.searchUrl(query),
+      results: [],
+      data: [],
+      errors: [result.reason?.message || String(result.reason)],
+    };
+  });
+  const data = dedupePrices(commerceResults.flatMap((source) => source.results || source.data || [])).slice(0, 48);
   return {
     query,
     generatedAt: nowIso(),
     data,
-    sources: settled.map(({ store, status, searchUrl, errors }) => ({ store, status, searchUrl, errors })),
+    commerceResults,
+    sources: commerceResults.map(({ commerce, store, status, fallbackUrl, searchUrl, errors }) => ({
+      commerce: commerce || store,
+      store: store || commerce,
+      status,
+      fallbackUrl: fallbackUrl || searchUrl,
+      searchUrl: searchUrl || fallbackUrl,
+      errors,
+    })),
     links: buildCatalogLinks(query),
   };
 }
 
+async function getAsyncStorage() {
+  try {
+    const mod = await import('@react-native-async-storage/async-storage');
+    return mod.default;
+  } catch {
+    return null;
+  }
+}
+
+async function readCatalogCache(query, options = {}) {
+  const storage = await getAsyncStorage();
+  if (!storage) return null;
+  const raw = await storage.getItem(`${CACHE_PREFIX}${query}`).catch(() => null);
+  if (!raw) return null;
+  const parsed = JSON.parse(raw);
+  if (!options.allowStale && (!parsed?.savedAt || Date.now() - Number(parsed.savedAt) > CACHE_TTL_MS)) return null;
+  return parsed.payload || null;
+}
+
+async function writeCatalogCache(query, payload) {
+  const storage = await getAsyncStorage();
+  if (!storage || !payload) return;
+  await storage.setItem(`${CACHE_PREFIX}${query}`, JSON.stringify({ savedAt: Date.now(), payload })).catch(() => null);
+}
+
 export async function loadUnifiedCatalogPrices(product) {
-  const query = normalizeProduct(product);
+  const query = canonicalizeProductQuery(product);
   if (!query) return { data: [], sources: [], links: [] };
+  const cached = await readCatalogCache(query);
+  if (cached?.data?.length || cached?.links?.length) {
+    return { ...cached, cacheStatus: 'hit' };
+  }
   const response = await fetch(getApiUrl(`/api/v1/catalog/search?q=${encodeURIComponent(query)}`), {
     method: 'GET',
     headers: { Accept: 'application/json' },
   }).catch(() => null);
   if (!response?.ok) {
+    const stale = await readCatalogCache(query, { allowStale: true });
+    if (stale) {
+      return { ...stale, cacheStatus: 'stale' };
+    }
     return {
       query,
       generatedAt: nowIso(),
       data: buildCatalogFallbackPrices(query),
+      commerceResults: CATALOG_STORES.map((adapter) => ({
+        commerce: adapter.store,
+        results: [],
+        fallbackUrl: adapter.searchUrl(query),
+        status: 'local_link',
+      })),
       sources: CATALOG_STORES.map((adapter) => ({
+        commerce: adapter.store,
         store: adapter.store,
         status: 'local_link',
+        fallbackUrl: adapter.searchUrl(query),
         searchUrl: adapter.searchUrl(query),
         errors: ['api_unavailable'],
       })),
       links: buildCatalogLinks(query),
     };
   }
-  return response.json();
+  const payload = await response.json();
+  await writeCatalogCache(query, payload);
+  return { ...payload, cacheStatus: 'fresh' };
 }
 
 export function mergeCatalogPrices(basePrices = [], catalogPrices = []) {

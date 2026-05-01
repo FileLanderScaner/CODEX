@@ -1,6 +1,13 @@
 import { enforceOrigin, handleOptions, paypalFetch, setCors } from './_utils.js';
 import { getBearerToken } from '../_security.js';
 import { getUserFromAccessToken } from '../supabase/_auth.js';
+import { z } from 'zod';
+
+const createOrderSchema = z.object({
+  amount: z.coerce.number().positive().max(100).default(4.99),
+  currency: z.string().length(3).default('USD'),
+  plan: z.enum(['premium_monthly', 'premium_yearly']).default('premium_monthly'),
+});
 
 export default async function handler(req, res) {
   if (handleOptions(req, res)) {
@@ -28,7 +35,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const { amount = '4.99', currency = 'USD', plan = 'premium_monthly' } = req.body || {};
+    const { amount, currency, plan } = createOrderSchema.parse(req.body || {});
 
     const order = await paypalFetch('/v2/checkout/orders', {
       method: 'POST',
@@ -40,7 +47,7 @@ export default async function handler(req, res) {
             description: `AhorroYA ${plan}`,
             amount: {
               currency_code: currency,
-              value: Number(amount).toFixed(2),
+              value: amount.toFixed(2),
             },
           },
         ],

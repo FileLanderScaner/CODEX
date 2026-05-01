@@ -1,19 +1,24 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import ProductLinks from '../components/ProductLinks';
 import Chip from '../components/ui/Chip';
 import SurfaceCard from '../components/ui/SurfaceCard';
 import { ui } from '../lib/ui';
+import { trackProductClick } from '../services/commerce-service';
 import { buildShareText, getCheapest, getPriceStats, getSavingsOpportunity, getSavingsText } from '../services/price-service';
 
 function stableDistanceKm(seed) {
   return null;
 }
 
+function hasValidPrice(item) {
+  return Number.isFinite(Number(item?.price)) && Number(item?.price) > 0;
+}
+
 function sortResults(results, sortKey) {
   const list = [...(results || [])];
   if (sortKey === 'price') {
-    return list.sort((a, b) => Number(a.price) - Number(b.price));
+    return list.sort((a, b) => Number(hasValidPrice(a) ? a.price : Number.MAX_SAFE_INTEGER) - Number(hasValidPrice(b) ? b.price : Number.MAX_SAFE_INTEGER));
   }
   if (sortKey === 'distance') {
     return list.sort((a, b) => String(a.neighborhood || '').localeCompare(String(b.neighborhood || '')));
@@ -24,6 +29,12 @@ function sortResults(results, sortKey) {
 export default function ResultsScreen({
   searchedQuery,
   results,
+  loadingCatalogs = false,
+  partialResults = [],
+  finalResults = [],
+  premiumLocalSuggestions = null,
+  isPremium = false,
+  onOpenPremium,
   favorites,
   onFavorite,
   onSharePoints,
@@ -31,6 +42,7 @@ export default function ResultsScreen({
   onCreateAlert,
   productLinks,
   catalogStatus,
+  catalogSources = [],
   sortKey = 'relevance',
   selectedNeighborhood,
   onNeighborhood,
@@ -39,29 +51,30 @@ export default function ResultsScreen({
 }) {
   const [selected, setSelected] = useState(null);
   const sorted = useMemo(() => sortResults(results, sortKey), [results, sortKey]);
-  const cheapest = useMemo(() => getCheapest(sorted), [sorted]);
-  const stats = useMemo(() => getPriceStats(sorted), [sorted]);
+  const pricedOffers = useMemo(() => sorted.flatMap((item) => item.offers || [item]).filter(hasValidPrice), [sorted]);
+  const cheapest = useMemo(() => getCheapest(pricedOffers), [pricedOffers]);
+  const stats = useMemo(() => getPriceStats(pricedOffers), [pricedOffers]);
   const isFavorite = Boolean(searchedQuery && favorites.includes(String(searchedQuery).toLowerCase()));
 
   const handleShare = async () => {
-    const message = buildShareText(sorted);
+    const message = buildShareText(pricedOffers);
     try {
       await Share.share({ message });
     } catch (_error) {
       Alert.alert('Compartir', message);
     } finally {
-      onSharePoints(cheapest, 'native', { savings: getSavingsOpportunity(sorted), url: message.match(/https?:\/\/\S+/)?.[0] || '' });
+      onSharePoints(cheapest, 'native', { savings: getSavingsOpportunity(pricedOffers), url: message.match(/https?:\/\/\S+/)?.[0] || '' });
     }
   };
 
   const handleWhatsApp = async () => {
-    const message = buildShareText(sorted);
+    const message = buildShareText(pricedOffers);
     await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(message)}`);
-    onSharePoints(cheapest, 'whatsapp', { savings: getSavingsOpportunity(sorted), url: message.match(/https?:\/\/\S+/)?.[0] || '' });
+    onSharePoints(cheapest, 'whatsapp', { savings: getSavingsOpportunity(pricedOffers), url: message.match(/https?:\/\/\S+/)?.[0] || '' });
   };
 
   const handleCopy = async () => {
-    const message = buildShareText(sorted);
+    const message = buildShareText(pricedOffers);
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       await navigator.clipboard.writeText(message);
       Alert.alert('Copiado', 'Texto copiado para compartir.');
@@ -85,7 +98,7 @@ export default function ResultsScreen({
         <View style={{ flex: 1, gap: 4 }}>
           <Text selectable style={styles.sectionTitle}>Resultados</Text>
           <Text selectable style={styles.savings}>
-            {sorted.length ? getSavingsText(sorted) : 'Sin resultados en la base actual'}
+            {pricedOffers.length ? getSavingsText(pricedOffers) : 'Mostrando links oficiales para comparar'}
           </Text>
         </View>
         <Pressable
@@ -118,18 +131,22 @@ export default function ResultsScreen({
       {sorted.length ? (
         <View style={styles.list}>
           {sorted.map((item, index) => {
-            const diff = Number(item.price) - Number(cheapest?.price || item.price);
+            const isComparison = item.type === 'comparison';
+            const bestOffer = item.bestOffer || item;
+            const offers = item.offers || [item];
+            const diff = Number(bestOffer?.price) - Number(cheapest?.price || bestOffer?.price || 0);
             const best = index === 0;
-            const regionLabel = item.neighborhood || item.region || 'Zona no informada';
+            const regionLabel = bestOffer?.neighborhood || bestOffer?.region || 'Catalogo online';
+            const hasPrice = hasValidPrice(bestOffer);
 
             return (
               <SurfaceCard key={item.id} style={[styles.storeCard, best && styles.bestCard]}>
                 <View style={styles.storeTop}>
                   <View style={styles.storeLogo}>
-                    <Text style={styles.storeLogoText}>{String(item.store || 'S').slice(0, 1).toUpperCase()}</Text>
+                    <Text style={styles.storeLogoText}>{String(bestOffer?.store || item.store || 'S').slice(0, 1).toUpperCase()}</Text>
                   </View>
                   <View style={{ flex: 1, gap: 2 }}>
-                    <Text selectable style={styles.storeName} numberOfLines={1}>{item.store}</Text>
+                    <Text selectable style={styles.storeName} numberOfLines={1}>{item.displayName}</Text>
                     <Text selectable style={styles.productName} numberOfLines={1}>{item.displayName}</Text>
                   </View>
                   <Text selectable style={styles.distance}>{regionLabel}</Text>
@@ -137,16 +154,17 @@ export default function ResultsScreen({
 
                 <View style={styles.storeBottom}>
                   <View style={{ gap: 8 }}>
-                    <Text selectable style={styles.price}>${Number(item.price)}</Text>
+                    <Text selectable style={styles.bestLabel}>MEJOR PRECIO</Text>
+                    <Text selectable style={styles.price}>{hasPrice ? `$${Number(bestOffer.price)}` : 'Ver catalogo'}</Text>
                     <View style={styles.badgeRow}>
-                      {best ? (
+                      {best && hasPrice ? (
                         <>
                           <View style={styles.badgeBest}><Text style={styles.badgeBestText}>MAS BARATO</Text></View>
-                          <Text selectable style={styles.savingsInline}>AHORRAS ${Math.max(0, Math.round(diff * -1))}</Text>
+                          <Text selectable style={styles.savingsInline}>MEJOR OFERTA</Text>
                         </>
                       ) : (
                         <Text selectable style={styles.metaInline}>
-                          {diff > 0 ? `+$${Math.round(diff)}` : 'Precio competitivo'}
+                          {hasPrice && diff > 0 ? `+$${Math.round(diff)}` : `${item.commerceCount || offers.length} comercios consultados`}
                         </Text>
                       )}
                     </View>
@@ -163,6 +181,48 @@ export default function ResultsScreen({
                     <Text style={[styles.detailBtnText, best && styles.detailBtnTextBest]}>Ver detalle</Text>
                   </Pressable>
                 </View>
+
+                {isComparison ? (
+                  <View style={styles.comparisonBox}>
+                    <Text selectable style={styles.comparisonTitle}>Comparacion por comercio</Text>
+                    {offers.map((offer) => {
+                      const offerHasPrice = hasValidPrice(offer);
+                      const link = offer.catalogUrl || offer.fallbackUrl;
+                      return (
+                        <View key={offer.id} style={styles.commerceRow}>
+                          <View style={{ flex: 1, gap: 2 }}>
+                            <Text selectable style={styles.commerceStore}>{offer.store}</Text>
+                            <Text selectable style={styles.commerceMeta}>
+                              {offerHasPrice ? `$${Number(offer.price)}${offer.priceDifference ? ` (+$${offer.priceDifference})` : ''}` : 'Sin precio legible'}
+                              {' · '}
+                              {String(offer.source || '').startsWith('catalog:') ? 'catalogo online' : String(offer.source || '').includes('fallback') ? 'link oficial' : 'seed local'}
+                            </Text>
+                          </View>
+                          {link ? (
+                            <Pressable
+                              accessibilityRole="link"
+                              onPress={async () => {
+                                await trackProductClick({
+                                  id: offer.id,
+                                  product: offer.product || searchedQuery,
+                                  store: offer.store,
+                                  url: link,
+                                }, offerHasPrice ? 'comparison_product' : 'comparison_fallback');
+                                Linking.openURL(link);
+                              }}
+                              style={styles.catalogBtn}
+                            >
+                              <Text style={styles.catalogBtnText}>{offerHasPrice ? 'Ver producto' : 'Ver catalogo'}</Text>
+                            </Pressable>
+                          ) : null}
+                        </View>
+                      );
+                    })}
+                    <Text selectable style={styles.catalogTime}>
+                      Fuente: {offers.map((offer) => offer.store).filter(Boolean).join(', ')}. Confianza {item.confidence || item.trustScore || 0}%.
+                    </Text>
+                  </View>
+                ) : null}
               </SurfaceCard>
             );
           })}
@@ -176,8 +236,101 @@ export default function ResultsScreen({
 
       {catalogStatus ? (
         <SurfaceCard style={styles.catalogCard} elevated={false}>
-          <Text selectable style={styles.catalogTitle}>Catalogos online</Text>
-          <Text selectable style={styles.catalogText}>{catalogStatus}</Text>
+          <View style={styles.catalogStatusTop}>
+            <Text selectable style={styles.catalogTitle}>Catalogos online</Text>
+            {loadingCatalogs ? <ActivityIndicator size="small" color={ui.colors.primaryInk} /> : null}
+          </View>
+          <Text selectable style={styles.catalogText}>
+            {catalogStatus} {partialResults.length && finalResults.length ? `Resultados locales: ${partialResults.length}. Comparaciones finales: ${finalResults.length}.` : ''}
+          </Text>
+          {catalogSources.length ? (
+            <View style={styles.sourceGrid}>
+              {catalogSources.map((source) => {
+                const label = source.store || source.commerce || 'Comercio';
+                const status = source.status === 'ok' ? 'precio online' : source.status === 'timeout' ? 'sin respuesta' : source.status === 'error' ? 'fallo, link oficial' : 'link oficial';
+                return (
+                  <View key={`${label}-${status}`} style={styles.sourcePill}>
+                    <Text selectable style={styles.sourceStore}>{label}</Text>
+                    <Text selectable style={styles.sourceStatus}>{status}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          ) : null}
+        </SurfaceCard>
+      ) : null}
+
+      {premiumLocalSuggestions?.suggestions?.length ? (
+        <SurfaceCard style={styles.premiumLocalCard}>
+          <View style={styles.rowBetween}>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text selectable style={styles.premiumLocalTitle}>
+                {isPremium ? 'Premium: resolver ahora' : 'Premium: locales abiertos'}
+              </Text>
+              <Text selectable style={styles.premiumLocalText}>
+                {premiumLocalSuggestions.lateNight
+                  ? 'Para compras tarde, priorizamos delivery y comercios con horarios extendidos.'
+                  : 'Compara precio y decide donde comprar, retirar o pedir envio.'}
+              </Text>
+            </View>
+            {!isPremium ? (
+              <Pressable accessibilityRole="button" onPress={onOpenPremium} style={styles.unlockBtn}>
+                <Text style={styles.unlockBtnText}>Activar</Text>
+              </Pressable>
+            ) : null}
+          </View>
+
+          {premiumLocalSuggestions.restricted === 'alcohol' ? (
+            <Text selectable style={styles.restrictedText}>Venta sujeta a mayoria de edad y reglas del comercio.</Text>
+          ) : null}
+
+          {(isPremium ? premiumLocalSuggestions.suggestions : premiumLocalSuggestions.suggestions.slice(0, 2)).map((commerce) => (
+            <View key={commerce.id} style={styles.localRow}>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text selectable style={styles.localName}>{commerce.name}</Text>
+                <Text selectable style={styles.localMeta}>{commerce.openSignal} · {commerce.deliveryLabel}</Text>
+                <Text selectable style={styles.localMeta}>{commerce.contactLabel}</Text>
+              </View>
+              <View style={styles.localActions}>
+                <Pressable
+                  accessibilityRole="link"
+                  onPress={async () => {
+                    await trackProductClick({
+                      id: `premium-local-${commerce.id}-${premiumLocalSuggestions.query}`,
+                      product: premiumLocalSuggestions.query,
+                      store: commerce.name,
+                      url: commerce.url,
+                    }, 'premium_local_catalog');
+                    Linking.openURL(commerce.url);
+                  }}
+                  style={styles.catalogBtn}
+                >
+                  <Text style={styles.catalogBtnText}>Ver</Text>
+                </Pressable>
+                {isPremium ? (
+                  <Pressable
+                    accessibilityRole="link"
+                    onPress={async () => {
+                      await trackProductClick({
+                        id: `premium-local-map-${commerce.id}-${premiumLocalSuggestions.query}`,
+                        product: premiumLocalSuggestions.query,
+                        store: commerce.name,
+                        url: commerce.mapUrl,
+                      }, 'premium_local_map');
+                      Linking.openURL(commerce.mapUrl);
+                    }}
+                    style={styles.mapSmallBtn}
+                  >
+                    <Text style={styles.mapSmallBtnText}>Mapa</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            </View>
+          ))}
+
+          {!isPremium ? (
+            <Text selectable style={styles.premiumLocalHint}>Premium desbloquea mas opciones, mapa, contacto oficial y priorizacion por hora.</Text>
+          ) : null}
         </SurfaceCard>
       ) : null}
 
@@ -205,7 +358,7 @@ export default function ResultsScreen({
           <View style={styles.detailGrid}>
             <View style={styles.detailMetric}>
               <Text selectable style={styles.metricLabel}>Precio mas barato</Text>
-              <Text selectable style={styles.metricValue}>${Number(cheapest?.price || 0)}</Text>
+              <Text selectable style={styles.metricValue}>{cheapest ? `$${Number(cheapest.price || 0)}` : 'Catalogo'}</Text>
               <Text selectable style={styles.metricMeta}>en {cheapest?.store || '-'}</Text>
             </View>
             <View style={styles.detailMetric}>
@@ -233,7 +386,7 @@ export default function ResultsScreen({
             </Pressable>
           </View>
 
-          <Pressable accessibilityRole="button" onPress={() => onReportPrice(selected)} style={styles.reportBtn}>
+          <Pressable accessibilityRole="button" onPress={() => onReportPrice(selected.bestOffer || selected)} style={styles.reportBtn}>
             <Text style={styles.reportBtnText}>Reportar precio</Text>
           </Pressable>
         </SurfaceCard>
@@ -343,6 +496,12 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     fontVariant: ['tabular-nums'],
   },
+  bestLabel: {
+    color: ui.colors.primaryInk,
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 0.6,
+  },
   badgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -433,6 +592,12 @@ const styles = StyleSheet.create({
     borderColor: '#BAE6FD',
     gap: 6,
   },
+  catalogStatusTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
   catalogTitle: {
     color: '#075985',
     fontWeight: '900',
@@ -442,6 +607,158 @@ const styles = StyleSheet.create({
     color: '#0C4A6E',
     fontSize: 13,
     lineHeight: 18,
+    fontWeight: '700',
+  },
+  sourceGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sourcePill: {
+    borderRadius: ui.radius.sm,
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    gap: 2,
+  },
+  sourceStore: {
+    color: '#075985',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  sourceStatus: {
+    color: '#0C4A6E',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  comparisonBox: {
+    marginTop: 14,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: ui.colors.outline,
+    paddingTop: 12,
+    gap: 10,
+  },
+  comparisonTitle: {
+    color: ui.colors.text,
+    fontWeight: '900',
+    fontSize: 14,
+  },
+  commerceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  commerceStore: {
+    color: ui.colors.text,
+    fontWeight: '900',
+    fontSize: 14,
+  },
+  commerceMeta: {
+    color: '#667085',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  catalogBtn: {
+    minHeight: 38,
+    borderRadius: ui.radius.md,
+    borderWidth: 1,
+    borderColor: ui.colors.outline,
+    backgroundColor: ui.colors.surface,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catalogBtnText: {
+    color: ui.colors.primaryInk,
+    fontWeight: '900',
+    fontSize: 12,
+  },
+  catalogTime: {
+    color: '#667085',
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '700',
+  },
+  premiumLocalCard: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#CBD5E1',
+    gap: 12,
+  },
+  premiumLocalTitle: {
+    color: ui.colors.text,
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  premiumLocalText: {
+    color: '#475467',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  unlockBtn: {
+    minHeight: 40,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.primaryInk,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unlockBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+  },
+  restrictedText: {
+    color: '#854D0E',
+    backgroundColor: '#FEFCE8',
+    borderColor: '#FEF08A',
+    borderWidth: 1,
+    borderRadius: ui.radius.sm,
+    padding: 10,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  localRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: ui.colors.outline,
+    paddingTop: 10,
+  },
+  localName: {
+    color: ui.colors.text,
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  localMeta: {
+    color: '#667085',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  localActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  mapSmallBtn: {
+    minHeight: 38,
+    borderRadius: ui.radius.md,
+    backgroundColor: ui.colors.primaryInk,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapSmallBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    fontSize: 12,
+  },
+  premiumLocalHint: {
+    color: '#475467',
+    fontSize: 12,
+    lineHeight: 17,
     fontWeight: '700',
   },
   rowBetween: {
