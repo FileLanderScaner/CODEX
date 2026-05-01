@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { hasGoogleConfig, hasSupabaseConfig } from '../lib/config';
+import { isDemoMode, getRuntimeStatusMessage } from '../lib/runtime-mode';
 import { signInWithFallback, signInWithProvider, signOutAccount } from '../services/account-service';
 
 export default function AuthPanel({ user, isPremium }) {
@@ -12,6 +13,11 @@ export default function AuthPanel({ user, isPremium }) {
           <Text selectable style={styles.text}>
             {isPremium ? 'Premium activo' : hasSupabaseConfig ? 'Favoritos y alertas guardados en la nube' : 'Sesion local activa con persistencia en este dispositivo'}
           </Text>
+          {isDemoMode() && (
+            <Text selectable style={styles.demoText}>
+              {getRuntimeStatusMessage()}
+            </Text>
+          )}
         </View>
         <Pressable accessibilityRole="button" onPress={signOutAccount} style={styles.secondaryButton}>
           <Text style={styles.secondaryButtonText}>Salir</Text>
@@ -27,6 +33,11 @@ export default function AuthPanel({ user, isPremium }) {
         <Text selectable style={styles.text}>
           {hasSupabaseConfig && hasGoogleConfig ? 'Entra con Google para sincronizar favoritos, ranking y Premium.' : 'Modo fallback activo: entra con una cuenta demo para guardar favoritos, alertas y Premium local.'}
         </Text>
+        {isDemoMode() && (
+          <Text selectable style={styles.demoText}>
+            {getRuntimeStatusMessage()}
+          </Text>
+        )}
       </View>
       <View style={styles.actions}>
         <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig && hasGoogleConfig ? signInWithProvider('google') : signInWithFallback()} style={styles.button}>
@@ -61,6 +72,11 @@ const styles = StyleSheet.create({
     color: '#667085',
     fontSize: 13,
     lineHeight: 18,
+  },
+  demoText: {
+    color: '#F59E0B',
+    fontSize: 12,
+    fontStyle: 'italic',
   },
   actions: {
     flexDirection: 'row',

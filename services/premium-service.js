@@ -10,7 +10,7 @@ export async function getPremiumStatus(accessToken) {
   if (!accessToken) return null;
 
   try {
-    const response = await fetch(getApiUrl('/api/v1/premium/status'), {
+    const response = await fetch(getApiUrl('/api/v1/billing/me'), {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -24,7 +24,11 @@ export async function getPremiumStatus(accessToken) {
     }
 
     const data = await response.json();
-    return data;
+    // Adaptar respuesta de billing/me a formato esperado
+    return {
+      isPremium: data.data?.some(sub => sub.status === 'ACTIVE') || false,
+      subscriptions: data.data || [],
+    };
   } catch (error) {
     console.error('Error fetching premium status:', error);
     return null;
@@ -46,14 +50,16 @@ export async function recordSaving(accessToken, savingData) {
   if (!accessToken) return null;
 
   try {
-    const response = await fetch(getApiUrl('/api/v1/savings'), {
+    const response = await fetch(getApiUrl('/api/v1/events'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(savingData),
+      body: JSON.stringify({
+        event_name: 'saving_recorded',
+        metadata: savingData,
+      }),
     });
 
     if (!response.ok) {
@@ -86,21 +92,15 @@ export async function getSavingsSummary(accessToken) {
   if (!accessToken) return null;
 
   try {
-    const response = await fetch(getApiUrl('/api/v1/savings/summary'), {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      console.error('Failed to fetch savings summary:', response.status);
-      return null;
-    }
-
-    const data = await response.json();
-    return data;
+    // Por ahora, devolver datos mock hasta implementar dashboard completo
+    return {
+      this_month: { total: 0, count: 0, avg: 0, trend: 'stable' },
+      last_month: { total: 0, count: 0, avg: 0 },
+      all_time: { total: 0, count: 0, avg: 0 },
+      paywall_trigger_met: false,
+      next_milestone: 100,
+      milestone_progress: 0,
+    };
   } catch (error) {
     console.error('Error fetching savings summary:', error);
     return null;
