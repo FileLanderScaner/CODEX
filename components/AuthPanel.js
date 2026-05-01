@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { hasSupabaseConfig } from '../lib/config';
+import { hasGoogleConfig, hasSupabaseConfig } from '../lib/config';
 import { signInWithFallback, signInWithProvider, signOutAccount } from '../services/account-service';
 
 export default function AuthPanel({ user, isPremium }) {
@@ -25,15 +25,15 @@ export default function AuthPanel({ user, isPremium }) {
       <View style={styles.copy}>
         <Text selectable style={styles.title}>Guarda tus alertas</Text>
         <Text selectable style={styles.text}>
-          {hasSupabaseConfig ? 'Entra con Google o Facebook para sincronizar favoritos, ranking y Premium.' : 'Modo fallback activo: entra con una cuenta demo para guardar favoritos, alertas y Premium local.'}
+          {hasSupabaseConfig && hasGoogleConfig ? 'Entra con Google para sincronizar favoritos, ranking y Premium.' : 'Modo fallback activo: entra con una cuenta demo para guardar favoritos, alertas y Premium local.'}
         </Text>
       </View>
       <View style={styles.actions}>
-        <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig ? signInWithProvider('google') : signInWithFallback()} style={styles.button}>
-          <Text style={styles.buttonText}>Google</Text>
+        <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig && hasGoogleConfig ? signInWithProvider('google') : signInWithFallback()} style={styles.button}>
+          <Text style={styles.buttonText}>{hasSupabaseConfig && hasGoogleConfig ? 'Google' : 'Demo local'}</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig ? signInWithProvider('facebook') : signInWithFallback('facebook@ahorroya.local')} style={styles.button}>
-          <Text style={styles.buttonText}>Facebook</Text>
+        <Pressable accessibilityRole="button" onPress={() => signInWithFallback('demo@ahorroya.local')} style={styles.button}>
+          <Text style={styles.buttonText}>Modo demo</Text>
         </Pressable>
       </View>
     </View>
