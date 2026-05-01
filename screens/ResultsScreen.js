@@ -54,6 +54,7 @@ export default function ResultsScreen({
   const pricedOffers = useMemo(() => sorted.flatMap((item) => item.offers || [item]).filter(hasValidPrice), [sorted]);
   const cheapest = useMemo(() => getCheapest(pricedOffers), [pricedOffers]);
   const stats = useMemo(() => getPriceStats(pricedOffers), [pricedOffers]);
+  const savingsOpportunity = useMemo(() => getSavingsOpportunity(pricedOffers), [pricedOffers]);
   const isFavorite = Boolean(searchedQuery && favorites.includes(String(searchedQuery).toLowerCase()));
 
   const handleShare = async () => {
@@ -128,6 +129,25 @@ export default function ResultsScreen({
         </View>
       ) : null}
 
+      {cheapest && savingsOpportunity > 0 ? (
+        <SurfaceCard style={styles.wowCard}>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text selectable style={styles.wowTitle}>Encontraste ${savingsOpportunity} de diferencia</Text>
+            <Text selectable style={styles.wowText}>
+              Mejor precio en {cheapest.store}. Si te sirve, compartilo o deja una alerta para la proxima compra.
+            </Text>
+          </View>
+          <View style={styles.wowActions}>
+            <Pressable accessibilityRole="button" onPress={handleWhatsApp} style={styles.whatsBtn}>
+              <Text style={styles.whatsBtnText}>Compartir</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" onPress={() => onCreateAlert(String(searchedQuery))} style={styles.secondaryBtn}>
+              <Text style={styles.secondaryBtnText}>Avisarme</Text>
+            </Pressable>
+          </View>
+        </SurfaceCard>
+      ) : null}
+
       {sorted.length ? (
         <View style={styles.list}>
           {sorted.map((item, index) => {
@@ -154,13 +174,13 @@ export default function ResultsScreen({
 
                 <View style={styles.storeBottom}>
                   <View style={{ gap: 8 }}>
-                    <Text selectable style={styles.bestLabel}>MEJOR PRECIO</Text>
+                    <Text selectable style={styles.bestLabel}>{best && hasPrice ? 'MEJOR PRECIO PARA COMPRAR' : 'PRECIO'}</Text>
                     <Text selectable style={styles.price}>{hasPrice ? `$${Number(bestOffer.price)}` : 'Ver catalogo'}</Text>
                     <View style={styles.badgeRow}>
                       {best && hasPrice ? (
                         <>
                           <View style={styles.badgeBest}><Text style={styles.badgeBestText}>MAS BARATO</Text></View>
-                          <Text selectable style={styles.savingsInline}>MEJOR OFERTA</Text>
+                          <Text selectable style={styles.savingsInline}>{savingsOpportunity > 0 ? `AHORRAS $${savingsOpportunity}` : 'MEJOR OFERTA'}</Text>
                         </>
                       ) : (
                         <Text selectable style={styles.metaInline}>
@@ -371,12 +391,12 @@ export default function ResultsScreen({
           </View>
 
           <Pressable accessibilityRole="button" onPress={() => onCreateAlert(String(searchedQuery))} style={styles.primaryBtn}>
-            <Text style={styles.primaryBtnText}>Crear alerta de precio</Text>
+            <Text style={styles.primaryBtnText}>Avisarme si baja</Text>
           </Pressable>
 
           <View style={styles.shareRow}>
             <Pressable accessibilityRole="button" onPress={handleShare} style={styles.secondaryBtn}>
-              <Text style={styles.secondaryBtnText}>Compartir ahorro</Text>
+              <Text style={styles.secondaryBtnText}>Compartir este ahorro</Text>
             </Pressable>
             <Pressable accessibilityRole="button" onPress={handleWhatsApp} style={styles.whatsBtn}>
               <Text style={styles.whatsBtnText}>WhatsApp</Text>
@@ -444,6 +464,28 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 12,
+  },
+  wowCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#ECFDF3',
+    borderColor: '#ABEFC6',
+  },
+  wowTitle: {
+    color: '#05603A',
+    fontSize: 17,
+    fontWeight: '900',
+  },
+  wowText: {
+    color: '#067647',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '700',
+  },
+  wowActions: {
+    gap: 8,
+    alignItems: 'stretch',
   },
   storeCard: {
     paddingVertical: 14,

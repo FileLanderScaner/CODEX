@@ -736,7 +736,8 @@ export function priceHistory(req, res) {
   return runEndpoint(req, res, ['GET'], 'prices-history', async (_req, _res, reqId) => {
     const productId = req.query.productId;
     const rows = await supabaseRest(`price_observations?product_id=eq.${encodeURIComponent(productId)}&select=*&order=observed_at.desc&limit=100`);
-    json(res, 200, { data: rows }, reqId);
+    const { analyzePriceHistory } = await import('../../../src/services/pricing/price-history/analyze.js');
+    json(res, 200, { data: rows, analysis: analyzePriceHistory(rows) }, reqId);
   });
 }
 

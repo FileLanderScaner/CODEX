@@ -1,8 +1,10 @@
 import alerts from '../server/api/v1/alerts.js';
+import aiAssistant from '../server/api/v1/ai-assistant.js';
 import adminApprovePrice from '../server/api/v1/admin/approve-price.js';
 import adminJobs from '../server/api/v1/admin/jobs.js';
 import adminReports from '../server/api/v1/admin/reports.js';
 import adminRetryJob from '../server/api/v1/admin/retry-job/[id].js';
+import cartOptimize from '../server/api/v1/cart-optimize.js';
 import billingCreate from '../server/api/v1/billing/subscriptions/create.js';
 import billingMe from '../server/api/v1/billing/me.js';
 import billingPaypalWebhook from '../server/api/v1/billing/webhooks/paypal.js';
@@ -14,6 +16,7 @@ import growthContent from '../server/api/v1/growth-content.js';
 import growthMetrics from '../server/api/v1/growth-metrics.js';
 import health from '../server/api/v1/health.js';
 import internalImport from '../server/api/v1/internal/import/[source].js';
+import { adEvent, affiliateRedirect, b2bDashboard, b2bExportCsv, commercialLead } from '../server/api/v1/monetization.js';
 import legacyMe from '../server/api/me.js';
 import legacyMonetizationEvent from '../server/api/monetization-event.js';
 import legacyPaypalCaptureOrder from '../server/api/paypal/capture-order.js';
@@ -32,19 +35,27 @@ import productById from '../server/api/v1/products/[id].js';
 import products from '../server/api/v1/products/index.js';
 import readiness from '../server/api/v1/readiness.js';
 import reports from '../server/api/v1/reports.js';
+import savings from '../server/api/v1/savings.js';
+import smartSearch from '../server/api/v1/smart-search.js';
 import stores from '../server/api/v1/stores.js';
 
 const exactRoutes = new Map([
   ['v1/alerts', alerts],
+  ['v1/ai/assistant', aiAssistant],
   ['v1/admin/approve-price', adminApprovePrice],
   ['v1/admin/jobs', adminJobs],
   ['v1/admin/reports', adminReports],
+  ['v1/ads/events', adEvent],
+  ['v1/affiliates/redirect', affiliateRedirect],
+  ['v1/b2b/dashboard', b2bDashboard],
+  ['v1/b2b/export.csv', b2bExportCsv],
   ['v1/billing/me', billingMe],
   ['v1/billing/subscriptions/create', billingCreate],
   ['v1/billing/webhooks/paypal', billingPaypalWebhook],
+  ['v1/cart/optimize', cartOptimize],
   ['v1/categories', categories],
   ['v1/catalog/search', catalogSearch],
-  ['v1/events', events],
+  ['v1/commercial/leads', commercialLead],
   ['v1/favorites', favorites],
   ['v1/growth/content', growthContent],
   ['v1/growth/metrics', growthMetrics],
@@ -55,6 +66,9 @@ const exactRoutes = new Map([
   ['v1/products', products],
   ['v1/readiness', readiness],
   ['v1/reports', reports],
+  ['v1/savings', savings],
+  ['v1/savings/summary', savings],
+  ['v1/search/smart', smartSearch],
   ['v1/stores', stores],
   ['me', legacyMe],
   ['monetization-event', legacyMonetizationEvent],

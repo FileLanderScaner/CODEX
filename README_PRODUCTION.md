@@ -34,6 +34,15 @@ PAYPAL_CLIENT_ID=<paypal-server-client-id>
 PAYPAL_CLIENT_SECRET=<paypal-server-client-secret>
 PAYPAL_WEBHOOK_ID=<paypal-webhook-id>
 ALLOWED_ORIGINS=https://<deployment>.vercel.app,http://localhost:8081
+OPENAI_API_KEY=<optional-openai-key>
+OPENAI_MODEL=gpt-4.1-mini
+GEMINI_API_KEY=<optional-gemini-key>
+GEMINI_MODEL=gemini-2.5-flash
+TWILIO_ACCOUNT_SID=<optional-twilio-sid>
+TWILIO_AUTH_TOKEN=<optional-twilio-token>
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+CRON_SHARED_SECRET=<random-shared-secret>
+AFFILIATE_SIGNING_SECRET=<random-signing-secret>
 ```
 
 ## Supabase
@@ -77,6 +86,22 @@ Eventos soportados:
 - eventos legacy de favoritos, shares y premium click
 
 El flujo intenta backend Supabase. Si falla, guarda localmente en AsyncStorage para no perder la sesion de usuario.
+
+## Endpoints unicornio
+
+- `GET /api/v1/search/smart?q=yerba`: busqueda tolerante a acentos, errores y sinonimos con ranking por precio, confianza y disponibilidad.
+- `POST /api/v1/cart/optimize`: calcula compra mas barata en una tienda, compra dividida, costo de traslado, ahorro y recomendacion final.
+- `POST /api/v1/ai/assistant`: asistente de ahorro con OpenAI/Gemini por env vars y fallback sin IA si faltan claves.
+- `GET /api/v1/affiliates/redirect`: registra clicks afiliados y redirige con UTM.
+- `POST /api/v1/ads/events`: registra impresiones/clicks de slots internos.
+- `POST /api/v1/commercial/leads`: CRM simple para marcas y supermercados.
+- `GET /api/v1/b2b/dashboard`: demanda agregada para data B2B.
+
+Antes de activar esos flujos en produccion, ejecutar la migracion:
+
+```bash
+supabase/migrations/202605010001_unicorn_growth_monetization.sql
+```
 
 ## Deploy Vercel
 
