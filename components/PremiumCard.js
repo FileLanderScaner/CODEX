@@ -5,11 +5,11 @@ export default function PremiumCard({ onPress }) {
   return (
     <View style={styles.card}>
       <View style={styles.copy}>
-        <Text selectable style={styles.title}>Premium mejora el ahorro</Text>
-        <Text selectable style={styles.text}>Sin anuncios, historial completo y alertas futuras cuando baje tu producto favorito.</Text>
+        <Text selectable style={styles.title}>Ya viste ahorro real</Text>
+        <Text selectable style={styles.text}>Premium te avisa antes de comprar caro: alertas, historial y favoritos ilimitados.</Text>
       </View>
       <Pressable accessibilityRole="button" onPress={onPress} style={styles.button}>
-        <Text style={styles.buttonText}>Ahorrar mas</Text>
+        <Text style={styles.buttonText}>Activar alertas</Text>
       </Pressable>
     </View>
   );

@@ -58,6 +58,8 @@ import { deleteCloudAlert, loadCloudAlerts, setCloudAlertActive } from '../servi
 // keep signOut in the same module (explicit import kept separate to avoid big diffs)
 import { signOutAccount } from '../services/account-service';
 
+const LAUNCH_PRODUCT_ORDER = ['yerba', 'leche', 'arroz', 'panales', 'carne', 'higiene'];
+
 function shareAttributionFromQuery(query = {}) {
   const source = String(query.utm_source || query.source || '').trim().toLowerCase();
   if (source !== 'whatsapp') {
@@ -101,6 +103,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const [showPremium, setShowPremium] = useState(false);
   const [sortKey, setSortKey] = useState('relevance');
   const [showDeveloperFeed, setShowDeveloperFeed] = useState(false);
+  const [valueSearches, setValueSearches] = useState(0);
   const [savingPrice, setSavingPrice] = useState(false);
   const [alerts, setAlerts] = useState([]);
   const [qrText, setQrText] = useState('');
@@ -242,10 +245,16 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     savings: growthMetrics?.activation?.savings_detected ?? deals.length,
     shares: growthMetrics?.funnel?.shares ?? 0,
   }), [deals, growthMetrics]);
-  const popularProducts = useMemo(
-    () => deals.map((deal) => deal.product).concat(allCommunityPrices.map((price) => price.product)).filter(Boolean).filter((product, index, list) => list.indexOf(product) === index).slice(0, 8),
-    [allCommunityPrices, deals],
-  );
+  const popularProducts = useMemo(() => {
+    const liveProducts = deals.map((deal) => deal.product).concat(allCommunityPrices.map((price) => price.product));
+    return LAUNCH_PRODUCT_ORDER
+      .concat(liveProducts)
+      .map(normalizeProduct)
+      .filter(Boolean)
+      .filter((product, index, list) => list.indexOf(product) === index)
+      .slice(0, 8);
+  }, [allCommunityPrices, deals]);
+  const hasPremiumTrigger = valueSearches >= 2 || favorites.length > 0 || alerts.length > 0;
 
   useEffect(() => {
     if (!searchedQuery || !allCommunityPrices.length) return;
@@ -348,6 +357,11 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     }).catch(() => null);
     const bestShown = comparison.finalResults.find((item) => item.bestOffer)?.bestOffer || null;
     if (bestShown) {
+      const bestGroup = comparison.finalResults.find((item) => item.bestOffer?.id === bestShown.id) || comparison.finalResults[0];
+      if (Number(bestGroup?.priceDifference || 0) > 0) {
+        setValueSearches((current) => current + 1);
+        setFeedback(`Encontraste $${Math.round(Number(bestGroup.priceDifference))} de diferencia. Comparti el ahorro o crea una alerta.`);
+      }
       await trackEvent('view_best_price', {
         product: bestShown.product,
         price_id: bestShown.id,
@@ -397,6 +411,9 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       await trackEvent('add_favorite', { product: normalized, authenticated: Boolean(accountUser) }).catch(() => null);
     }
     setFeedback(nextFavorites.includes(normalized) ? 'Favorito guardado.' : 'Favorito eliminado.');
+    if (nextFavorites.includes(normalized)) {
+      setValueSearches((current) => Math.max(current, 1));
+    }
   };
 
   const handleSharePoints = async (price, channel, context = {}) => {
@@ -437,6 +454,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       const nextAlerts = await upsertLocalAlert({ normalized_product: normalized, neighborhood: neighborhood || 'Montevideo' });
       setAlerts(nextAlerts);
       setFavorites(nextFavorites);
+      setValueSearches((current) => Math.max(current, 2));
       setFeedback(`Alerta local creada para ${normalized}. Inicia sesion para sincronizarla.`);
       return;
     }
@@ -445,6 +463,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       setAlerts((current) => [created, ...current.filter((a) => a.id !== created.id)]);
     }
     setFavorites(nextFavorites);
+    setValueSearches((current) => Math.max(current, 2));
     await trackEvent('create_alert', { product: normalized, neighborhood, authenticated: Boolean(accountUser) }).catch(() => null);
     setFeedback(`Alerta creada para ${normalized}.`);
   };
@@ -573,7 +592,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
         <View style={styles.hero}>
           <Text selectable style={styles.brand}>AhorroYA</Text>
-          <Text selectable style={styles.heroSubtitle}>Montevideo: compara Disco, Tienda Inglesa, Devoto y Ta-Ta en menos de 30 segundos.</Text>
+          <Text selectable style={styles.heroSubtitle}>Busca yerba, leche o arroz y ve en segundos donde esta mas barato hoy.</Text>
         </View>
 
         <SearchBar
@@ -599,11 +618,11 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         </SurfaceCard>
 
         <View style={{ gap: 10 }}>
-          <Text selectable style={styles.sectionTitle}>Busca rapido en Montevideo</Text>
+          <Text selectable style={styles.sectionTitle}>Prueba con productos reales</Text>
           {popularProducts.length ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
               {popularProducts.map((product) => (
-                <Chip key={product} label={product} active={false} onPress={() => runSearch(product)} />
+                <Chip key={product} label={`Buscar ${product}`} active={false} onPress={() => runSearch(product)} />
               ))}
             </ScrollView>
           ) : (
@@ -623,11 +642,11 @@ export default function PriceSearchScreen({ nav, activeTab }) {
                 title={String(topDeal.product).replace(/\b\w/g, (c) => c.toUpperCase())}
                 price={`$${Number(topDeal.cheapest?.price || 0)}`}
                 oldPrice={`$${Number(topDeal.expensive?.price || 0)}`}
-                subtitle={`Ahorro real $${topDeal.savings} en ${topDeal.cheapest?.store}`}
+                subtitle={`Encontraste $${topDeal.savings} de diferencia en ${topDeal.cheapest?.store}`}
                 onPress={() => runSearch(topDeal.product)}
               />
               <Pressable accessibilityRole="button" onPress={() => shareDealOnWhatsApp(topDeal)} style={styles.whatsHomeBtn}>
-                <Text style={styles.whatsHomeBtnText}>Compartir por WhatsApp</Text>
+                <Text style={styles.whatsHomeBtnText}>Compartir este ahorro</Text>
               </Pressable>
             </View>
           ) : (
@@ -773,7 +792,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         </Pressable>
       </SurfaceCard>
 
-      {!isPremium ? <PremiumCard onPress={openPremium} /> : null}
+      {!isPremium && hasPremiumTrigger ? <PremiumCard onPress={openPremium} /> : null}
       {!isPremium ? <AdBanner /> : null}
     </View>
   );
@@ -795,7 +814,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
           onPress={() => Platform.OS === 'web' ? nav?.navigate?.('/app/buscar') : Alert.alert('Crear alerta', 'Desde resultados toca “Avisarme si baja”.')}
           style={styles.primaryCta}
         >
-          <Text style={styles.primaryCtaText}>Crear alerta</Text>
+          <Text style={styles.primaryCtaText}>Avisarme si baja</Text>
         </Pressable>
       </View>
 
@@ -837,7 +856,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       ) : (
         <SurfaceCard>
           <Text selectable style={styles.emptyTitle}>Todavia no tenes alertas.</Text>
-          <Text selectable style={styles.emptyText}>Abri un producto en Buscar y toca “Crear alerta de precio”.</Text>
+          <Text selectable style={styles.emptyText}>Abri un producto en Buscar y toca “Avisarme si baja”.</Text>
         </SurfaceCard>
       )}
     </View>
