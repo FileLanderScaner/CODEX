@@ -12,6 +12,29 @@ async function tryInsertEvent(body) {
   });
 }
 
+function eventTable(eventName) {
+  if (['search_submitted', 'search_product'].includes(eventName)) return 'search_events';
+  if (['cheapest_price_shown', 'view_best_price', 'commerce_clicked', 'fallback_used'].includes(eventName)) return 'price_events';
+  return null;
+}
+
+async function tryInsertTypedEvent({ userId, eventName, amount, currency, metadata }) {
+  const table = eventTable(eventName);
+  if (!table) return null;
+  const product = normalizeProduct(metadata.product || metadata.query || metadata.search_query || '');
+  return supabaseRest(table, {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: userId,
+      event_name: eventName,
+      normalized_product: product || null,
+      amount,
+      currency,
+      metadata,
+    }),
+  });
+}
+
 async function insertSharesAnalyticsFallback({ userId, eventName, metadata }) {
   const product = normalizeProduct(metadata.product || metadata.search_query || metadata.query || eventName);
   const variants = [
@@ -49,6 +72,13 @@ export async function insertMonetizationEvent({ userId = null, eventName, amount
     amount: normalizedAmount,
     currency: normalizedCurrency,
   };
+  await tryInsertTypedEvent({
+    userId,
+    eventName,
+    amount: normalizedAmount,
+    currency: normalizedCurrency,
+    metadata: compactMetadata,
+  }).catch(() => null);
   const variants = [
     { user_id: userId, event_name: eventName, amount: normalizedAmount, currency: normalizedCurrency, metadata },
     { user_id: userId, event_name: eventName, metadata: compactMetadata },

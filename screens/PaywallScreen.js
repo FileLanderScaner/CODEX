@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import PayPalButtons from '../components/PayPalButtons';
 import SurfaceCard from '../components/ui/SurfaceCard';
-import { config, getAppUrl, hasPayPalConfig, hasSupabaseConfig } from '../lib/config';
+import { config, getAppUrl, hasGoogleConfig, hasPayPalConfig, hasSupabaseConfig, runtimeMode } from '../lib/config';
 import { ui } from '../lib/ui';
 import { activateMockPremium, getAccessToken, signInWithFallback, signInWithProvider } from '../services/account-service';
 
@@ -59,7 +59,7 @@ export default function PaywallScreen({ user, onBack }) {
       <View style={styles.hero}>
         <Text selectable style={styles.heroKicker}>PREMIUM ACCESS</Text>
         <Text selectable style={styles.heroTitle}>Ahorra mas cada semana</Text>
-        <Text selectable style={styles.heroSub}>Desbloquea herramientas para optimizar tus compras.</Text>
+        <Text selectable style={styles.heroSub}>Desbloquea herramientas para optimizar tus compras. Modo {runtimeMode === 'production' ? 'produccion' : 'demo'}.</Text>
       </View>
 
       <FeatureRow title="Busquedas ilimitadas" subtitle="Sin restricciones diarias." />
@@ -91,7 +91,7 @@ export default function PaywallScreen({ user, onBack }) {
             accessibilityRole="button"
             onPress={async () => {
               const result = await activateMockPremium(user);
-              setStatus(`Premium demo activo para ${result.user.email}.`);
+              setStatus(result.isPremium ? `Premium demo activo para ${result.user.email}.` : result.message || 'Inicia sesion para activar Premium demo.');
             }}
             style={styles.mockPayButton}
           >
@@ -107,11 +107,11 @@ export default function PaywallScreen({ user, onBack }) {
             Para que Premium quede asociado a tu cuenta, entra antes de pagar. Sin Supabase se crea una sesion demo local.
           </Text>
           <View style={styles.noticeActions}>
-            <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig ? signInWithProvider('google') : signInWithFallback()} style={styles.providerBtn}>
-              <Text style={styles.providerBtnText}>Google</Text>
+            <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig && hasGoogleConfig ? signInWithProvider('google') : signInWithFallback()} style={styles.providerBtn}>
+              <Text style={styles.providerBtnText}>{hasSupabaseConfig && hasGoogleConfig ? 'Google' : 'Demo'}</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" onPress={() => hasSupabaseConfig ? signInWithProvider('facebook') : signInWithFallback('facebook@ahorroya.local')} style={styles.providerBtn}>
-              <Text style={styles.providerBtnText}>Facebook</Text>
+            <Pressable accessibilityRole="button" onPress={() => signInWithFallback('demo@ahorroya.local')} style={styles.providerBtn}>
+              <Text style={styles.providerBtnText}>Demo local</Text>
             </Pressable>
           </View>
           {status ? <Text selectable style={styles.status}>{status}</Text> : null}

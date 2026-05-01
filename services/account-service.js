@@ -8,6 +8,7 @@ import {
   setLocalAlertActive,
   upsertLocalAlert,
 } from './user-price-service';
+import { loadFavorites } from './favorites-service';
 
 const LOCAL_USER_KEY = '@ahorroya:fallback-user';
 const LOCAL_PREMIUM_KEY = '@ahorroya:fallback-premium';
@@ -104,6 +105,48 @@ export async function signOutAccount() {
   }
   await AsyncStorage.removeItem(LOCAL_USER_KEY);
   emitLocalAuthChange(null);
+}
+
+export async function migrateLocalStateToCloud(user) {
+  if (!supabase || !user) {
+    return { favorites: 0, alerts: 0 };
+  }
+
+  const [favorites, alerts] = await Promise.all([
+    loadFavorites().catch(() => []),
+    loadLocalAlerts().catch(() => []),
+  ]);
+
+  const favoriteRows = favorites
+    .map((product) => normalizeProduct(product))
+    .filter(Boolean)
+    .map((product) => ({
+      user_id: user.id,
+      product,
+      normalized_product: product,
+    }));
+
+  const alertRows = alerts
+    .filter((alert) => alert?.normalized_product)
+    .map((alert) => ({
+      user_id: user.id,
+      product: normalizeProduct(alert.normalized_product),
+      normalized_product: normalizeProduct(alert.normalized_product),
+      neighborhood: alert.neighborhood || 'Montevideo',
+      target_price: alert.target_price || null,
+      currency: 'UYU',
+      active: alert.active !== false,
+    }));
+
+  if (favoriteRows.length) {
+    await supabase.from('user_favorites').upsert(favoriteRows, { onConflict: 'user_id,normalized_product' }).catch(() => null);
+  }
+
+  if (alertRows.length) {
+    await supabase.from('price_alerts').upsert(alertRows, { onConflict: 'user_id,normalized_product,neighborhood' }).catch(() => null);
+  }
+
+  return { favorites: favoriteRows.length, alerts: alertRows.length };
 }
 
 export async function upsertProfile(user) {
@@ -278,6 +321,22 @@ export async function checkPremiumStatus(user) {
 }
 
 export async function activateMockPremium(user) {
+  if (supabase) {
+    if (!user) {
+      return { isPremium: false, user: null, message: 'Inicia sesion para activar Premium demo.' };
+    }
+    const premiumUntil = new Date();
+    premiumUntil.setMonth(premiumUntil.getMonth() + 1);
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      email: user.email,
+      plan: 'premium',
+      is_premium: true,
+      premium_until: premiumUntil.toISOString(),
+    }).catch(() => null);
+    return { isPremium: true, user };
+  }
+
   const activeUser = user || await signInWithFallback();
   await AsyncStorage.setItem(LOCAL_PREMIUM_KEY, 'active');
   emitLocalAuthChange(activeUser);

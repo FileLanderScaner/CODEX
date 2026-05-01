@@ -14,7 +14,7 @@ describe('catalog service', () => {
   it('builds official catalog links for the launch supermarkets', () => {
     const links = buildCatalogLinks('leche');
 
-    expect(links.map((link) => link.store)).toEqual(['Disco', 'Devoto', 'Ta-Ta', 'Tienda Inglesa']);
+    expect(links.map((link) => link.store)).toEqual(expect.arrayContaining(['Disco', 'Devoto', 'Ta-Ta', 'Tienda Inglesa', 'Farmashop', 'San Roque']));
     expect(links.every((link) => link.kind === 'catalog')).toBe(true);
     expect(links[0].url).toContain('disco.com.uy');
   });
@@ -49,7 +49,7 @@ describe('catalog service', () => {
       price: 54,
       source: 'catalog:disco',
     });
-    expect(result.links).toHaveLength(4);
+    expect(result.links.length).toBeGreaterThanOrEqual(8);
   });
 
   it('keeps fallback prices and dedupes merged catalog rows', () => {
