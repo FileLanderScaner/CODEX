@@ -7,6 +7,8 @@ jobs:
   production:
     runs-on: ubuntu-latest
     environment: production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,6 +17,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run ci
-      - run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Verify Vercel production token
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Missing GitHub Actions secret VERCEL_TOKEN. Add a Vercel token in repository Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - run: npx vercel@53.0.1 pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - run: npx vercel@53.0.1 build --prod --token="$VERCEL_TOKEN"
+      - run: npx vercel@53.0.1 deploy --prebuilt --prod --token="$VERCEL_TOKEN"

@@ -4,6 +4,8 @@ on:
 jobs:
   vercel-preview:
     runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -12,6 +14,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run ci
-      - run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Skip Vercel preview when token is not configured
+        if: env.VERCEL_TOKEN == ''
+        run: |
+          echo "::notice::VERCEL_TOKEN is not configured for this repository or PR context. Skipping preview deployment."
+      - name: Pull Vercel preview environment
+        if: env.VERCEL_TOKEN != ''
+        run: npx vercel@53.0.1 pull --yes --environment=preview --token="$VERCEL_TOKEN"
+      - name: Build Vercel preview
+        if: env.VERCEL_TOKEN != ''
+        run: npx vercel@53.0.1 build --token="$VERCEL_TOKEN"
+      - name: Deploy Vercel preview
+        if: env.VERCEL_TOKEN != ''
+        run: npx vercel@53.0.1 deploy --prebuilt --token="$VERCEL_TOKEN"
