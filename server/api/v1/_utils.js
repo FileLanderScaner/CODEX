@@ -111,7 +111,7 @@ export async function requireUser(req) {
 
 export async function requireRole(req, roles) {
   const user = await requireUser(req);
-  const role = user.app_metadata?.role || user.user_metadata?.role || 'authenticated';
+  const role = user.app_metadata?.role || 'authenticated';
   if (!roles.includes(role)) {
     const error = new Error('Forbidden');
     error.statusCode = 403;

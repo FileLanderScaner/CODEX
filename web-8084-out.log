@@ -1,0 +1,15 @@
+
+> ahorroya@1.0.0 web
+> npx expo start --web --port 8084
+
+Starting project at C:\codex
+Metro is running in CI mode, reloads are disabled. Remove CI=true to enable watch mode.
+Starting Metro Bundler
+Waiting on http://localhost:8084
+Logs for your project will appear below.
+Web node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 63.0% (127/160)
+Web node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.3% (277/278)
+Web node_modules\expo\AppEntry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (278/278)
+Web Bundled 6031ms node_modules\expo\AppEntry.js (278 modules)
+Web node_modules\expo\AppEntry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 225ms node_modules\expo\AppEntry.js (1 module)

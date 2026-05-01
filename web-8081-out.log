@@ -1,0 +1,7 @@
+
+> ahorroya@1.0.0 web
+> npx expo start --web --port 8081
+
+Starting project at C:\codex
+› Port 8081 is being used by another process
+› Skipping dev server

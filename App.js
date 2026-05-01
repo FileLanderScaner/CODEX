@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import AppShell from './components/layout/AppShell';
 import { ui } from './lib/ui';
 
+
 export default function App() {
   return (
     <View style={styles.safeArea}>

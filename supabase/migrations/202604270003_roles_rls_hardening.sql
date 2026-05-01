@@ -4,10 +4,10 @@ update profiles set role = 'user' where role::text = 'authenticated';
 update profiles set role = 'merchant' where role::text = 'merchant_admin';
 
 create or replace function current_app_role() returns text language sql stable as $$
-  select case coalesce((auth.jwt() -> 'app_metadata' ->> 'role'), (auth.jwt() -> 'user_metadata' ->> 'role'), 'anon')
+  select case coalesce((auth.jwt() -> 'app_metadata' ->> 'role'), 'anon')
     when 'authenticated' then 'user'
     when 'merchant_admin' then 'merchant'
-    else coalesce((auth.jwt() -> 'app_metadata' ->> 'role'), (auth.jwt() -> 'user_metadata' ->> 'role'), 'anon')
+    else coalesce((auth.jwt() -> 'app_metadata' ->> 'role'), 'anon')
   end;
 $$;
 

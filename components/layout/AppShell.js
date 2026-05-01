@@ -4,7 +4,9 @@ import BottomNav from './BottomNav';
 import { ui } from '../../lib/ui';
 import LandingScreen from '../../screens/LandingScreen';
 import PriceSearchScreen from '../../screens/PriceSearchScreen';
+import AuthScreen from '../../screens/AuthScreen';
 import { useWebLocation } from '../../lib/navigation';
+import { getSessionUser, subscribeToAuth, upsertProfile } from '../../services/account-service';
 
 const TABS = [
   { key: 'home', label: 'Inicio', icon: 'home' },
@@ -14,9 +16,47 @@ const TABS = [
   { key: 'profile', label: 'Perfil', icon: 'user' },
 ];
 
+const PROTECTED_TABS = new Set(['alerts', 'favorites', 'profile']);
+const PROTECTED_PATHS = [
+  '/app/alertas',
+  '/app/favoritos',
+  '/app/perfil',
+  '/app/historial',
+  '/app/configuracion',
+  '/app/premium',
+];
+
+function isProtectedRoute(path, tab) {
+  return PROTECTED_TABS.has(tab) || PROTECTED_PATHS.some((prefix) => path?.startsWith(prefix));
+}
+
 export default function AppShell() {
   const webLocation = useWebLocation();
   const [tab, setTab] = useState('home');
+  const [authReady, setAuthReady] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    getSessionUser()
+      .then((sessionUser) => {
+        if (!mounted) return;
+        setUser(sessionUser);
+      })
+      .finally(() => {
+        if (mounted) setAuthReady(true);
+      });
+
+    const unsubscribe = subscribeToAuth((sessionUser) => {
+      setUser(sessionUser);
+      setAuthReady(true);
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     if (Platform.OS !== 'web') {
@@ -72,6 +112,33 @@ export default function AppShell() {
         >
           <LandingScreen onOpenApp={() => webLocation.navigate('/app')} />
         </ScrollView>
+      </View>
+    );
+  }
+
+  const protectedRoute = isProtectedRoute(webLocation.path, tab);
+  if (!authReady && protectedRoute) {
+    return <View style={styles.root} />;
+  }
+
+  if (protectedRoute && !user) {
+    return (
+      <View style={styles.root}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <AuthScreen
+            onAuthenticated={async (sessionUser) => {
+              setUser(sessionUser);
+              await upsertProfile(sessionUser).catch(() => null);
+            }}
+          />
+        </ScrollView>
+
+        <View style={styles.navWrap}>
+          <BottomNav tabs={TABS} activeKey={tab} onChange={nav.setTab} />
+        </View>
       </View>
     );
   }

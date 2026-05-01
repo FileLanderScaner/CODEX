@@ -12,16 +12,24 @@ export default function AuthScreen({ onAuthenticated }) {
 
   const submit = async () => {
     setError('');
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPassword = password;
+    if (hasSupabaseConfig && (!normalizedEmail || !normalizedPassword)) {
+      setError('Ingresa email y contrasena para continuar.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const normalizedEmail = email.trim().toLowerCase() || 'demo@ahorroya.app';
-      const normalizedPassword = password || 'demo1234';
       const user = mode === 'signup'
-        ? await signUpWithEmail(normalizedEmail, normalizedPassword)
-        : await signInWithEmail(normalizedEmail, normalizedPassword);
+        ? await signUpWithEmail(normalizedEmail || 'demo@ahorroya.app', normalizedPassword || 'demo1234')
+        : await signInWithEmail(normalizedEmail || 'demo@ahorroya.app', normalizedPassword || 'demo1234');
 
-      onAuthenticated(user);
+      if (user) {
+        onAuthenticated(user);
+      }
     } catch (authError) {
       setError(authError.message || 'No pudimos iniciar sesion.');
     } finally {
