@@ -24,6 +24,12 @@ Actualizacion 2026-05-03 Vercel safe flags: se agregaron variables no secretas y
 
 Actualizacion 2026-05-03 Preview branch-specific: Ronald aprobo cargar las variables seguras en Preview exclusivamente para la rama `codex/production-deploy-ready`. Se agregaron `AI_PROVIDER`, `AI_AUTONOMY_LEVEL`, `ENABLE_AI_AGENTS`, `ENABLE_AGENT_SCHEDULER`, `ENABLE_ADMIN_AI_PANEL`, `ENABLE_AI_LEVEL4_OVERRIDE`, `PAYPAL_ENV`, `EXPO_PUBLIC_PREMIUM_PRICE`, `EXPO_PUBLIC_PREMIUM_CURRENCY`. No se toco production, no se hizo deploy, no se cargaron secretos y no se modificaron variables Supabase/Postgres existentes. La auditoria segura de nombres confirma presencia en Preview. Staging sigue No-Go porque faltan URLs reales, PayPal sandbox real, Google Auth y `ALLOWED_ORIGINS`.
 
+Actualizacion 2026-05-03 Preview deploy: se ejecuto `vercel deploy --yes --no-color --non-interactive` sin `--prod`. Preview creado en `https://codex-2bidx8wly-akuma424-projects.vercel.app`; inspect en `https://vercel.com/akuma424-projects/codex/5kShtPEdGzyVurNy37rvMtLve2QJ`. No se tocaron variables remotas, no se imprimieron secretos y production no fue tocado. Smoke con `curl.exe` a `/api/v1/health` y `/api/v1/readiness` devolvio `401 Unauthorized` por Vercel Deployment Protection. La API no fue alcanzada publicamente; se requiere validar con acceso autenticado, `vercel curl` o bypass token aprobado. Staging sigue No-Go.
+
+Actualizacion 2026-05-03 Preview URL/CORS env: se cargaron en Vercel Preview branch-specific `codex/production-deploy-ready` las variables no secretas `EXPO_PUBLIC_API_BASE_URL`, `EXPO_PUBLIC_APP_URL` y `ALLOWED_ORIGINS` usando stdin/pipe de Vercel CLI. No se toco production, no se hizo deploy y no se cargaron secretos. La auditoria segura de nombres confirma presencia en Preview branch-specific. Los checks locales siguen en `demo_or_partial` porque no leen automaticamente las variables remotas; se requiere nuevo deploy preview para que estas env vars apliquen al deployment.
+
+Actualizacion 2026-05-03 Preview redeploy: se ejecuto un nuevo `vercel deploy --yes --no-color --non-interactive` sin `--prod` para aplicar las variables Preview branch-specific. Nueva URL: `https://codex-75aq3h1gx-akuma424-projects.vercel.app`; inspect: `https://vercel.com/akuma424-projects/codex/EffrTRcPgV6Zoh3uL4QMjDhus4Ri`. Build remoto OK. Smoke publico `/api/v1/health` y `/api/v1/readiness` sigue devolviendo `401 Unauthorized` por Vercel Deployment Protection. No se desactivo proteccion, no se tocaron variables remotas, no se cargaron secretos y production no fue tocado. Staging sigue No-Go hasta validar acceso protegido, PayPal sandbox, Google Auth y Supabase/RLS.
+
 ## Cambios realizados
 
 ### Estado tecnico
@@ -207,6 +213,76 @@ Salida relevante:
 ```text
 1 passed
 ```
+
+### `vercel deploy`
+
+Estado: OK para Preview.
+
+Salida relevante:
+
+```text
+Preview: https://codex-2bidx8wly-akuma424-projects.vercel.app
+Deployment completed
+```
+
+No se uso `--prod`.
+
+### `curl.exe` smoke preview
+
+Estado: bloqueado por Deployment Protection.
+
+Salida relevante:
+
+```text
+GET /api/v1/health -> HTTP/1.1 401 Unauthorized
+GET /api/v1/readiness -> HTTP/1.1 401 Unauthorized
+```
+
+Causa: Vercel Authentication Required en el preview.
+
+Accion humana: validar con acceso autenticado, `vercel curl` o bypass token aprobado.
+
+### Vercel Preview URL/CORS env
+
+Estado: OK en Preview branch-specific.
+
+Variables agregadas:
+
+```text
+EXPO_PUBLIC_API_BASE_URL
+EXPO_PUBLIC_APP_URL
+ALLOWED_ORIGINS
+```
+
+Branch:
+
+```text
+codex/production-deploy-ready
+```
+
+No se tocaron production ni secretos.
+
+### Vercel Preview redeploy after URL/CORS
+
+Estado: OK para Preview deploy.
+
+Salida relevante:
+
+```text
+Preview: https://codex-75aq3h1gx-akuma424-projects.vercel.app
+Deployment completed
+```
+
+Smoke:
+
+```text
+GET /api/v1/health -> 401 Unauthorized
+GET /api/v1/readiness -> 401 Unauthorized
+```
+
+Causa: Vercel Deployment Protection.
+
+No se uso `--prod`.
 
 ## Seguridad
 
