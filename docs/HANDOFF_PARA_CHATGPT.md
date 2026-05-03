@@ -36,6 +36,8 @@ Actualizacion 2026-05-03 protected smoke aprobado: Ronald aprobo usar `vercel cu
 
 Actualizacion 2026-05-03 debug Vercel Function: se revisaron logs Vercel del preview protegido y la causa confirmada fue `ERR_MODULE_NOT_FOUND`: Node ESM en Vercel no podia resolver imports relativos sin extension, empezando por `services/catalog-service.js` importando `../lib/config`. Como `api/[...path].js` carga el router completo, ese import rompia tambien `/api/v1/health` y `/api/v1/readiness`. Se aplico patch minimo agregando `.js` a imports relativos en `services/*.js`, `lib/runtime-mode.js` y `lib/supabase.js`. Validaciones locales posteriores: `npm run lint` OK, `npm run typecheck` OK, `npm test` OK, `npm run build` OK. Se genero nuevo preview sin `--prod`: `https://codex-xpel3o047-akuma424-projects.vercel.app`; inspect: `https://vercel.com/akuma424-projects/codex/Hr4vhSZvQ9s7omjdpnzrUZJ19m42`. Smoke protegido con `vercel curl` ahora devuelve JSON en ambos endpoints: `/api/v1/health` status app `ok`; `/api/v1/readiness` status app `degraded`, `mode=demo_or_partial`, con Supabase ready, PayPal demo/missing, Google Auth fallback demo, origins configurados, rate limit memory fallback, local fallback enabled y tracking con fallback. Production no fue tocado, no se modificaron variables remotas y no se imprimieron secretos.
 
+Actualizacion 2026-05-03 Supabase staging plan: se verifico que Supabase CLI no esta disponible en este entorno (`supabase` no reconocido). No se aplicaron migraciones, no se linkeo proyecto y no se tocaron variables remotas. Se revisaron esquemas/migraciones y se creo `docs/SUPABASE_STAGING_APPLY_PLAN.md`. Hallazgo clave: `202605010001_unicorn_growth_monetization.sql` usa `current_app_role()`, pero esa funcion no se crea en `supabase-production-schema.sql` ni `supabase-price-schema.sql`; existe en migraciones previas y debe estar presente antes de aplicar growth/monetizacion. El plan incluye preflight, helper seguro basado solo en `app_metadata.role`, orden de migraciones, verificacion RLS, creacion de usuarios normal/admin/internal_job y rollback seguro. Supabase staging sigue No-Go hasta ejecutar migraciones y validar RLS con usuarios reales.
+
 ## Cambios realizados
 
 ### Estado tecnico
@@ -60,6 +62,7 @@ Actualizacion 2026-05-03 debug Vercel Function: se revisaron logs Vercel del pre
 - `docs/GOOGLE_AUTH_STAGING_EXECUTION_CHECKLIST.md`
 - `docs/STAGING_MANUAL_SMOKE_TESTS.md`
 - `docs/STAGING_RELEASE_CANDIDATE_REPORT.md`
+- `docs/SUPABASE_STAGING_APPLY_PLAN.md`
 - `docs/FASE_4_STAGING_OPERATIVO_RESULTADO.md`
 - `docs/FASE_3_AUDITORIA_FINAL.md`
 - `docs/FASE_3_RESULTADO_STAGING_DEPLOY.md`
@@ -459,6 +462,7 @@ Staging no puede pasar a Go si `npm run staging:check` no devuelve `mode=staging
 ### Supabase
 
 - Crear/confirmar proyecto staging.
+- Aplicar preflight de `current_app_role()` antes de growth/monetizacion.
 - Aplicar migraciones.
 - Ejecutar `scripts/sql/verify-production-schema.sql`.
 - Ejecutar `scripts/sql/verify-ai-agents-rls.sql`.
@@ -579,20 +583,18 @@ Tareas:
 
 ## MENSAJE PARA CHATGPT
 
-Codex diagnostico y corrigio el `FUNCTION_INVOCATION_FAILED` del preview Vercel de AhorroYA.
-La causa confirmada en logs fue `ERR_MODULE_NOT_FOUND`: Node ESM en Vercel no resolvia imports relativos sin `.js`, empezando por `services/catalog-service.js`.
-Se aplico patch minimo agregando `.js` a imports relativos en `services/*.js`, `lib/runtime-mode.js` y `lib/supabase.js`; no se cambio arquitectura ni variables remotas.
-Validaciones posteriores: `npm run lint` OK, `npm run typecheck` OK, `npm test` OK con 20 files / 59 tests, `npm run build` OK.
-Se hizo nuevo deploy preview sin `--prod`: `https://codex-xpel3o047-akuma424-projects.vercel.app`.
-Smoke protegido con `vercel curl`: `/api/v1/health` devuelve JSON `status=ok`; `/api/v1/readiness` devuelve JSON `status=degraded`, `mode=demo_or_partial`.
-`npm run production:check` sigue OK con `mode=demo_or_partial`.
-`npm run staging:check` falla correctamente porque aun faltan variables/credenciales reales y no debe marcar staging listo.
-No se tocaron production ni variables remotas durante el debug.
-No se imprimieron ni guardaron secretos o bypass tokens.
-No se activo PayPal live.
-No se activo Level 4.
-IA sigue en modo seguro/off por defecto y RLS no fue debilitado.
-Staging queda Go condicionado: health/readiness ya funcionan, pero faltan Supabase/RLS real, PayPal sandbox, Google Auth y `staging:check mode=staging_ready`.
+Codex preparo el plan ejecutable de Supabase staging/RLS para AhorroYA.
+Supabase CLI no esta disponible en este entorno, por lo que no se aplicaron migraciones ni se linkeo ningun proyecto.
+No se toco production, no se modificaron variables remotas y no se imprimieron secretos.
+Se revisaron `supabase-production-schema.sql`, `supabase-price-schema.sql`, `202605010001_unicorn_growth_monetization.sql`, `202605020001_ai_agents_memory.sql`, los scripts SQL de verificacion y docs Supabase existentes.
+Hallazgo clave: `202605010001_unicorn_growth_monetization.sql` usa `current_app_role()`, pero esa funcion no se crea en los dos SQL base; debe existir antes de aplicar esa migracion.
+Se creo `docs/SUPABASE_STAGING_APPLY_PLAN.md` con preflight, helper seguro basado solo en `app_metadata.role`, orden de migraciones, verificacion RLS y rollback.
+El plan exige crear usuarios staging normal, admin e internal_job y asignar roles en `app_metadata.role`, nunca en `user_metadata`.
+El usuario normal debe quedar bloqueado para tablas `agent_*`.
+Admin e internal_job deben poder leer/escribir en `agent_*` segun policies.
+No se debilito RLS.
+No se activo panel IA, agentes IA ni Level 4.
+Staging sigue No-Go para Supabase hasta aplicar migraciones y validar RLS con usuarios reales.
 Produccion sigue No-Go.
-Archivos clave modificados: `services/*.js`, `lib/runtime-mode.js`, `lib/supabase.js`, `docs/HANDOFF_PARA_CHATGPT.md`, `docs/VERCEL_AUTONOMY_AUDIT.md`, `docs/STAGING_RELEASE_CANDIDATE_REPORT.md`.
-Proximo paso recomendado: cargar/validar Supabase staging y RLS, luego PayPal sandbox y Google Auth, actualizar Vercel envs reales, redeploy preview y correr `npm run staging:check` hasta `mode=staging_ready`.
+Archivos clave: `docs/SUPABASE_STAGING_APPLY_PLAN.md`, `docs/HANDOFF_PARA_CHATGPT.md`, `docs/STAGING_RELEASE_CANDIDATE_REPORT.md`.
+Proximo paso seguro: Ronald debe confirmar proyecto Supabase staging y ejecutar por SQL Editor la ruta del plan, guardando evidencia sin secretos.

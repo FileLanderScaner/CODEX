@@ -77,8 +77,12 @@ Nota: este resultado fue ejecutado localmente. Las variables `EXPO_PUBLIC_API_BA
 
 ## Supabase RLS
 
-- `scripts/sql/verify-production-schema.sql`:
-- `scripts/sql/verify-ai-agents-rls.sql`:
+- Supabase CLI: no disponible en este entorno (`supabase` no reconocido).
+- Ruta recomendada: Supabase Dashboard / SQL Editor sobre proyecto staging confirmado por Ronald.
+- Plan operativo: `docs/SUPABASE_STAGING_APPLY_PLAN.md`.
+- Riesgo detectado: `202605010001_unicorn_growth_monetization.sql` depende de `current_app_role()`. Ejecutar preflight y crear helper seguro basado en `app_metadata.role` si no existe.
+- `scripts/sql/verify-production-schema.sql`: pendiente de ejecutar en staging.
+- `scripts/sql/verify-ai-agents-rls.sql`: pendiente de ejecutar en staging.
 - Usuario normal bloqueado:
 - Admin permitido:
 - Internal job permitido:
@@ -106,8 +110,9 @@ Motivo: el `FUNCTION_INVOCATION_FAILED` fue corregido y health/readiness respond
 
 ## Proximos pasos
 
-1. Validar Supabase/RLS en staging con usuario normal, admin e internal_job.
-2. Cargar variables reales pendientes de PayPal sandbox y Google Auth.
-3. Actualizar URL/CORS si se decide usar el preview corregido como staging temporal.
-4. Reejecutar `production:check`, `staging:check` y smoke tests.
-5. Completar evidencia de PayPal sandbox, Google Auth, RLS y panel IA antes de considerar Go staging.
+1. Confirmar proyecto Supabase staging y aplicar `docs/SUPABASE_STAGING_APPLY_PLAN.md`.
+2. Validar Supabase/RLS en staging con usuario normal, admin e internal_job.
+3. Cargar variables reales pendientes de PayPal sandbox y Google Auth.
+4. Actualizar URL/CORS si se decide usar el preview corregido como staging temporal.
+5. Reejecutar `production:check`, `staging:check` y smoke tests.
+6. Completar evidencia de PayPal sandbox, Google Auth, RLS y panel IA antes de considerar Go staging.
