@@ -105,6 +105,8 @@ Nota: este resultado fue ejecutado localmente. Las variables `EXPO_PUBLIC_API_BA
 
 Validar RLS real con usuarios autenticados siguiendo `docs/SUPABASE_AGENT_RLS_USER_VALIDATION_RUNBOOK.md`.
 
+Se genero `scripts/rls-agent-user-smoke.mjs` y el archivo de ejemplo `.env.rls.example` para ejecutar la validación localmente. El archivo real local debe ser `.env.rls` y debe estar ignorado por git.
+
 ## Panel IA
 
 - Bloqueado con `ENABLE_ADMIN_AI_PANEL=false`:

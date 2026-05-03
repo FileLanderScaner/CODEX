@@ -141,6 +141,40 @@ async function executeSql(jwt, sql) {
 
 > Nota: esta plantilla es solo un ejemplo. No debe incluir ningún JWT, password o service role key en el repositorio.
 
+## Script de validación recomendado
+
+Usar el script local seguro `scripts/rls-agent-user-smoke.mjs` y el archivo de plantilla `.env.rls.example`.
+
+1. Copiar:
+
+```sh
+cp .env.rls.example .env.rls
+```
+
+2. Completar `.env.rls` localmente con:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+   - `RLS_NORMAL_EMAIL`
+   - `RLS_NORMAL_PASSWORD`
+   - `RLS_ADMIN_EMAIL`
+   - `RLS_ADMIN_PASSWORD`
+   - `RLS_INTERNAL_EMAIL`
+   - `RLS_INTERNAL_PASSWORD`
+
+3. Ejecutar:
+
+```sh
+node scripts/rls-agent-user-smoke.mjs
+```
+
+4. Reportar solo:
+   - `normal_blocked`
+   - `admin_allowed`
+   - `internal_job_allowed`
+   - `rls_validation`
+
+5. No commitear `.env.rls`.
+
 ## Resultados esperados
 
 ### Usuario normal
