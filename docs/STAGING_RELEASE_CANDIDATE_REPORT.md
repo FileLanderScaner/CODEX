@@ -101,6 +101,10 @@ Nota: este resultado fue ejecutado localmente. Las variables `EXPO_PUBLIC_API_BA
 - RLS activo: sí.
 - Incidentes: ninguno.
 
+## Runbook operativo
+
+Validar RLS real con usuarios autenticados siguiendo `docs/SUPABASE_AGENT_RLS_USER_VALIDATION_RUNBOOK.md`.
+
 ## Panel IA
 
 - Bloqueado con `ENABLE_ADMIN_AI_PANEL=false`:
@@ -118,7 +122,7 @@ Elegir una:
 
 Decision actual: No-Go staging.
 
-Motivo: la migración de agentes IA fue aplicada correctamente en Supabase staging, pero staging sigue No-Go hasta validar RLS con usuarios reales, PayPal sandbox real y Google Auth. `npm run staging:check` sigue fallando correctamente con `mode=demo_or_partial`.
+Motivo: la migración de agentes IA fue aplicada correctamente en Supabase staging, pero staging sigue No-Go hasta validar RLS con usuarios reales, PayPal sandbox real y Google Auth. `npm run staging:check` sigue fallando correctamente con `mode=demo_or_partial`. Validar RLS real con el runbook `docs/SUPABASE_AGENT_RLS_USER_VALIDATION_RUNBOOK.md`.
 
 ## Proximos pasos
 

@@ -61,6 +61,13 @@ No guardar JWT, refresh tokens, passwords ni service role key.
 
 Las pruebas deben ejecutarse desde una sesión autenticada real (cliente web/app con JWT), no desde SQL Editor.
 
+### Método recomendado
+
+- Opción A (recomendada): usar la app o cliente staging con anon key y login real de cada usuario.
+- Opción B: si se prefiere, usar un script local temporal no commiteado para login con email/password de staging y pruebas select/insert. El script no debe guardarse en el repositorio ni imprimir JWT ni passwords.
+
+Ver `docs/SUPABASE_AGENT_RLS_USER_VALIDATION_RUNBOOK.md` para el runbook operativo completo.
+
 ### Usuario normal debe fallar
 
 Con sesión de usuario normal (rol `user`):
