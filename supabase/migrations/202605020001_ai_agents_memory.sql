@@ -120,9 +120,9 @@ alter table agent_suggestions enable row level security;
 alter table agent_memory enable row level security;
 alter table agent_executions enable row level security;
 
-create policy admin_internal_agent_tasks on agent_tasks for all using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
-create policy admin_internal_agent_logs on agent_logs for all using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
-create policy admin_internal_agent_reports on agent_reports for all using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
-create policy admin_internal_agent_suggestions on agent_suggestions for all using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
-create policy admin_internal_agent_memory on agent_memory for all using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
-create policy admin_internal_agent_executions on agent_executions for all using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
+create policy admin_internal_agent_tasks on agent_tasks for all to authenticated using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
+create policy admin_internal_agent_logs on agent_logs for all to authenticated using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
+create policy admin_internal_agent_reports on agent_reports for all to authenticated using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
+create policy admin_internal_agent_suggestions on agent_suggestions for all to authenticated using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
+create policy admin_internal_agent_memory on agent_memory for all to authenticated using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
+create policy admin_internal_agent_executions on agent_executions for all to authenticated using (agent_authorized_role() in ('admin','internal_job')) with check (agent_authorized_role() in ('admin','internal_job'));
