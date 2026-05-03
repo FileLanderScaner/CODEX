@@ -80,14 +80,26 @@ Nota: este resultado fue ejecutado localmente. Las variables `EXPO_PUBLIC_API_BA
 - Supabase CLI: no disponible en este entorno (`supabase` no reconocido).
 - Ruta recomendada: Supabase Dashboard / SQL Editor sobre proyecto staging confirmado por Ronald.
 - Plan operativo: `docs/SUPABASE_STAGING_APPLY_PLAN.md`.
-- Riesgo detectado: `202605010001_unicorn_growth_monetization.sql` depende de `current_app_role()`. Ejecutar preflight y crear helper seguro basado en `app_metadata.role` si no existe.
-- `scripts/sql/verify-production-schema.sql`: pendiente de ejecutar en staging.
-- `scripts/sql/verify-ai-agents-rls.sql`: pendiente de ejecutar en staging.
-- Usuario normal bloqueado:
-- Admin permitido:
-- Internal job permitido:
-- RLS activo:
-- Incidentes:
+- Paquete SQL Editor agentes: `docs/SUPABASE_AGENT_MIGRATION_SQL_EDITOR_PACKAGE.md`.
+- Proyecto staging confirmado: `supabase-aquamarine-battery`.
+- Project ref staging confirmado: `wzwjjjajmyfwvspxysjb`.
+- Migración agent IA aplicada: sí (2026-05-03).
+- Tablas agent_* creadas: sí.
+- public.agent_authorized_role(): sí.
+- RLS en agent_*: true.
+- Policies admin_internal_agent_*: 6/6.
+- Policies públicas/no esperadas agent_*: 0.
+- Policies usan: `for all to authenticated`.
+- Autorización usa: `auth.jwt() -> 'app_metadata' ->> 'role'`.
+- Roles permitidos: admin, internal_job.
+- No usa user_metadata/raw_user_meta_data.
+- Producción no tocada.
+- Secrets no expuestos.
+- Usuario normal bloqueado: pendiente (validación con usuarios reales).
+- Admin permitido: pendiente (validación con usuarios reales).
+- Internal job permitido: pendiente (validación con usuarios reales).
+- RLS activo: sí.
+- Incidentes: ninguno.
 
 ## Panel IA
 
@@ -106,7 +118,7 @@ Elegir una:
 
 Decision actual: No-Go staging.
 
-Motivo: el `FUNCTION_INVOCATION_FAILED` fue corregido y health/readiness responden en el preview protegido, pero staging todavia no puede declararse Go porque faltan PayPal sandbox real, Google Auth y validacion Supabase/RLS. `npm run staging:check` sigue fallando correctamente con `mode=demo_or_partial`.
+Motivo: la migración de agentes IA fue aplicada correctamente en Supabase staging, pero staging sigue No-Go hasta validar RLS con usuarios reales, PayPal sandbox real y Google Auth. `npm run staging:check` sigue fallando correctamente con `mode=demo_or_partial`.
 
 ## Proximos pasos
 

@@ -38,6 +38,8 @@ Actualizacion 2026-05-03 debug Vercel Function: se revisaron logs Vercel del pre
 
 Actualizacion 2026-05-03 Supabase staging plan: se verifico que Supabase CLI no esta disponible en este entorno (`supabase` no reconocido). No se aplicaron migraciones, no se linkeo proyecto y no se tocaron variables remotas. Se revisaron esquemas/migraciones y se creo `docs/SUPABASE_STAGING_APPLY_PLAN.md`. Hallazgo clave: `202605010001_unicorn_growth_monetization.sql` usa `current_app_role()`, pero esa funcion no se crea en `supabase-production-schema.sql` ni `supabase-price-schema.sql`; existe en migraciones previas y debe estar presente antes de aplicar growth/monetizacion. El plan incluye preflight, helper seguro basado solo en `app_metadata.role`, orden de migraciones, verificacion RLS, creacion de usuarios normal/admin/internal_job y rollback seguro. Supabase staging sigue No-Go hasta ejecutar migraciones y validar RLS con usuarios reales.
 
+Actualizacion 2026-05-03 Supabase agent migration aplicada: Ronald aplico la migracion de agentes IA en Supabase staging `supabase-aquamarine-battery` (project ref `wzwjjjajmyfwvspxysjb`) via SQL Editor. Evidencia: tablas agent_* creadas OK, public.agent_authorized_role() OK, RLS activo OK, policies admin_internal_agent_* 6/6 OK, policies publicas/no esperadas 0, policies usan `for all to authenticated`, autorizacion usa `auth.jwt() -> 'app_metadata' ->> 'role'`, roles permitidos admin/internal_job, no usa user_metadata/raw_user_meta_data, produccion no tocada, secrets no expuestos. Staging sigue No-Go hasta validar RLS con usuarios reales, PayPal sandbox y Google Auth.
+
 ## Cambios realizados
 
 ### Estado tecnico
@@ -63,6 +65,7 @@ Actualizacion 2026-05-03 Supabase staging plan: se verifico que Supabase CLI no 
 - `docs/STAGING_MANUAL_SMOKE_TESTS.md`
 - `docs/STAGING_RELEASE_CANDIDATE_REPORT.md`
 - `docs/SUPABASE_STAGING_APPLY_PLAN.md`
+- `docs/SUPABASE_AGENT_MIGRATION_SQL_EDITOR_PACKAGE.md`
 - `docs/FASE_4_STAGING_OPERATIVO_RESULTADO.md`
 - `docs/FASE_3_AUDITORIA_FINAL.md`
 - `docs/FASE_3_RESULTADO_STAGING_DEPLOY.md`
@@ -463,6 +466,7 @@ Staging no puede pasar a Go si `npm run staging:check` no devuelve `mode=staging
 
 - Crear/confirmar proyecto staging.
 - Aplicar preflight de `current_app_role()` antes de growth/monetizacion.
+- Para el proyecto staging confirmado `wzwjjjajmyfwvspxysjb`, aplicar solo la migracion de agentes desde `docs/SUPABASE_AGENT_MIGRATION_SQL_EDITOR_PACKAGE.md`.
 - Aplicar migraciones.
 - Ejecutar `scripts/sql/verify-production-schema.sql`.
 - Ejecutar `scripts/sql/verify-ai-agents-rls.sql`.
@@ -583,18 +587,19 @@ Tareas:
 
 ## MENSAJE PARA CHATGPT
 
-Codex preparo el plan ejecutable de Supabase staging/RLS para AhorroYA.
-Supabase CLI no esta disponible en este entorno, por lo que no se aplicaron migraciones ni se linkeo ningun proyecto.
-No se toco production, no se modificaron variables remotas y no se imprimieron secretos.
-Se revisaron `supabase-production-schema.sql`, `supabase-price-schema.sql`, `202605010001_unicorn_growth_monetization.sql`, `202605020001_ai_agents_memory.sql`, los scripts SQL de verificacion y docs Supabase existentes.
-Hallazgo clave: `202605010001_unicorn_growth_monetization.sql` usa `current_app_role()`, pero esa funcion no se crea en los dos SQL base; debe existir antes de aplicar esa migracion.
-Se creo `docs/SUPABASE_STAGING_APPLY_PLAN.md` con preflight, helper seguro basado solo en `app_metadata.role`, orden de migraciones, verificacion RLS y rollback.
-El plan exige crear usuarios staging normal, admin e internal_job y asignar roles en `app_metadata.role`, nunca en `user_metadata`.
-El usuario normal debe quedar bloqueado para tablas `agent_*`.
-Admin e internal_job deben poder leer/escribir en `agent_*` segun policies.
-No se debilito RLS.
-No se activo panel IA, agentes IA ni Level 4.
-Staging sigue No-Go para Supabase hasta aplicar migraciones y validar RLS con usuarios reales.
+Codex preparo el paquete SQL Editor para aplicar la migracion de agentes IA en Supabase staging.
+Proyecto staging confirmado por Ronald: `supabase-aquamarine-battery`, project ref `wzwjjjajmyfwvspxysjb`.
+El proyecto no esta limpio y ya tiene tablas base, por eso no se deben ejecutar `supabase-production-schema.sql` ni `supabase-price-schema.sql`.
+Preflight confirmado por Ronald: `current_app_role()` existe, tablas `agent_*` no existen y policies `agent_*` no existen.
+Se reviso `supabase/migrations/202605020001_ai_agents_memory.sql`.
+La migracion crea `agent_tasks`, `agent_logs`, `agent_reports`, `agent_suggestions`, `agent_memory` y `agent_executions`.
+Crea `public.agent_authorized_role()` usando solo `auth.jwt() -> 'app_metadata' ->> 'role'`.
+Roles permitidos: `admin` e `internal_job`.
+No usa `user_metadata`.
+Activa RLS en todas las tablas `agent_*`.
+Crea policies `admin_internal_agent_*` con `for all to authenticated` para admin/internal_job.
+Es segura para este staging porque `agent_*` no existe todavia, pero no debe reejecutarse completa si las policies ya existen.
+Se creo `docs/SUPABASE_AGENT_MIGRATION_SQL_EDITOR_PACKAGE.md` con instrucciones, SQL completo y queries post-migracion.
+No se ejecuto SQL, no se tocaron variables remotas, no se imprimieron secretos y no se toco production.
+Staging sigue No-Go hasta que Ronald ejecute el SQL en Supabase Dashboard y valide RLS con usuarios reales.
 Produccion sigue No-Go.
-Archivos clave: `docs/SUPABASE_STAGING_APPLY_PLAN.md`, `docs/HANDOFF_PARA_CHATGPT.md`, `docs/STAGING_RELEASE_CANDIDATE_REPORT.md`.
-Proximo paso seguro: Ronald debe confirmar proyecto Supabase staging y ejecutar por SQL Editor la ruta del plan, guardando evidencia sin secretos.

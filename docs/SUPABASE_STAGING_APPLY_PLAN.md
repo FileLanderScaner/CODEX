@@ -7,7 +7,8 @@ Fecha: 2026-05-03.
 - Supabase CLI no esta disponible en este entorno (`supabase` no reconocido).
 - No se puede automatizar `supabase link`, `db push` ni migraciones desde esta maquina.
 - Ruta recomendada actual: Supabase Dashboard / SQL Editor en un proyecto staging confirmado por Ronald.
-- No se aplico ninguna migracion.
+- Migración agent IA aplicada: sí (2026-05-03, project ref wzwjjjajmyfwvspxysjb).
+- No se aplicaron otras migraciones.
 - No se tocaron production, variables remotas ni secretos.
 
 ## Proyecto staging requerido
@@ -285,9 +286,11 @@ Nunca ejecutar rollback destructivo en production sin plan aprobado.
 
 ## Estado Go/No-Go
 
-- Supabase staging: No-Go hasta aplicar migraciones y validar RLS con usuarios reales.
-- Staging general: Go condicionado.
-- Produccion: No-Go.
+- Supabase schema agentes: Go
+- Supabase RLS estructura: Go
+- Supabase RLS usuarios reales: pendiente
+- Staging general: No-Go
+- Produccion: No-Go
 
 ## Proximo paso seguro
 
