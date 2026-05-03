@@ -1,4 +1,4 @@
-import { resolveSearchIntent } from './search-intent-service';
+import { resolveSearchIntent } from './search-intent-service.js';
 
 const LOCAL_COMMERCE_DIRECTORY = [
   {

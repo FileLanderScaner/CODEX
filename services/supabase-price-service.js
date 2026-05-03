@@ -1,8 +1,8 @@
-import { getApiUrl } from '../lib/config';
-import { fetchOfficialPrices, formatProductName, mapObservation, normalizeProduct } from './price-service';
-import { getAuthHeaders } from './account-service';
-import { MONTEVIDEO_SEED_PRICES } from '../data/seed-prices';
-import { addUserPrice, loadUserPrices } from './user-price-service';
+import { getApiUrl } from '../lib/config.js';
+import { fetchOfficialPrices, formatProductName, mapObservation, normalizeProduct } from './price-service.js';
+import { getAuthHeaders } from './account-service.js';
+import { MONTEVIDEO_SEED_PRICES } from '../data/seed-prices.js';
+import { addUserPrice, loadUserPrices } from './user-price-service.js';
 
 export async function ensureSupabaseUser() {
   return null;

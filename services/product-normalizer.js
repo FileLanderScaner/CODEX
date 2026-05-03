@@ -1,4 +1,4 @@
-import { normalizeProduct, normalizeStoreKey } from './price-service';
+import { normalizeProduct, normalizeStoreKey } from './price-service.js';
 
 const KNOWN_BRANDS = [
   'conaprole',

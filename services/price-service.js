@@ -1,4 +1,4 @@
-import { getApiUrl, getAppUrl } from '../lib/config';
+import { getApiUrl, getAppUrl } from '../lib/config.js';
 
 const MONTEVIDEO_LAUNCH_STORES = new Set(['disco', 'tiendainglesa', 'devoto', 'tata']);
 

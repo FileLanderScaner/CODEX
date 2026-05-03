@@ -1,5 +1,5 @@
-import { getApiUrl } from '../lib/config';
-import { getAuthHeaders } from './account-service';
+import { getApiUrl } from '../lib/config.js';
+import { getAuthHeaders } from './account-service.js';
 
 const allowedEvents = new Set([
   'search_submitted',

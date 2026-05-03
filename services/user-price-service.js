@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { formatProductName, normalizeProduct } from './price-service';
+import { formatProductName, normalizeProduct } from './price-service.js';
 
 const USER_PRICES_KEY = '@ahorroya:user-prices';
 const SEARCH_HISTORY_KEY = '@ahorroya:search-history';

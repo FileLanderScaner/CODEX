@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase.js';
 
 const TRANSACTIONS_KEY = '@ahorroya:transactions';
 const GOALS_KEY = '@ahorroya:goals';

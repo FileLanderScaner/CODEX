@@ -1,5 +1,5 @@
-import { normalizeComparableProduct, pricePerUnit } from './product-normalizer';
-import { getAllPrices, normalizeProduct, normalizeStoreKey } from './price-service';
+import { normalizeComparableProduct, pricePerUnit } from './product-normalizer.js';
+import { getAllPrices, normalizeProduct, normalizeStoreKey } from './price-service.js';
 
 const SYNONYMS = new Map([
   ['yerba mate', ['yerba', 'mate']],

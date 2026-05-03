@@ -6,12 +6,12 @@ Completar despues del deploy staging.
 
 - Branch:
 - Branch: `codex/production-deploy-ready`
-- Commit: `022939d`
+- Commit: `f086010` + cambios pendientes de patch ESM/docs
 - Fecha: 2026-05-03
 - Responsable:
-- URL staging: `https://codex-75aq3h1gx-akuma424-projects.vercel.app`
+- URL staging: `https://codex-xpel3o047-akuma424-projects.vercel.app`
 - Supabase project ref:
-- Vercel deployment id/url: `https://vercel.com/akuma424-projects/codex/EffrTRcPgV6Zoh3uL4QMjDhus4Ri`
+- Vercel deployment id/url: `https://vercel.com/akuma424-projects/codex/Hr4vhSZvQ9s7omjdpnzrUZJ19m42`
 
 ## Validaciones automaticas
 
@@ -19,8 +19,8 @@ Completar despues del deploy staging.
 - `npm run typecheck`: OK, `syntax check passed (134 files)`.
 - `npm test`: OK, 20 files / 59 tests.
 - `npm run build`: OK, Expo export web completo.
-- `npm run production:check`:
-- `npm run staging:check`:
+- `npm run production:check`: OK, `mode=demo_or_partial`.
+- `npm run staging:check`: FAIL esperado, `mode=demo_or_partial`.
 - `npm run test:e2e`:
 
 ## Resultado `production:check`
@@ -46,6 +46,15 @@ Nota: este resultado fue ejecutado localmente. Las variables `EXPO_PUBLIC_API_BA
 - Resultado general: bloqueado por Vercel Deployment Protection.
 - Pruebas fallidas: `curl.exe` publico contra `/api/v1/health` y `/api/v1/readiness` recibio `401 Unauthorized`.
 - Evidencia: preview responde pagina `Authentication Required` de Vercel; se requiere acceso autenticado, `vercel curl` o bypass token aprobado.
+- Auditoria `vercel curl`: disponible, pero al usarse contra el preview protegido genero automaticamente un Deployment Protection bypass token. No se imprimio el token. Se detuvieron nuevas pruebas hasta aprobacion explicita de Ronald.
+- Ronald aprobo `vercel curl` para smoke protegido. Resultado: `/api/v1/health` y `/api/v1/readiness` fueron alcanzados, pero ambos devolvieron `FUNCTION_INVOCATION_FAILED` sin JSON. Request ids: health `gru1::q8kn4-1777786187299-2d5dd399ca25`; readiness `gru1::v78wv-1777786197615-be70c15a5297`.
+- Debug posterior: logs Vercel confirmaron `ERR_MODULE_NOT_FOUND` por imports relativos ESM sin `.js`, empezando por `services/catalog-service.js`.
+- Patch aplicado: imports relativos ESM actualizados con `.js` en servicios/librerias usadas por API.
+- Nuevo preview: `https://codex-xpel3o047-akuma424-projects.vercel.app`.
+- Smoke protegido corregido:
+  - `/api/v1/health`: JSON OK, `status=ok`, `service=ahorroya-api`.
+  - `/api/v1/readiness`: JSON OK, `status=degraded`, `mode=demo_or_partial`.
+  - Checks no sensibles: Supabase server/public ready; PayPal demo/missing; Google Auth fallback demo; origins configured; rate limit memory fallback; local fallback enabled; tracking with fallback.
 
 ## PayPal sandbox
 
@@ -91,11 +100,14 @@ Elegir una:
 - Go staging
 - No-Go staging
 
-Motivo: nuevo preview fue creado despues de cargar URL/CORS, pero smoke HTTP publico no alcanza la API por Deployment Protection. Ademas faltan PayPal sandbox real, Google Auth y validacion Supabase/RLS.
+Decision actual: No-Go staging.
+
+Motivo: el `FUNCTION_INVOCATION_FAILED` fue corregido y health/readiness responden en el preview protegido, pero staging todavia no puede declararse Go porque faltan PayPal sandbox real, Google Auth y validacion Supabase/RLS. `npm run staging:check` sigue fallando correctamente con `mode=demo_or_partial`.
 
 ## Proximos pasos
 
-1. Definir metodo aprobado para smoke protegido: sesion Vercel, `vercel curl` o bypass token.
+1. Validar Supabase/RLS en staging con usuario normal, admin e internal_job.
 2. Cargar variables reales pendientes de PayPal sandbox y Google Auth.
-3. Validar Supabase/RLS en staging.
+3. Actualizar URL/CORS si se decide usar el preview corregido como staging temporal.
 4. Reejecutar `production:check`, `staging:check` y smoke tests.
+5. Completar evidencia de PayPal sandbox, Google Auth, RLS y panel IA antes de considerar Go staging.

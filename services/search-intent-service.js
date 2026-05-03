@@ -1,4 +1,4 @@
-import { normalizeProduct } from './price-service';
+import { normalizeProduct } from './price-service.js';
 
 const QUERY_ALIASES = [
   {

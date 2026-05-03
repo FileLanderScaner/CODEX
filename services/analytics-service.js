@@ -3,9 +3,9 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
-import { supabase } from '../lib/supabase';
-import { isProductionMode } from '../lib/runtime-mode';
-import { getApiUrl } from '../lib/config';
+import { supabase } from '../lib/supabase.js';
+import { isProductionMode } from '../lib/runtime-mode.js';
+import { getApiUrl } from '../lib/config.js';
 
 const ANALYTICS_EVENTS_KEY = '@ahorroya:analytics-events';
 

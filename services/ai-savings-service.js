@@ -1,4 +1,4 @@
-import { optimizeCart, rankOffers } from './savings-intelligence-service';
+import { optimizeCart, rankOffers } from './savings-intelligence-service.js';
 
 const RECIPE_PRESETS = [
   { test: /asado|parrilla|carne/i, items: ['tira de asado', 'chorizo', 'pan', 'refresco', 'ensalada'] },

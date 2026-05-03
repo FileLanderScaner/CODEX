@@ -1,4 +1,4 @@
-import { getApiUrl } from '../lib/config';
+import { getApiUrl } from '../lib/config.js';
 
 export async function loadGrowthMetrics() {
   const response = await fetch(getApiUrl('/api/v1/growth/metrics'), {

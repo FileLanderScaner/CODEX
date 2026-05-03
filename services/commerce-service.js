@@ -1,9 +1,9 @@
-import { supabase } from '../lib/supabase';
-import { getApiUrl } from '../lib/config';
-import { normalizeProduct } from './price-service';
-import { getAuthHeaders } from './account-service';
-import { buildCatalogLinks } from './catalog-service';
-import { trackEvent } from './tracking-service';
+import { supabase } from '../lib/supabase.js';
+import { getApiUrl } from '../lib/config.js';
+import { normalizeProduct } from './price-service.js';
+import { getAuthHeaders } from './account-service.js';
+import { buildCatalogLinks } from './catalog-service.js';
+import { trackEvent } from './tracking-service.js';
 
 export async function loadProductLinks(product) {
   const catalogLinks = buildCatalogLinks(product);

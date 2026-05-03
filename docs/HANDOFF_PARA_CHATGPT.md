@@ -30,6 +30,12 @@ Actualizacion 2026-05-03 Preview URL/CORS env: se cargaron en Vercel Preview bra
 
 Actualizacion 2026-05-03 Preview redeploy: se ejecuto un nuevo `vercel deploy --yes --no-color --non-interactive` sin `--prod` para aplicar las variables Preview branch-specific. Nueva URL: `https://codex-75aq3h1gx-akuma424-projects.vercel.app`; inspect: `https://vercel.com/akuma424-projects/codex/EffrTRcPgV6Zoh3uL4QMjDhus4Ri`. Build remoto OK. Smoke publico `/api/v1/health` y `/api/v1/readiness` sigue devolviendo `401 Unauthorized` por Vercel Deployment Protection. No se desactivo proteccion, no se tocaron variables remotas, no se cargaron secretos y production no fue tocado. Staging sigue No-Go hasta validar acceso protegido, PayPal sandbox, Google Auth y Supabase/RLS.
 
+Actualizacion 2026-05-03 Vercel protected access: se verifico que `vercel curl` existe. Al probar `vercel curl /api/v1/health --deployment <preview>` y `vercel curl /api/v1/readiness --deployment <preview>`, la CLI informo que el deployment requiere bypass y genero automaticamente un Deployment Protection bypass token para el proyecto. No se imprimio el token, no se desactivo proteccion, no se modificaron variables, no se hizo deploy y production no fue tocado. Se detuvieron nuevas pruebas porque continuar con bypass automatico requiere aprobacion explicita de Ronald. Health/readiness no quedan concluyentemente validados con cuerpo JSON visible.
+
+Actualizacion 2026-05-03 protected smoke aprobado: Ronald aprobo usar `vercel curl` contra `https://codex-75aq3h1gx-akuma424-projects.vercel.app` solo para `/api/v1/health` y `/api/v1/readiness`. Ambos endpoints fueron alcanzados via `vercel curl`, pero devolvieron respuesta no JSON con `FUNCTION_INVOCATION_FAILED`. Request ids: health `gru1::q8kn4-1777786187299-2d5dd399ca25`; readiness `gru1::v78wv-1777786197615-be70c15a5297`. No se imprimio token, no se guardo token, no se desactivo Deployment Protection, no se toco production, no se modificaron variables y no se hizo deploy. Staging sigue No-Go.
+
+Actualizacion 2026-05-03 debug Vercel Function: se revisaron logs Vercel del preview protegido y la causa confirmada fue `ERR_MODULE_NOT_FOUND`: Node ESM en Vercel no podia resolver imports relativos sin extension, empezando por `services/catalog-service.js` importando `../lib/config`. Como `api/[...path].js` carga el router completo, ese import rompia tambien `/api/v1/health` y `/api/v1/readiness`. Se aplico patch minimo agregando `.js` a imports relativos en `services/*.js`, `lib/runtime-mode.js` y `lib/supabase.js`. Validaciones locales posteriores: `npm run lint` OK, `npm run typecheck` OK, `npm test` OK, `npm run build` OK. Se genero nuevo preview sin `--prod`: `https://codex-xpel3o047-akuma424-projects.vercel.app`; inspect: `https://vercel.com/akuma424-projects/codex/Hr4vhSZvQ9s7omjdpnzrUZJ19m42`. Smoke protegido con `vercel curl` ahora devuelve JSON en ambos endpoints: `/api/v1/health` status app `ok`; `/api/v1/readiness` status app `degraded`, `mode=demo_or_partial`, con Supabase ready, PayPal demo/missing, Google Auth fallback demo, origins configurados, rate limit memory fallback, local fallback enabled y tracking con fallback. Production no fue tocado, no se modificaron variables remotas y no se imprimieron secretos.
+
 ## Cambios realizados
 
 ### Estado tecnico
@@ -84,6 +90,23 @@ Actualizacion 2026-05-03 Preview redeploy: se ejecuto un nuevo `vercel deploy --
 - `scripts/production-check.mjs`
 - `services/premium-service.js`
 - `services/tracking-service.js`
+- `lib/supabase.js`
+- `services/account-service.js`
+- `services/ai-savings-service.js`
+- `services/analytics-service.js`
+- `services/auth-service.js`
+- `services/catalog-service.js`
+- `services/commerce-service.js`
+- `services/finance-service.js`
+- `services/growth-service.js`
+- `services/local-commerce-service.js`
+- `services/price-engine.js`
+- `services/price-service.js`
+- `services/product-normalizer.js`
+- `services/savings-intelligence-service.js`
+- `services/search-intent-service.js`
+- `services/supabase-price-service.js`
+- `services/user-price-service.js`
 - `web-out.log` aparece modificado como artefacto/preexistente; no usar como evidencia funcional.
 
 ## Validaciones
@@ -284,6 +307,93 @@ Causa: Vercel Deployment Protection.
 
 No se uso `--prod`.
 
+### Vercel protected preview access
+
+Estado: metodo disponible, pendiente aprobacion operativa.
+
+Hallazgo:
+
+```text
+vercel curl existe.
+Al usarlo contra el preview protegido, Vercel CLI genero automaticamente un Deployment Protection bypass token.
+```
+
+No se imprimio el token.
+
+No se continuo con nuevas pruebas.
+
+Proximo paso: Ronald debe aprobar explicitamente `vercel curl` como metodo de smoke protegido o proveer un bypass token manual/usar navegador autenticado.
+
+### Protected smoke after Ronald approval
+
+Estado: FAIL server-side en preview.
+
+Resultado:
+
+```text
+/api/v1/health -> FUNCTION_INVOCATION_FAILED, no JSON
+/api/v1/readiness -> FUNCTION_INVOCATION_FAILED, no JSON
+```
+
+Request ids:
+
+```text
+health: gru1::q8kn4-1777786187299-2d5dd399ca25
+readiness: gru1::v78wv-1777786197615-be70c15a5297
+```
+
+No se imprimieron ni guardaron tokens.
+
+Proximo paso: revisar logs Vercel para esos request ids.
+
+### Vercel Function debug y preview corregido
+
+Estado: OK para health/readiness en nuevo preview protegido.
+
+Causa raiz confirmada:
+
+```text
+ERR_MODULE_NOT_FOUND: Cannot find module '/var/task/lib/config' imported from /var/task/services/catalog-service.js
+```
+
+Correccion aplicada:
+
+```text
+Imports relativos ESM actualizados para incluir extension `.js` en servicios y librerias usadas por API/serverless.
+```
+
+Validaciones posteriores:
+
+```text
+npm run lint -> OK, basic lint passed
+npm run typecheck -> OK, syntax check passed (134 files)
+npm test -> OK, 20 files / 59 tests
+npm run build -> OK, Expo export web completo
+```
+
+Preview nuevo:
+
+```text
+Preview: https://codex-xpel3o047-akuma424-projects.vercel.app
+Inspect: https://vercel.com/akuma424-projects/codex/Hr4vhSZvQ9s7omjdpnzrUZJ19m42
+```
+
+Smoke protegido:
+
+```text
+/api/v1/health -> JSON OK, status=ok, service=ahorroya-api
+/api/v1/readiness -> JSON OK, status=degraded, mode=demo_or_partial
+```
+
+Checks locales posteriores:
+
+```text
+npm run production:check -> OK, mode=demo_or_partial
+npm run staging:check -> FAIL esperado, mode=demo_or_partial
+```
+
+Causa de `staging:check` FAIL esperado: los checks locales no leen automaticamente variables remotas de Vercel y aun faltan PayPal sandbox real, Google Auth y variables publicas/servidor completas en entorno local/staging.
+
 ## Seguridad
 
 - No se agregaron secretos reales versionados.
@@ -308,7 +418,7 @@ No se uso `--prod`.
 - Local: Go.
   - Motivo: lint, typecheck, tests, build y E2E pasan.
 - Staging: Go condicionado.
-  - Motivo: hay plan operativo y guardrails, pero falta cargar variables reales, aplicar migraciones y ejecutar smoke tests. `staging:check` aun falla correctamente.
+  - Motivo: health/readiness ya responden en preview protegido corregido, pero falta cargar PayPal sandbox real, Google Auth, aplicar/validar Supabase staging/RLS y lograr `npm run staging:check` con `mode=staging_ready`.
 - Produccion: No-Go.
   - Motivo: faltan PayPal live aprobado, Google Auth produccion, `ALLOWED_ORIGINS` productivo, Supabase/RLS validado en staging y smoke tests reales.
 
@@ -469,20 +579,20 @@ Tareas:
 
 ## MENSAJE PARA CHATGPT
 
-Codex completo la preparacion operativa de STAGING REAL para AhorroYA.
-La rama actual es `codex/production-deploy-ready` y hay cambios pendientes sin commit.
-Se crearon runbooks/checklists de staging: Vercel env, Supabase migrations/RLS, PayPal sandbox, Google Auth, smoke tests manuales y release candidate report.
-Se agrego `npm run staging:check`, que exige `mode=staging_ready` y bloquea PayPal live, Level 4 y secretos expuestos.
-Validaciones ejecutadas: `npm run lint` OK, `npm run typecheck` OK, `npm test` OK con 59 tests, `npm run build` OK, `npm run test:e2e` OK.
-`npm run production:check` esta OK pero devuelve `mode=demo_or_partial`.
-`npm run staging:check` falla correctamente porque faltan variables reales de staging.
-No se agregaron secretos reales.
-No se expuso `SUPABASE_SERVICE_ROLE_KEY` ni `PAYPAL_CLIENT_SECRET` en frontend.
-No se activo `PAYPAL_ENV=live`.
-No se activo `ENABLE_AI_LEVEL4_OVERRIDE=true`.
-IA sigue segura: mock/read-only/off por defecto.
-RLS no fue debilitado; debe validarse en Supabase staging con usuarios `admin` e `internal_job`.
-Staging queda Go condicionado hasta cargar variables reales, aplicar migraciones y pasar smoke tests.
+Codex diagnostico y corrigio el `FUNCTION_INVOCATION_FAILED` del preview Vercel de AhorroYA.
+La causa confirmada en logs fue `ERR_MODULE_NOT_FOUND`: Node ESM en Vercel no resolvia imports relativos sin `.js`, empezando por `services/catalog-service.js`.
+Se aplico patch minimo agregando `.js` a imports relativos en `services/*.js`, `lib/runtime-mode.js` y `lib/supabase.js`; no se cambio arquitectura ni variables remotas.
+Validaciones posteriores: `npm run lint` OK, `npm run typecheck` OK, `npm test` OK con 20 files / 59 tests, `npm run build` OK.
+Se hizo nuevo deploy preview sin `--prod`: `https://codex-xpel3o047-akuma424-projects.vercel.app`.
+Smoke protegido con `vercel curl`: `/api/v1/health` devuelve JSON `status=ok`; `/api/v1/readiness` devuelve JSON `status=degraded`, `mode=demo_or_partial`.
+`npm run production:check` sigue OK con `mode=demo_or_partial`.
+`npm run staging:check` falla correctamente porque aun faltan variables/credenciales reales y no debe marcar staging listo.
+No se tocaron production ni variables remotas durante el debug.
+No se imprimieron ni guardaron secretos o bypass tokens.
+No se activo PayPal live.
+No se activo Level 4.
+IA sigue en modo seguro/off por defecto y RLS no fue debilitado.
+Staging queda Go condicionado: health/readiness ya funcionan, pero faltan Supabase/RLS real, PayPal sandbox, Google Auth y `staging:check mode=staging_ready`.
 Produccion sigue No-Go.
-Archivos clave para revisar: `docs/HANDOFF_PARA_CHATGPT.md`, `docs/STAGING_EXECUTION_PLAN.md`, `docs/VERCEL_STAGING_ENV_CHECKLIST.md`, `docs/SUPABASE_STAGING_EXECUTION_CHECKLIST.md`, `docs/PAYPAL_STAGING_EXECUTION_CHECKLIST.md`, `docs/GOOGLE_AUTH_STAGING_EXECUTION_CHECKLIST.md`, `docs/STAGING_MANUAL_SMOKE_TESTS.md`, `docs/STAGING_RELEASE_CANDIDATE_REPORT.md`, `.env.example`, `package.json`.
-Necesito que ChatGPT me guie ahora a cargar credenciales reales de staging sin exponer secretos, ejecutar Supabase/PayPal/Google, correr `npm run staging:check` hasta `mode=staging_ready`, y completar el release candidate report.
+Archivos clave modificados: `services/*.js`, `lib/runtime-mode.js`, `lib/supabase.js`, `docs/HANDOFF_PARA_CHATGPT.md`, `docs/VERCEL_AUTONOMY_AUDIT.md`, `docs/STAGING_RELEASE_CANDIDATE_REPORT.md`.
+Proximo paso recomendado: cargar/validar Supabase staging y RLS, luego PayPal sandbox y Google Auth, actualizar Vercel envs reales, redeploy preview y correr `npm run staging:check` hasta `mode=staging_ready`.

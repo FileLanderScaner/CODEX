@@ -1,14 +1,14 @@
-import { supabase } from '../lib/supabase';
-import { getApiUrl, getAppUrl } from '../lib/config';
-import { normalizeProduct } from './price-service';
+import { supabase } from '../lib/supabase.js';
+import { getApiUrl, getAppUrl } from '../lib/config.js';
+import { normalizeProduct } from './price-service.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   deleteLocalAlert,
   loadLocalAlerts,
   setLocalAlertActive,
   upsertLocalAlert,
-} from './user-price-service';
-import { loadFavorites } from './favorites-service';
+} from './user-price-service.js';
+import { loadFavorites } from './favorites-service.js';
 
 const LOCAL_USER_KEY = '@ahorroya:fallback-user';
 const LOCAL_PREMIUM_KEY = '@ahorroya:fallback-premium';

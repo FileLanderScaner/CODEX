@@ -1,6 +1,6 @@
-import { CATALOG_STORES, buildCatalogLinks } from './catalog-service';
-import { getAllPrices, normalizeProduct, normalizeStoreKey } from './price-service';
-import { normalizeComparableProduct } from './product-normalizer';
+import { CATALOG_STORES, buildCatalogLinks } from './catalog-service.js';
+import { getAllPrices, normalizeProduct, normalizeStoreKey } from './price-service.js';
+import { normalizeComparableProduct } from './product-normalizer.js';
 
 function asPriceList(items = [], query = '') {
   return getAllPrices(items).map((item) => normalizeComparableProduct(item, query));

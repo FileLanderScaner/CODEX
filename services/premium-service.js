@@ -1,7 +1,7 @@
 // services/premium-service.js
 // Servicios para gestionar Premium y ahorros
 
-import { getApiUrl } from '../lib/config';
+import { getApiUrl } from '../lib/config.js';
 
 /**
  * Obtener estado de suscripcion premium del usuario

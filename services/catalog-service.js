@@ -1,7 +1,7 @@
-import { getApiUrl } from '../lib/config';
-import { MONTEVIDEO_SEED_PRICES } from '../data/seed-prices';
-import { formatProductName, normalizeProduct, normalizeStoreKey } from './price-service';
-import { canonicalizeProductQuery } from './search-intent-service';
+import { getApiUrl } from '../lib/config.js';
+import { MONTEVIDEO_SEED_PRICES } from '../data/seed-prices.js';
+import { formatProductName, normalizeProduct, normalizeStoreKey } from './price-service.js';
+import { canonicalizeProductQuery } from './search-intent-service.js';
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_PREFIX = '@ahorroya:catalog-search:';

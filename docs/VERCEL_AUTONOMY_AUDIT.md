@@ -326,3 +326,203 @@ Nota:
 
 - Los checks locales no leen automaticamente variables remotas de Vercel.
 - Staging sigue bloqueado por PayPal sandbox real, Google Auth, validacion Supabase/RLS y metodo de acceso al preview protegido.
+
+## Vercel protected preview access audit
+
+Fecha: 2026-05-03.
+
+Objetivo:
+
+- Determinar metodo seguro para validar el preview protegido sin desactivar Deployment Protection, sin tocar production y sin exponer secretos.
+
+Comandos consultados:
+
+```bash
+vercel --help
+vercel curl --help
+```
+
+Resultado:
+
+- `vercel curl` existe en Vercel CLI 53.1.0.
+- Sintaxis soportada:
+  - `vercel curl /api/status --deployment <deployment-url>`
+  - `vercel curl /api/protected --protection-bypass <secret> -- --request GET`
+
+Prueba ejecutada:
+
+```bash
+vercel curl /api/v1/health --deployment https://codex-75aq3h1gx-akuma424-projects.vercel.app --no-color --non-interactive
+vercel curl /api/v1/readiness --deployment https://codex-75aq3h1gx-akuma424-projects.vercel.app --no-color --non-interactive
+```
+
+Resultado observado:
+
+- La CLI indico que el deployment requiere bypass token.
+- La CLI genero automaticamente un Deployment Protection bypass token para el proyecto.
+- No se imprimio el token.
+- No se imprimieron secretos.
+- No se desactivo Deployment Protection.
+- No se modificaron variables.
+- No se hizo deploy.
+- No se toco production.
+
+Control aplicado:
+
+- Se detuvieron nuevas pruebas con `vercel curl` porque la generacion automatica de bypass token requiere aprobacion explicita de Ronald para continuar como metodo operativo.
+
+Estado de health/readiness:
+
+- No queda una validacion concluyente documentada de respuesta JSON de `/api/v1/health` o `/api/v1/readiness`.
+- El comando transfirio una respuesta pequena, pero la salida capturada no mostro el cuerpo JSON de la API.
+
+Metodo recomendado:
+
+1. Confirmar si Ronald aprueba usar `vercel curl` aun cuando genere/gestione bypass automaticamente.
+2. Alternativa: abrir preview en navegador con sesion Vercel.
+3. Alternativa: crear bypass token manualmente por Ronald y pasarlo de forma segura sin imprimirlo.
+4. Mantener Deployment Protection activo.
+
+## Protected smoke with Ronald approval
+
+Fecha: 2026-05-03.
+
+Ronald aprobo explicitamente usar `vercel curl` como metodo de smoke protegido para la preview:
+
+```text
+https://codex-75aq3h1gx-akuma424-projects.vercel.app
+```
+
+Endpoints aprobados:
+
+- `/api/v1/health`
+- `/api/v1/readiness`
+
+Comandos ejecutados:
+
+```bash
+vercel curl /api/v1/health --deployment https://codex-75aq3h1gx-akuma424-projects.vercel.app --no-color --non-interactive
+vercel curl /api/v1/readiness --deployment https://codex-75aq3h1gx-akuma424-projects.vercel.app --no-color --non-interactive
+```
+
+Resultado seguro:
+
+- `/api/v1/health`: API alcanzada por `vercel curl`, respuesta no JSON, error `FUNCTION_INVOCATION_FAILED`, request id Vercel `gru1::q8kn4-1777786187299-2d5dd399ca25`.
+- `/api/v1/readiness`: API alcanzada por `vercel curl`, respuesta no JSON, error `FUNCTION_INVOCATION_FAILED`, request id Vercel `gru1::v78wv-1777786197615-be70c15a5297`.
+
+Status code:
+
+- No confirmado por `vercel curl` porque el comando no imprimio headers HTTP.
+- La respuesta corresponde a error de funcion de Vercel; tratar como fallo server-side de preview hasta revisar logs.
+
+Controles:
+
+- No se imprimio bypass token.
+- No se guardo bypass token.
+- No se copio token a docs.
+- No se desactivo Deployment Protection.
+- No se toco production.
+- No se hizo deploy.
+- No se modificaron variables.
+- No se cargaron secretos.
+- No se probaron endpoints sensibles, pagos ni IA admin.
+
+Proximo paso recomendado:
+
+- Revisar logs de la deployment/function en Vercel para los request ids anteriores.
+- No cambiar production.
+- No desactivar protection.
+- No avanzar a Go staging hasta corregir `FUNCTION_INVOCATION_FAILED`.
+
+## Function invocation debug and corrected preview
+
+Fecha: 2026-05-03.
+
+Objetivo:
+
+- Diagnosticar y corregir el `FUNCTION_INVOCATION_FAILED` en el preview protegido sin tocar production, sin modificar variables remotas y sin exponer secretos.
+
+Logs Vercel revisados:
+
+- Request health: `gru1::q8kn4-1777786187299-2d5dd399ca25`.
+- Request readiness: `gru1::v78wv-1777786197615-be70c15a5297`.
+
+Causa raiz confirmada:
+
+```text
+ERR_MODULE_NOT_FOUND: Cannot find module '/var/task/lib/config' imported from /var/task/services/catalog-service.js
+```
+
+Impacto:
+
+- `api/[...path].js` importa el router completo.
+- El import roto en `services/catalog-service.js` rompia la inicializacion de la Function.
+- Por eso fallaban tambien endpoints simples como `/api/v1/health` y `/api/v1/readiness`.
+
+Patch aplicado:
+
+- Se agrego extension `.js` a imports relativos ESM en servicios y librerias usadas por la API serverless.
+- No se modifico logica funcional.
+- No se modificaron variables remotas.
+- No se tocaron secretos.
+
+Validaciones locales:
+
+```text
+npm run lint -> OK, basic lint passed
+npm run typecheck -> OK, syntax check passed (134 files)
+npm test -> OK, 20 files / 59 tests
+npm run build -> OK, Expo export web completo
+```
+
+Deploy preview corregido:
+
+```text
+Comando: vercel deploy --yes --no-color --non-interactive
+Preview: https://codex-xpel3o047-akuma424-projects.vercel.app
+Inspect: https://vercel.com/akuma424-projects/codex/Hr4vhSZvQ9s7omjdpnzrUZJ19m42
+```
+
+No se uso `--prod`.
+
+Smoke protegido con `vercel curl`:
+
+```text
+/api/v1/health -> JSON OK, status=ok, service=ahorroya-api
+/api/v1/readiness -> JSON OK, status=degraded, mode=demo_or_partial
+```
+
+Readiness checks no sensibles observados:
+
+- `supabase_server=ready`
+- `supabase_public=ready`
+- `paypal=demo_or_missing_config`
+- `google_auth=fallback_demo`
+- `allowed_origins=configured`
+- `rate_limit=memory_fallback`
+- `local_fallback=enabled`
+- `tracking=supabase_with_local_fallback`
+
+Controles:
+
+- Deployment Protection sigue activo.
+- No se imprimio bypass token.
+- No se guardo bypass token.
+- No se desactivo Deployment Protection.
+- No se toco production.
+- No se modificaron variables remotas.
+- No se cargaron secretos.
+- No se probaron endpoints sensibles, pagos ni IA admin.
+
+Estado:
+
+- Health/readiness corregidos para preview protegido.
+- Staging sigue Go condicionado, no Go final.
+- Produccion sigue No-Go.
+
+Pendientes:
+
+- PayPal sandbox real.
+- Google Auth real.
+- Supabase staging/RLS con usuarios reales.
+- `npm run staging:check` debe llegar a `mode=staging_ready`.
