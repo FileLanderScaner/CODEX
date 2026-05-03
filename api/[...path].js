@@ -1,5 +1,6 @@
 import alerts from '../server/api/v1/alerts.js';
 import aiAssistant from '../server/api/v1/ai-assistant.js';
+import aiAgents from '../server/api/v1/ai-agents.js';
 import adminApprovePrice from '../server/api/v1/admin/approve-price.js';
 import adminJobs from '../server/api/v1/admin/jobs.js';
 import adminReports from '../server/api/v1/admin/reports.js';
@@ -42,6 +43,7 @@ import stores from '../server/api/v1/stores.js';
 const exactRoutes = new Map([
   ['v1/alerts', alerts],
   ['v1/ai/assistant', aiAssistant],
+  ['v1/ai/agents', aiAgents],
   ['v1/admin/approve-price', adminApprovePrice],
   ['v1/admin/jobs', adminJobs],
   ['v1/admin/reports', adminReports],

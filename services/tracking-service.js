@@ -18,6 +18,9 @@ const allowedEvents = new Set([
   'premium_click',
   'landing_view',
   'open_app',
+  'app_loaded',
+  'web_session_started',
+  'client_error',
 ]);
 
 async function saveLocalEvent(eventName, metadata = {}, amount = null, currency = 'UYU') {

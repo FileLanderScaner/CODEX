@@ -17,6 +17,7 @@ import PaywallScreen from './PaywallScreen';
 import ResultsScreen from './ResultsScreen';
 import ProductDetailScreen from './ProductDetailScreen';
 import QrScreen from './QrScreen';
+import AdminAIAgentsScreen from './AdminAIAgentsScreen';
 import { loadFavorites, toggleFavorite } from '../services/favorites-service';
 import {
   checkPremiumStatus,
@@ -1028,6 +1029,10 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         />
       ) : null}
 
+      {Platform.OS === 'web' && currentPath.startsWith('/admin/ai-agents') ? (
+        <AdminAIAgentsScreen onBack={() => nav?.navigate?.('/app/perfil')} />
+      ) : null}
+
       {Platform.OS === 'web' && currentPath.startsWith('/app/productos/') ? (
         <ProductDetailScreen
           product={decodeURIComponent(currentPath.replace('/app/productos/', ''))}
@@ -1135,6 +1140,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
 
       {!(Platform.OS === 'web' && (
         currentPath.startsWith('/app/qr') ||
+        currentPath.startsWith('/admin/ai-agents') ||
         currentPath.startsWith('/app/productos/') ||
         currentPath.startsWith('/app/escanear') ||
         currentPath.startsWith('/app/supermercados') ||

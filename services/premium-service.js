@@ -4,7 +4,7 @@
 import { getApiUrl } from '../lib/config';
 
 /**
- * Obtener estado de suscripción premium del usuario
+ * Obtener estado de suscripcion premium del usuario
  */
 export async function getPremiumStatus(accessToken) {
   if (!accessToken) return null;
@@ -36,8 +36,8 @@ export async function getPremiumStatus(accessToken) {
 }
 
 /**
- * Registrar un ahorro de búsqueda
- * 
+ * Registrar un ahorro de busqueda
+ *
  * Retorna:
  * {
  *   id: "uuid",
@@ -77,7 +77,7 @@ export async function recordSaving(accessToken, savingData) {
 
 /**
  * Obtener resumen de ahorros
- * 
+ *
  * Retorna:
  * {
  *   this_month: { total: 180, count: 12, avg: 15, trend: 'up' },
@@ -92,7 +92,17 @@ export async function getSavingsSummary(accessToken) {
   if (!accessToken) return null;
 
   try {
-    // Por ahora, devolver datos mock hasta implementar dashboard completo
+    const response = await fetch(getApiUrl('/api/v1/savings/summary'), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return { ...data, source: 'api' };
+    }
     return {
       this_month: { total: 0, count: 0, avg: 0, trend: 'stable' },
       last_month: { total: 0, count: 0, avg: 0 },
@@ -100,6 +110,8 @@ export async function getSavingsSummary(accessToken) {
       paywall_trigger_met: false,
       next_milestone: 100,
       milestone_progress: 0,
+      source: 'fallback_unavailable',
+      warning: 'Savings summary unavailable; showing zeroed fallback, not real savings.',
     };
   } catch (error) {
     console.error('Error fetching savings summary:', error);
@@ -112,14 +124,14 @@ export async function getSavingsSummary(accessToken) {
  * Reglas:
  * - Usuario no premium
  * - Ahorro acumulado > $50
- * - Último paywall mostrado hace > 7 días
+ * - Ultimo paywall mostrado hace > 7 dias
  */
 export function shouldShowPaywall(premiumStatus, savingsSummary, lastPaywallShownAt) {
   if (!premiumStatus || !savingsSummary) return false;
 
-  const isPremium = premiumStatus.is_premium;
+  const isPremium = Boolean(premiumStatus.isPremium ?? premiumStatus.is_premium);
   const hasEnoughSavings = savingsSummary.paywall_trigger_met;
-  
+
   const lastShown = lastPaywallShownAt ? new Date(lastPaywallShownAt) : null;
   const now = new Date();
   const daysSinceShown = lastShown ? Math.floor((now - lastShown) / (1000 * 60 * 60 * 24)) : 10;
@@ -140,18 +152,17 @@ export function formatSavings(amount, currency = 'UYU') {
  */
 export function getMotivationalMessage(monthlyTotal) {
   if (monthlyTotal < 50) {
-    return `Buscá 2-3 veces más y empezá a ver ofertas reales`;
+    return 'Busca 2-3 veces mas y empeza a ver ofertas reales';
   } else if (monthlyTotal < 150) {
-    return `Ya ahorraste el equivalente a una comida. Sigue así 💪`;
+    return 'Ya ahorraste el equivalente a una comida. Segui asi.';
   } else if (monthlyTotal < 300) {
-    return `Ahorraste lo suficiente para una cerveza o café por día`;
-  } else {
-    return `¡Con este ahorro podrías comprar cosas gratis! 🎉`;
+    return 'Ahorraste lo suficiente para una cerveza o cafe por dia';
   }
+  return 'Con este ahorro podrias cubrir compras extra.';
 }
 
 /**
- * Obtener estimación de ahorro anual
+ * Obtener estimacion de ahorro anual
  */
 export function getAnnualProjection(monthlyTotal) {
   return monthlyTotal * 12;

@@ -24,6 +24,7 @@ const PROTECTED_PATHS = [
   '/app/historial',
   '/app/configuracion',
   '/app/premium',
+  '/admin/ai-agents',
 ];
 
 function isProtectedRoute(path, tab) {

@@ -43,7 +43,19 @@ TWILIO_AUTH_TOKEN=<optional-twilio-token>
 TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
 CRON_SHARED_SECRET=<random-shared-secret>
 AFFILIATE_SIGNING_SECRET=<random-signing-secret>
+AI_PROVIDER=mock
+AI_AUTONOMY_LEVEL=LEVEL_0_READ_ONLY
+ENABLE_AI_AGENTS=false
+ENABLE_AGENT_SCHEDULER=false
+ENABLE_ADMIN_AI_PANEL=false
+ENABLE_AI_LEVEL4_OVERRIDE=false
 ```
+
+## Autonomia IA segura
+
+La arquitectura minima de agentes vive en `lib/ai-agents` y el endpoint `POST /api/v1/ai/agents` queda bloqueado por defecto. Activarlo solo en entornos controlados con rol `admin` o `internal_job`.
+
+Documentacion relacionada: `docs/AI_AGENTS_ARCHITECTURE.md`, `docs/AUTONOMY_POLICY.md`, `docs/SECURITY_AUDIT.md` y `docs/PRODUCTION_READINESS.md`.
 
 ## Supabase
 
@@ -70,7 +82,8 @@ La app migra favoritos y alertas locales a nube al iniciar sesion. Si Supabase n
 1. Crear app PayPal REST.
 2. Configurar `EXPO_PUBLIC_PAYPAL_CLIENT_ID` para el SDK web.
 3. Configurar en Vercel `PAYPAL_CLIENT_ID` y `PAYPAL_CLIENT_SECRET`.
-4. Configurar `PAYPAL_ENV=live` para produccion real.
+4. Mantener `PAYPAL_ENV=sandbox` hasta aprobar `docs/PAYPAL_SANDBOX_RUNBOOK.md`.
+5. Configurar `PAYPAL_ENV=live` solo para produccion real aprobada.
 
 El boton usa PayPal JS SDK en web. La orden se crea en `/api/paypal/create-order` y se captura en `/api/paypal/capture-order`; al confirmarse, el backend actualiza `profiles.premium_until` usando service role.
 
@@ -78,6 +91,9 @@ El boton usa PayPal JS SDK en web. La orden se crea en `/api/paypal/create-order
 
 Eventos soportados:
 
+- `app_loaded`
+- `web_session_started`
+- `client_error`
 - `search_submitted`
 - `cheapest_price_shown`
 - `commerce_clicked`
@@ -159,6 +175,12 @@ El endpoint `/api/v1/readiness` devuelve:
 - `checks.local_fallback`
 
 No expone valores secretos. Usarlo como smoke check post-deploy.
+
+`npm run production:check` distingue:
+
+- `mode=demo_or_partial`
+- `mode=staging_ready`
+- `mode=production_ready`
 
 ## Seguridad
 

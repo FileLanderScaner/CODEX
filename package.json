@@ -14,6 +14,7 @@
     "typecheck": "node scripts/typecheck-js.mjs",
     "ci": "npm run lint && npm run typecheck && npm test && npm run build",
     "production:check": "node scripts/production-check.mjs",
+    "staging:check": "node scripts/staging-check.mjs",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
