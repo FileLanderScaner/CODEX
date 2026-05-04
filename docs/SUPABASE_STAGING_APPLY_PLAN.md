@@ -65,6 +65,22 @@ La funcion si existe en migraciones previas:
 
 La version segura lee `auth.jwt() -> 'app_metadata' ->> 'role'` y no usa `user_metadata` para permisos criticos.
 
+## Estado operativo actual del staging
+
+Este plan queda actualizado para el proyecto Supabase staging real:
+
+- Project name: `supabase-aquamarine-battery`.
+- Project ref: `wzwjjjajmyfwvspxysjb`.
+- Este proyecto no es un staging limpio: ya tenia tablas base antes de la migracion de agentes IA.
+- No reejecutar `supabase-production-schema.sql` en `wzwjjjajmyfwvspxysjb`.
+- No reejecutar `supabase-price-schema.sql` en `wzwjjjajmyfwvspxysjb`.
+- La migracion agent IA `supabase/migrations/202605020001_ai_agents_memory.sql` ya fue aplicada correctamente.
+- Supabase schema agentes: Go.
+- Supabase RLS estructura: Go.
+- Supabase RLS usuarios reales: pendiente.
+
+Siguiente accion para este staging: ejecutar el smoke RLS real con `scripts/rls-agent-user-smoke.mjs` usando un `.env.rls` local ignorado por git. No migrar de nuevo.
+
 ## Preflight obligatorio
 
 Antes de ejecutar la migracion growth/monetizacion, correr:
@@ -103,6 +119,10 @@ No usar `user_metadata` para esta funcion.
 ## Orden exacto recomendado
 
 ### Ruta A: staging limpio con SQL Editor
+
+Solo para proyectos nuevos/limpios. No aplica al staging actual `wzwjjjajmyfwvspxysjb`.
+
+No usar esta ruta contra `supabase-aquamarine-battery`, porque ese proyecto ya tenia tablas base y la migracion agent IA ya fue aplicada correctamente.
 
 1. Confirmar que el proyecto es staging.
 2. Ejecutar `supabase-production-schema.sql`.
