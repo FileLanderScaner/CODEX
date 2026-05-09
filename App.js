@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import AppShell from './components/layout/AppShell';
 import { ui } from './lib/ui';
 
@@ -18,6 +19,7 @@ export default function App() {
     <View style={styles.safeArea}>
       <StatusBar style="dark" />
       <AppShell />
+      {Platform.OS === 'web' && <SpeedInsights />}
     </View>
   );
 }
