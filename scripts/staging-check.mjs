@@ -18,8 +18,8 @@ if (String(env.ENABLE_AI_LEVEL4_OVERRIDE).toLowerCase() === 'true') {
   failures.push('ENABLE_AI_LEVEL4_OVERRIDE=true is blocked for staging.');
 }
 
-if (env.AI_AUTONOMY_LEVEL === 'LEVEL_4_CONTROLLED_EXECUTION') {
-  failures.push('AI_AUTONOMY_LEVEL=LEVEL_4_CONTROLLED_EXECUTION is blocked for staging.');
+if (['LEVEL_4_CONTROLLED_EXECUTION', 'LEVEL_4_HIGH_AUTONOMY'].includes(env.AI_AUTONOMY_LEVEL)) {
+  failures.push(`AI_AUTONOMY_LEVEL=${env.AI_AUTONOMY_LEVEL} is blocked for staging.`);
 }
 
 if (String(env.PAYPAL_ENV).toLowerCase() === 'live') {

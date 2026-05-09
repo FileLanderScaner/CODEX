@@ -4,6 +4,16 @@ const PAYPAL_API_BASE = process.env.PAYPAL_ENV === 'live'
 
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGIN || '';
 
+export class PayPalWebhookError extends Error {
+  constructor(message, { statusCode = 500, code = 'paypal_webhook_error', stage = 'unknown_error' } = {}) {
+    super(message);
+    this.name = 'PayPalWebhookError';
+    this.statusCode = statusCode;
+    this.code = code;
+    this.stage = stage;
+  }
+}
+
 function getAllowedOrigin(req) {
   const originHeader = req?.headers?.origin;
   const allowedOrigins = (ALLOWED_ORIGINS || '').split(',').map((value) => value.trim()).filter(Boolean);
@@ -101,7 +111,11 @@ export async function paypalFetch(path, options = {}) {
 export async function verifyWebhookSignature({ req, event }) {
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
   if (!webhookId) {
-    throw new Error('Missing PAYPAL_WEBHOOK_ID');
+    throw new PayPalWebhookError('Missing PAYPAL_WEBHOOK_ID', {
+      statusCode: 500,
+      code: 'paypal_webhook_config_invalid',
+      stage: 'verify_signature',
+    });
   }
 
   const transmissionId = req.headers['paypal-transmission-id'];
@@ -111,7 +125,11 @@ export async function verifyWebhookSignature({ req, event }) {
   const transmissionSig = req.headers['paypal-transmission-sig'];
 
   if (!transmissionId || !transmissionTime || !certUrl || !authAlgo || !transmissionSig) {
-    throw new Error('Missing PayPal signature headers');
+    throw new PayPalWebhookError('Missing PayPal signature headers', {
+      statusCode: 400,
+      code: 'paypal_signature_headers_missing',
+      stage: 'verify_signature',
+    });
   }
 
   const result = await paypalFetch('/v1/notifications/verify-webhook-signature', {
@@ -128,7 +146,11 @@ export async function verifyWebhookSignature({ req, event }) {
   });
 
   if (result?.verification_status !== 'SUCCESS') {
-    throw new Error('PayPal webhook signature invalid');
+    throw new PayPalWebhookError('PayPal webhook signature invalid', {
+      statusCode: 401,
+      code: 'paypal_signature_verification_failed',
+      stage: 'verify_signature',
+    });
   }
 
   return true;
@@ -206,7 +228,11 @@ export async function updatePremiumProfile(userId, paypalOrderId, options = {}) 
   });
 
   if (!response.ok) {
-    throw new Error('Payment captured, but Supabase profile update failed');
+    const data = await response.json().catch(() => null);
+    const error = new Error(data?.message || 'Payment captured, but Supabase profile update failed');
+    error.code = data?.code || null;
+    error.httpStatus = response.status;
+    throw error;
   }
 }
 
@@ -239,7 +265,10 @@ export async function updateSubscriptionRecord({ subscriptionId, userId, planCod
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(data?.message || 'Subscription update failed');
+    const error = new Error(data?.message || 'Subscription update failed');
+    error.code = data?.code || null;
+    error.httpStatus = response.status;
+    throw error;
   }
   return data?.[0] || null;
 }
@@ -272,6 +301,10 @@ export async function recordPremiumOrder({ orderId, userId, email, amount, curre
   });
 
   if (!response.ok) {
-    throw new Error('Payment captured, but premium order registration failed');
+    const data = await response.json().catch(() => null);
+    const error = new Error(data?.message || 'Payment captured, but premium order registration failed');
+    error.code = data?.code || null;
+    error.httpStatus = response.status;
+    throw error;
   }
 }

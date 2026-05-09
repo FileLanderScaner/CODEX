@@ -3,12 +3,12 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const PUBLIC_REQUIRED = [
-  'EXPO_PUBLIC_SUPABASE_URL',
-  'EXPO_PUBLIC_SUPABASE_ANON_KEY',
-  'EXPO_PUBLIC_API_BASE_URL',
-  'EXPO_PUBLIC_APP_URL',
-  'EXPO_PUBLIC_PAYPAL_CLIENT_ID',
-  'EXPO_PUBLIC_GOOGLE_CLIENT_ID',
+  ['EXPO_PUBLIC_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL'],
+  ['EXPO_PUBLIC_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'],
+  ['EXPO_PUBLIC_API_BASE_URL', 'NEXT_PUBLIC_API_BASE_URL'],
+  ['EXPO_PUBLIC_APP_URL', 'NEXT_PUBLIC_APP_URL'],
+  ['EXPO_PUBLIC_PAYPAL_CLIENT_ID', 'NEXT_PUBLIC_PAYPAL_CLIENT_ID'],
+  ['EXPO_PUBLIC_GOOGLE_CLIENT_ID', 'NEXT_PUBLIC_GOOGLE_CLIENT_ID'],
 ];
 
 const SERVER_REQUIRED_STAGING = [
@@ -68,8 +68,17 @@ function hasValue(env, key) {
   return Boolean(value) && !PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(value));
 }
 
+function keyLabel(keyOrGroup) {
+  return Array.isArray(keyOrGroup) ? keyOrGroup[0] : keyOrGroup;
+}
+
+function hasAnyValue(env, keyOrGroup) {
+  const keys = Array.isArray(keyOrGroup) ? keyOrGroup : [keyOrGroup];
+  return keys.some((key) => hasValue(env, key));
+}
+
 function missing(env, keys) {
-  return keys.filter((key) => !hasValue(env, key));
+  return keys.filter((key) => !hasAnyValue(env, key)).map(keyLabel);
 }
 
 function publicSecretLeaks(env) {
@@ -80,7 +89,7 @@ function publicSecretLeaks(env) {
 
 function riskyValues(env) {
   const risks = [];
-  if (env.AI_AUTONOMY_LEVEL === 'LEVEL_4_CONTROLLED_EXECUTION') risks.push('AI_AUTONOMY_LEVEL=LEVEL_4_CONTROLLED_EXECUTION is blocked for initial production.');
+  if (['LEVEL_4_CONTROLLED_EXECUTION', 'LEVEL_4_HIGH_AUTONOMY'].includes(env.AI_AUTONOMY_LEVEL)) risks.push(`AI_AUTONOMY_LEVEL=${env.AI_AUTONOMY_LEVEL} is blocked for initial production.`);
   if (String(env.ENABLE_AI_LEVEL4_OVERRIDE).toLowerCase() === 'true') risks.push('ENABLE_AI_LEVEL4_OVERRIDE=true is not allowed for staging/initial production.');
   if (String(env.ENABLE_ADMIN_AI_PANEL).toLowerCase() === 'true' && !hasValue(env, 'SUPABASE_SERVICE_ROLE_KEY')) risks.push('Admin AI panel enabled without Supabase server memory.');
   if (!String(env.ALLOWED_ORIGINS || '').includes('https://')) risks.push('ALLOWED_ORIGINS should include explicit HTTPS staging/production origins.');
@@ -120,8 +129,8 @@ export function validateProductionEnv(source = process.env) {
     checks: {
       supabase_public: publicMissing.filter((key) => key.includes('SUPABASE')).length === 0,
       supabase_server: stagingMissing.filter((key) => key.includes('SUPABASE')).length === 0,
-      paypal: stagingMissing.filter((key) => key.includes('PAYPAL')).length === 0 && hasValue(env, 'EXPO_PUBLIC_PAYPAL_CLIENT_ID'),
-      google_auth: hasValue(env, 'EXPO_PUBLIC_GOOGLE_CLIENT_ID') && hasValue(env, 'GOOGLE_OAUTH_CLIENT_ID') && hasValue(env, 'GOOGLE_OAUTH_CLIENT_SECRET'),
+      paypal: stagingMissing.filter((key) => key.includes('PAYPAL')).length === 0 && hasAnyValue(env, ['EXPO_PUBLIC_PAYPAL_CLIENT_ID', 'NEXT_PUBLIC_PAYPAL_CLIENT_ID']),
+      google_auth: hasAnyValue(env, ['EXPO_PUBLIC_GOOGLE_CLIENT_ID', 'NEXT_PUBLIC_GOOGLE_CLIENT_ID']) && hasValue(env, 'GOOGLE_OAUTH_CLIENT_ID') && hasValue(env, 'GOOGLE_OAUTH_CLIENT_SECRET'),
       allowed_origins: hasSafeOrigins,
       ai_safe_defaults: aiSafe,
     },

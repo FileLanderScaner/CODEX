@@ -22,7 +22,8 @@
     "test:security": "vitest run tests/security",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:rls": "node scripts/run-rls-tests.mjs"
+    "test:rls": "node scripts/run-rls-tests.mjs",
+    "paypal:sandbox:create-subscription": "node scripts/create-paypal-sandbox-subscription.mjs"
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.5",

@@ -11,11 +11,14 @@ Este proyecto ya queda preparado para desplegar la version web exportada de Expo
 
 ## Deploy manual
 
+Preview/staging desde la rama `codex/production-deploy-ready`:
+
 ```powershell
 cd C:\codex
 npm.cmd run build
-npx.cmd vercel link --yes --project project-6vgnm --scope akuma424-projects
-npx.cmd vercel deploy --prod --yes
+npx.cmd vercel link --yes --project codex --scope akuma424-projects
+npx.cmd vercel pull --yes --environment=preview --scope akuma424-projects
+npx.cmd vercel deploy --yes --scope akuma424-projects
 ```
 
 Si la CLI pide login:
@@ -27,8 +30,10 @@ npx.cmd vercel login
 Luego repetir:
 
 ```powershell
-npx.cmd vercel deploy --prod --yes
+npx.cmd vercel deploy --yes --scope akuma424-projects
 ```
+
+No ejecutar `vercel deploy --prod` hasta que staging tenga `npm run staging:check`, smoke RLS y validacion manual aprobados.
 
 ## Variables opcionales
 
