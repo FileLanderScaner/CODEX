@@ -29,3 +29,10 @@ Conexion staging recomendada:
 - Formato esperado: `postgresql://postgres.<PROJECT_REF>:<URL_ENCODED_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=require`.
 - Mantener `ENVIRONMENT=staging` y `SUPABASE_STAGING_PROJECT_REF=<PROJECT_REF>` en `.env.rls`.
 - No commitear `.env.rls` ni imprimir la URL. URL-encodear caracteres especiales de la password.
+
+Auth production gate:
+
+- Antes de production, revisar manualmente Supabase Auth leaked password protection en Dashboard.
+- No asumir que esta activado sin evidencia.
+- Si no hay evidencia o el plan no lo permite, production queda `NO-GO_PRODUCTION`.
+- Runbook: `docs/security/supabase-auth-production-gate.md`.

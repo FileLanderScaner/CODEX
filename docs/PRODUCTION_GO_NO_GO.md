@@ -47,6 +47,12 @@ Production solo puede pasar a `GO_PRODUCTION` cuando todo esto este completo y a
 
 Si falta cualquiera de esos puntos: `PRODUCTION_STATUS=NO-GO_PRODUCTION`.
 
+Runbooks de bloqueo:
+
+- Supabase Auth leaked password protection: `docs/security/supabase-auth-production-gate.md`.
+- Backup SQL production: `docs/deployment/production-backup-sql-plan.md`.
+- Revert SQL/deploy/env production: `docs/deployment/production-revert-sql-plan.md`.
+
 ## Matriz tecnica
 
 | Area | Estado requerido | Estado actual | Go/No-Go | Evidencia |
@@ -54,6 +60,7 @@ Si falta cualquiera de esos puntos: `PRODUCTION_STATUS=NO-GO_PRODUCTION`.
 | Build | `npm run build` OK | OK local | Go tecnico staging | Validacion RC |
 | Tests | Lint/typecheck/Vitest OK | OK local | Go tecnico staging | Suite local |
 | Supabase staging | Schema/RLS staging validado | OK staging | Go staging | Session Pooler + RLS PASS |
+| Supabase Auth production | Leaked password protection validado | Pendiente manual | No-Go production | Auth production gate |
 | RLS | Normal bloqueado, admin/internal_job permitido | OK staging | Go staging | `rls_validation: PASS` |
 | Vercel Preview | Deployment Preview Ready | OK staging | Go staging | Vercel Preview |
 | Vercel Production env | Variables reales production configuradas | Pendiente manual | No-Go production | Env matrix |

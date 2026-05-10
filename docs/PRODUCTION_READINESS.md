@@ -44,4 +44,5 @@ Checklist:
 - Ejecutar Playwright E2E contra deploy preview.
 - Ejecutar `npm run production:check -- --strict` solo cuando las variables productivas reales esten cargadas.
 - Mantener `PRODUCTION_STATUS=NO-GO_PRODUCTION` hasta completar: Supabase Auth leaked password protection, backup SQL, revert plan, Vercel Production env real, PayPal live, Google OAuth production, ventana de deploy/responsables y aprobacion humana explicita.
+- Resolver los runbooks manuales antes de cualquier production action: `docs/security/supabase-auth-production-gate.md`, `docs/deployment/production-backup-sql-plan.md` y `docs/deployment/production-revert-sql-plan.md`.
 - Ver `docs/ENVIRONMENT_VARIABLES_MATRIX.md`, `docs/STAGING_DEPLOY_CHECKLIST.md` y `docs/PRODUCTION_GO_NO_GO.md`.

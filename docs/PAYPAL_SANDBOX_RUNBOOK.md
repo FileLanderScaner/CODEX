@@ -20,14 +20,19 @@ APP_URL=https://<staging-domain>
 3. Configurar webhook hacia:
 
 ```text
-https://<staging-domain>/api/v1/billing/webhooks/paypal
+https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal?x-vercel-protection-bypass=<REDACTED>
 ```
 
 4. Suscribir eventos:
+   - `BILLING.SUBSCRIPTION.CREATED`
    - `BILLING.SUBSCRIPTION.ACTIVATED`
    - `BILLING.SUBSCRIPTION.CANCELLED`
    - `BILLING.SUBSCRIPTION.SUSPENDED`
+   - `BILLING.SUBSCRIPTION.PAYMENT.FAILED`
+   - `PAYMENT.SALE.COMPLETED`
    - `PAYMENT.CAPTURE.COMPLETED`
+
+El bypass real de Vercel Deployment Protection debe configurarse solo en PayPal Dashboard o en el mecanismo seguro aprobado. No imprimirlo, no guardarlo en Git y no usarlo para production sin revision de seguridad.
 
 ## Verificacion
 
@@ -35,6 +40,7 @@ https://<staging-domain>/api/v1/billing/webhooks/paypal
 - La compra sandbox debe crear/actualizar `subscriptions`.
 - Perfil debe quedar con `is_premium=true` y `premium_until`.
 - Premium demo no debe presentarse como pago real.
+- Si el webhook no apunta al branch alias, actualizarlo manualmente antes del smoke.
 
 ## Paso a live
 

@@ -55,6 +55,12 @@ Checklist minimo para desbloquear production:
 
 Si falta un punto: `PRODUCTION_STATUS=NO-GO_PRODUCTION`.
 
+Runbooks obligatorios antes de production:
+
+- `docs/security/supabase-auth-production-gate.md`.
+- `docs/deployment/production-backup-sql-plan.md`.
+- `docs/deployment/production-revert-sql-plan.md`.
+
 ## Plan demo_or_partial -> staging_release_candidate
 
 ### 1. Completar `.env.server.local`
@@ -304,6 +310,7 @@ Rollback Supabase:
 - No hay rollback automatico seguro para migraciones remotas.
 - Antes de migraciones production debe existir backup, plan de revert SQL y ventana aprobada.
 - No aplicar migraciones production desde este estado.
+- Ver `docs/deployment/production-backup-sql-plan.md` y `docs/deployment/production-revert-sql-plan.md`.
 
 ## Checklist Go/No-Go production
 

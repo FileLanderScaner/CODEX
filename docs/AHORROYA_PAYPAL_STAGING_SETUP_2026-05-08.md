@@ -13,13 +13,13 @@ No se uso PayPal live, NVP/SOAP, deploy production ni variables de Production en
 Preview base URL estable para validacion sandbox:
 
 ```text
-https://codex-akuma424424-akuma424-projects.vercel.app
+https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app
 ```
 
 Webhook URL configurada/recomendada:
 
 ```text
-https://codex-akuma424424-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal
+https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal
 ```
 
 El deployment Preview esta protegido por Vercel Deployment Protection. Sin bypass, las llamadas publicas al Preview devuelven 401 antes de llegar a la app.
@@ -27,7 +27,7 @@ El deployment Preview esta protegido por Vercel Deployment Protection. Sin bypas
 Para PayPal Sandbox contra un Preview protegido, usar Protection Bypass for Automation y configurar el webhook con query parameter:
 
 ```text
-https://codex-akuma424424-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal?x-vercel-protection-bypass=<REDACTED>
+https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal?x-vercel-protection-bypass=<REDACTED>
 ```
 
 Estado del bypass: presente y validado. No guardar el bypass secret en el repo. No usar este patron en produccion sin revision de seguridad. Alternativa futura recomendada: dominio staging estable sin Deployment Protection para webhooks externos, o dominio production real cuando el release este aprobado.
@@ -111,6 +111,16 @@ Eventos esperados:
 - `PAYMENT.SALE.COMPLETED`.
 - `PAYMENT.CAPTURE.COMPLETED`.
 
+## Manual Dashboard action
+
+Confirmar manualmente en PayPal Developer Dashboard que el webhook sandbox apunta al branch alias:
+
+```text
+https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal?x-vercel-protection-bypass=<REDACTED>
+```
+
+No imprimir el bypass token real. No usar credenciales live. Si PayPal sigue apuntando a una URL de deployment efimera, actualizarlo manualmente al branch alias antes de repetir smoke sandbox.
+
 ## Vercel Preview
 
 Variables cargadas/actualizadas solo en Preview branch `codex/production-deploy-ready`:
@@ -168,7 +178,7 @@ El POST externo desde PayPal Sandbox alcanza el webhook Preview protegido, por l
 Configurar PayPal Sandbox con:
 
 ```text
-https://codex-akuma424424-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal?x-vercel-protection-bypass=<REAL_SECRET>
+https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal?x-vercel-protection-bypass=<REDACTED>
 ```
 
 No ejecutar production sin aprobacion explicita.
