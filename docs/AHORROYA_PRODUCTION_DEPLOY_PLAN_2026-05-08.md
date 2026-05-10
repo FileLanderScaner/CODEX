@@ -2,11 +2,13 @@
 
 ## Estado actual
 
-Estado actual: `demo_or_partial`.
+Estado actual: `PRODUCTION_STATUS=NO-GO_PRODUCTION`.
 
-Objetivo inmediato: pasar a `staging_release_candidate` sin tocar produccion.
+Staging actual: sano y revisable. Rama subida, Vercel Preview `Ready`, RLS PASS con Session Pooler, AI Gateway apagado, agentes IA apagados, PayPal sandbox y produccion intacta.
 
-Objetivo posterior: pasar a `production_ready` solo despues de staging validado, preview operativo, RLS confirmado, PayPal sandbox confirmado, Google OAuth staging confirmado y aprobacion humana explicita.
+Objetivo inmediato: mantener staging release candidate sin tocar produccion.
+
+Objetivo posterior: pasar a `production_ready` solo despues de completar el checklist manual de production y registrar aprobacion humana explicita.
 
 ## Reglas de seguridad
 
@@ -23,6 +25,35 @@ Objetivo posterior: pasar a `production_ready` solo despues de staging validado,
 - Mantener `ENABLE_ADMIN_AI_PANEL=false`.
 - Mantener `ENABLE_AI_LEVEL4_OVERRIDE=false`.
 - Mantener `PAYPAL_ENV=sandbox` hasta produccion real.
+
+## Gate production vigente
+
+Hasta aprobacion explicita, quedan prohibidos:
+
+- `npx vercel --prod`
+- `npx vercel deploy --prod`
+- `npx vercel promote`
+- Cambios en Vercel Production env.
+- Migraciones contra Supabase production.
+- `supabase db push` contra production.
+- Activar PayPal live.
+- Activar Google OAuth production como flujo real.
+- `AI_GATEWAY_ENABLED=true`.
+- `ENABLE_AI_AGENTS=true`.
+- Commitear `.env`, `.env.local`, `.env.rls` o secretos.
+
+Checklist minimo para desbloquear production:
+
+1. Supabase Auth leaked password protection revisado y activado si aplica.
+2. Backup SQL tomado y verificable.
+3. Revert plan SQL escrito y revisado.
+4. Vercel Production env configurado con variables reales.
+5. PayPal live configurado y separado de sandbox.
+6. Google OAuth production configurado con callbacks reales.
+7. Ventana de deploy definida con responsables.
+8. Aprobacion humana explicita registrada.
+
+Si falta un punto: `PRODUCTION_STATUS=NO-GO_PRODUCTION`.
 
 ## Plan demo_or_partial -> staging_release_candidate
 

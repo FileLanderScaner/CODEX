@@ -1,10 +1,25 @@
 # Production readiness
 
-Estado actual: build/test local verde tras la implementacion, pendiente aplicar migraciones y variables reales.
+Estado actual: `PRODUCTION_STATUS=NO-GO_PRODUCTION`.
+
+Staging esta sano y revisable: rama subida, Vercel Preview `Ready`, RLS PASS con Session Pooler, AI Gateway apagado, agentes IA apagados, PayPal sandbox y produccion intacta.
+
+Produccion queda bloqueada por politica de release hasta completar el checklist manual de `docs/PRODUCTION_GO_NO_GO.md`.
 
 Modo esperado antes de credenciales reales: `demo_or_partial`.
 Modo requerido para staging: `staging_ready`.
 Modo requerido para produccion: `production_ready`.
+
+Comandos prohibidos hasta aprobacion humana explicita:
+
+- `npx vercel --prod`
+- `npx vercel deploy --prod`
+- `npx vercel promote`
+- modificar Vercel Production env
+- aplicar migraciones Supabase production
+- activar PayPal live
+- activar AI Gateway
+- activar agentes IA
 
 Checklist:
 
@@ -28,4 +43,5 @@ Checklist:
 - Ver `docs/SUPABASE_AI_AGENTS_SETUP.md` antes de aplicar la migracion de memoria.
 - Ejecutar Playwright E2E contra deploy preview.
 - Ejecutar `npm run production:check -- --strict` solo cuando las variables productivas reales esten cargadas.
+- Mantener `PRODUCTION_STATUS=NO-GO_PRODUCTION` hasta completar: Supabase Auth leaked password protection, backup SQL, revert plan, Vercel Production env real, PayPal live, Google OAuth production, ventana de deploy/responsables y aprobacion humana explicita.
 - Ver `docs/ENVIRONMENT_VARIABLES_MATRIX.md`, `docs/STAGING_DEPLOY_CHECKLIST.md` y `docs/PRODUCTION_GO_NO_GO.md`.

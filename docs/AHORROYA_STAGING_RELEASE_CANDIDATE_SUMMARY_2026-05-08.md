@@ -11,9 +11,10 @@
 - PayPal real webhook delivery: 2xx.
 - PayPal signature: verified.
 - Supabase subscriptions schema: ready.
+- RLS SQL: PASS con Session Pooler.
 - `npm run lint`: PASS.
 - `npm run typecheck`: PASS.
-- `npm run test`: PASS, 77 tests.
+- `npm run test`: PASS.
 - `npm run build`: PASS.
 - `npm run production:check`: PASS tecnico, `mode=staging_ready`.
 
@@ -28,8 +29,8 @@
 
 ## Pendiente conocido
 
-- `npm run test:rls` bloqueado localmente por falta de `psql`.
-- Production sigue `NO-GO` hasta completar y aprobar checklist production.
+- Production sigue `NO-GO_PRODUCTION` hasta completar y aprobar checklist manual production.
+- Si la URL de Preview cambia, PayPal sandbox webhook debe actualizarse o apuntar a un alias estable.
 
 ## Confirmaciones
 
