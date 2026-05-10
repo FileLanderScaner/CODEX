@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { json, optionalUser, runEndpoint, supabaseRest, validate } from './_utils.js';
+import { json, optionalUser, requireRole, runEndpoint, supabaseRest, validate } from './_utils.js';
 
 const leadSchema = z.object({
   company: z.string().trim().min(2),
@@ -90,6 +90,7 @@ export function adEvent(req, res) {
 
 export function b2bDashboard(req, res) {
   return runEndpoint(req, res, ['GET'], 'b2b-dashboard', async (_req, _res, reqId) => {
+    await requireRole(req, ['admin', 'internal_job']);
     const [events, clicks, leads] = await Promise.all([
       supabaseRest('monetization_events?select=event_name,metadata,amount,currency,created_at&order=created_at.desc&limit=500').catch(() => []),
       supabaseRest('affiliate_clicks?select=product,store,campaign,created_at&order=created_at.desc&limit=500').catch(() => []),
@@ -112,6 +113,7 @@ export function b2bDashboard(req, res) {
 
 export function b2bExportCsv(req, res) {
   return runEndpoint(req, res, ['GET'], 'b2b-export-csv', async (_req, _res, reqId) => {
+    await requireRole(req, ['admin', 'internal_job']);
     const events = await supabaseRest('monetization_events?select=event_name,metadata,amount,currency,created_at&order=created_at.desc&limit=5000').catch(() => []);
     const rows = [['event_name', 'product', 'store', 'amount', 'currency', 'created_at']];
     events.forEach((event) => {
