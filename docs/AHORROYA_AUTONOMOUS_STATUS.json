@@ -1,0 +1,75 @@
+{
+  "project": "AhorroYA",
+  "mode": "company_autopilot",
+  "date": "2026-05-10",
+  "branch": "codex/preprod-hardening-auth-paypal",
+  "technical_status": "PREPROD_READY",
+  "commercial_status": "READY_FOR_CLOSED_BETA",
+  "monetization_status": "SANDBOX_READY_LIVE_BLOCKED",
+  "production_status": "NO-GO_PRODUCTION",
+  "company_autopilot_decision": "BLOCKED_EXTERNAL_CREDENTIALS",
+  "north_star": "user_sees_real_savings_in_under_30_seconds",
+  "completed_areas": [
+    "staging_release_candidate",
+    "supabase_rls_session_pooler_pass",
+    "paypal_sandbox",
+    "vercel_preview",
+    "ai_disabled_by_default",
+    "dependency_audit_zero_vulnerabilities",
+    "product_growth_audit",
+    "company_autopilot_docs"
+  ],
+  "business_readiness": {
+    "product_usable": true,
+    "closed_beta_ready": true,
+    "premium_sandbox_ready": true,
+    "real_revenue_ready": false,
+    "b2b_ready": false,
+    "latam_scale_ready": false
+  },
+  "checks": {
+    "npm_audit": true,
+    "lint": true,
+    "typecheck": true,
+    "tests": true,
+    "build": true,
+    "staging_check": true,
+    "production_check_safe": true,
+    "rls": true,
+    "secret_scan": true
+  },
+  "blocking_items": [
+    "Vercel Production env real not verified",
+    "PayPal live credentials and webhook not verified",
+    "Google OAuth production client and redirect URIs not verified",
+    "Supabase Auth leaked password protection requires dashboard evidence",
+    "Production SQL backup and revert drill not executed"
+  ],
+  "next_cycle": {
+    "decision": "WAIT_FOR_EXTERNAL_PRODUCTION_CREDENTIALS_OR_RUN_CLOSED_BETA",
+    "objective": "Operate closed beta on staging/preview, or resume production readiness only when external credentials are available",
+    "safe_actions": [
+      "expand browser E2E",
+      "prepare beta tester runbook",
+      "build internal AARRR dashboard",
+      "improve source/timestamp trust UI"
+    ],
+    "unsafe_until_gates": [
+      "vercel --prod",
+      "vercel promote",
+      "production env changes",
+      "production migrations",
+      "PayPal live charges",
+      "autonomous AI agents"
+    ]
+  },
+  "safety_confirmations": {
+    "no_secrets_printed": true,
+    "env_not_committed": true,
+    "no_vercel_prod_used": true,
+    "no_vercel_promote_used": true,
+    "production_envs_not_modified": true,
+    "paypal_live_not_enabled_without_credentials": true,
+    "ai_agents_remain_disabled": true
+  }
+}
