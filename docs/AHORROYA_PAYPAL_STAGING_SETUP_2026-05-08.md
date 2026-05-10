@@ -97,8 +97,8 @@ P-1DR07576L5006620YNH7MHLY
 Webhook sandbox activo:
 
 - `PAYPAL_WEBHOOK_ID`: `3JD19417P19777723`.
-- URL esperada: `https://codex-akuma424424-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal`.
-- URL configurada para Preview protegido: `https://codex-akuma424424-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal?x-vercel-protection-bypass=<REDACTED>`.
+- URL recomendada estable: `https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal`.
+- URL recomendada para Preview protegido: `https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app/api/v1/billing/webhooks/paypal?x-vercel-protection-bypass=<REDACTED>`.
 - Eventos configurados en PayPal Sandbox: All Events.
 
 Eventos esperados:
@@ -144,10 +144,10 @@ No se modifico Vercel Production.
 |---|---:|
 | `npm run staging:check` | OK, `mode=staging_ready` |
 | `node scripts/rls-agent-user-smoke.mjs` | OK, `rls_validation: PASS` |
-| `npm run test:rls` | BLOCKED por `psql` no instalado en el entorno local |
+| `npm run test:rls` | OK, `RLS_SESSION_POOLER_DETECTED`, `rls_validation: PASS` |
 | `npm run lint` | OK |
 | `npm run typecheck` | OK |
-| `npm run test` | OK, 68 tests |
+| `npm run test` | OK, 89 tests |
 | `npm run build` | OK |
 | `npm run production:check` | OK tecnico, `mode=staging_ready` |
 
@@ -186,14 +186,14 @@ No ejecutar production sin aprobacion explicita.
 Para crear una suscripcion sandbox real y obtener la URL de aprobacion del buyer:
 
 ```powershell
-npm run paypal:sandbox:create-subscription -- --preview-url=https://codex-akuma424424-akuma424-projects.vercel.app
+npm run paypal:sandbox:create-subscription -- --preview-url=https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app
 ```
 
 El script usa PayPal REST API sandbox, no imprime `PAYPAL_CLIENT_SECRET`, no guarda tokens y devuelve solo `PAYPAL_SUBSCRIPTION_ID`, `PAYPAL_PLAN_ID`, `PAYPAL_CUSTOM_ID` y `APPROVAL_URL`.
 
 ## Suscripcion sandbox real
 
-Estado actual: `PAYPAL_WEBHOOK_REAL_EVENT_DELIVERED`, `PAYPAL_SIGNATURE_VERIFIED`, `PAYPAL_WEBHOOK_PROCESSING_FIX_PENDING_DEPLOY`.
+Estado actual: `PAYPAL_WEBHOOK_PROCESSING_PASS`, `PREVIEW_VALIDATED`.
 
 - Subscription ID: `I-BUMBH66SEMAW`.
 - Plan usado: `P-6U716511BB093204YNH7MHLQ`.
@@ -202,7 +202,7 @@ Estado actual: `PAYPAL_WEBHOOK_REAL_EVENT_DELIVERED`, `PAYPAL_SIGNATURE_VERIFIED
 - Firma PayPal: verificada correctamente.
 - Resultado previo al primer fix: 502 en etapa `supabase_update` porque la suscripcion de prueba fue creada con `custom_id=sandbox-validation-...`, que no es un UUID de usuario interno.
 - Resultado con usuario staging real: firma verificada, pero `supabase_update` falla porque Supabase REST staging devuelve `PGRST205` para `subscriptions`.
-- Estado de almacenamiento: `BLOCKED_SUPABASE_SCHEMA`; no se aplicaron migraciones remotas.
+- Estado historico de almacenamiento: `BLOCKED_SUPABASE_SCHEMA`; resuelto en staging autorizado con `scripts/sql/staging-fix-subscriptions-schema.sql`.
 - Comportamiento corregido para staging: eventos firmados con almacenamiento opcional no disponible devuelven 202 `accepted_pending_storage`, sin desactivar firma y sin marcar procesamiento Supabase como exitoso.
 - Resultado despues del deploy del fix: evento real `BILLING.SUBSCRIPTION.CREATED` con ID `WH-5UG88567EP0492624-6NK49054Y5188582B` devolvio HTTP 202, firma verificada y accion `storage_unavailable`.
 - Suscripcion usada para esta validacion: `I-G3M126LWGLBW`.
@@ -217,7 +217,7 @@ Despues de aprobar la suscripcion en PayPal Sandbox, validar PayPal Event Logs y
 Para validar procesamiento completo contra Supabase staging, crear una suscripcion con el usuario normal RLS staging como `custom_id`:
 
 ```powershell
-npm run paypal:sandbox:create-subscription -- --preview-url=https://codex-akuma424424-akuma424-projects.vercel.app --use-rls-normal-user
+npm run paypal:sandbox:create-subscription -- --preview-url=https://codex-git-codex-production-deploy-ready-akuma424-projects.vercel.app --use-rls-normal-user
 ```
 
 El script no imprime email, password ni secretos; solo indica que el `custom_id` salio de `rls_normal_user`.
