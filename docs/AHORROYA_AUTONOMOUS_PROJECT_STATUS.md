@@ -10,9 +10,9 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 
 ## Ultimo ciclo ejecutado
 
-- Ciclo: `003`.
+- Ciclo: `004`.
 - Rama actual: `codex/preprod-hardening-auth-paypal`.
-- Commit actual al inicio del ciclo: `5b7868e2a8117d7ffe23e79dcc8ec6da90d0bb5e`.
+- Commit actual al inicio del ciclo: `0b93cf37a457cf124aa5c4eca7b844c6d09d85c4`.
 - Produccion: `NO-GO`.
 
 ## Modulos completos
@@ -32,6 +32,7 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 - Gate automatico Codex de preproduccion.
 - Indice canonico de documentacion de release.
 - Dependency audit sin vulnerabilidades mediante override seguro de PostCSS.
+- Auditoria producto/growth/monetizacion de preproduccion.
 
 ## Modulos incompletos
 
@@ -42,7 +43,8 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 - Revert/restore drill production real.
 - Supabase Auth leaked password protection verificado en Dashboard production.
 - Upgrade seguro para vulnerabilidades moderadas Expo/PostCSS.
-- Auditoria producto/UX/growth pendiente desde codigo.
+- Validacion E2E browser ampliada del flujo completo.
+- Cobros production reales.
 
 ## Bloqueos externos
 
@@ -61,7 +63,7 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 
 ## Proxima accion automatica
 
-Ejecutar Ciclo 004: auditoria producto/UX/growth desde codigo y backlog accionable sin tocar produccion.
+Ejecutar Ciclo 005: evaluacion final de bloqueos externos y cierre autonomo si no queda trabajo seguro dentro del repo.
 
 ## Historial resumido de ciclos
 
@@ -70,3 +72,4 @@ Ejecutar Ciclo 004: auditoria producto/UX/growth desde codigo y backlog accionab
 | 001 | `CONTINUE_NEXT_CYCLE` | Auditoria base, checks completos, confirmacion de preproduccion y production NO-GO |
 | 002 | `CONTINUE_NEXT_CYCLE` | Indice canonico de documentacion y clasificacion de reportes historicos |
 | 003 | `CONTINUE_NEXT_CYCLE` | Hardening de dependencias; `npm audit` queda en cero vulnerabilidades sin `--force` |
+| 004 | `CONTINUE_NEXT_CYCLE` | Auditoria producto/growth/monetizacion y backlog priorizado |
