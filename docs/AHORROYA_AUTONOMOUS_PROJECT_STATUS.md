@@ -2,7 +2,7 @@
 
 ## Estado global
 
-`CONTINUE_NEXT_CYCLE`
+`BLOCKED_EXTERNAL_CREDENTIALS`
 
 Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 
@@ -10,9 +10,9 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 
 ## Ultimo ciclo ejecutado
 
-- Ciclo: `004`.
+- Ciclo: `005`.
 - Rama actual: `codex/preprod-hardening-auth-paypal`.
-- Commit actual al inicio del ciclo: `0b93cf37a457cf124aa5c4eca7b844c6d09d85c4`.
+- Commit actual al inicio del ciclo: `3c3a2ccd89d90f83f3912e6fd3b1e1afe97b6203`.
 - Produccion: `NO-GO`.
 
 ## Modulos completos
@@ -33,6 +33,7 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 - Indice canonico de documentacion de release.
 - Dependency audit sin vulnerabilidades mediante override seguro de PostCSS.
 - Auditoria producto/growth/monetizacion de preproduccion.
+- Cierre autonomo de bloqueos externos.
 
 ## Modulos incompletos
 
@@ -43,7 +44,6 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 - Revert/restore drill production real.
 - Supabase Auth leaked password protection verificado en Dashboard production.
 - Upgrade seguro para vulnerabilidades moderadas Expo/PostCSS.
-- Validacion E2E browser ampliada del flujo completo.
 - Cobros production reales.
 
 ## Bloqueos externos
@@ -63,7 +63,7 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 
 ## Proxima accion automatica
 
-Ejecutar Ciclo 005: evaluacion final de bloqueos externos y cierre autonomo si no queda trabajo seguro dentro del repo.
+Detenido por `BLOCKED_EXTERNAL_CREDENTIALS`. Reanudar cuando existan credenciales/evidencias externas production reales para Vercel, PayPal live, Google OAuth, Supabase Auth Dashboard, backup SQL production y revert/restore drill.
 
 ## Historial resumido de ciclos
 
@@ -73,3 +73,4 @@ Ejecutar Ciclo 005: evaluacion final de bloqueos externos y cierre autonomo si n
 | 002 | `CONTINUE_NEXT_CYCLE` | Indice canonico de documentacion y clasificacion de reportes historicos |
 | 003 | `CONTINUE_NEXT_CYCLE` | Hardening de dependencias; `npm audit` queda en cero vulnerabilidades sin `--force` |
 | 004 | `CONTINUE_NEXT_CYCLE` | Auditoria producto/growth/monetizacion y backlog priorizado |
+| 005 | `BLOCKED_EXTERNAL_CREDENTIALS` | Checks finales PASS; cierre autonomo por dependencias externas production |

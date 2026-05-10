@@ -1,13 +1,13 @@
 {
   "project": "AhorroYA",
   "mode": "autonomous_chained_codex",
-  "current_cycle": 4,
+  "current_cycle": 5,
   "branch": "codex/preprod-hardening-auth-paypal",
-  "initial_commit": "0b93cf37a457cf124aa5c4eca7b844c6d09d85c4",
-  "current_commit": "0b93cf37a457cf124aa5c4eca7b844c6d09d85c4",
-  "working_tree_clean": false,
+  "initial_commit": "3c3a2ccd89d90f83f3912e6fd3b1e1afe97b6203",
+  "current_commit": "3c3a2ccd89d90f83f3912e6fd3b1e1afe97b6203",
+  "working_tree_clean": true,
   "production_status": "NO-GO_PRODUCTION",
-  "global_decision": "CONTINUE_NEXT_CYCLE",
+  "global_decision": "BLOCKED_EXTERNAL_CREDENTIALS",
   "completed_areas": [
     "preproduction_gate",
     "lint",
@@ -20,7 +20,8 @@
     "vercel_preview",
     "ai_disabled_by_default",
     "dependency_audit_zero_vulnerabilities",
-    "product_growth_audit"
+    "product_growth_audit",
+    "autonomous_external_blocker_closeout"
   ],
   "incomplete_areas": [
     "paypal_live",
@@ -30,7 +31,6 @@
     "production_backup_real",
     "production_revert_drill",
     "historical_docs_cleanup",
-    "full_browser_e2e_flow",
     "closed_beta_operations"
   ],
   "blocking_items": [
@@ -39,7 +39,7 @@
     "PayPal live and Google OAuth production are not verified.",
     "Production env values are not verifiably ready."
   ],
-  "next_cycle_objective": "Evaluar bloqueos externos restantes y cerrar ciclo autonomo si no queda trabajo seguro dentro del repo.",
+  "next_cycle_objective": "Reanudar cuando existan credenciales y evidencias externas production reales.",
   "checks": {
     "secret_scan": true,
     "lint": true,

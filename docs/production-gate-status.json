@@ -4,6 +4,7 @@
   "commit": "commit-containing-this-report",
   "production_status": "NO-GO_PRODUCTION",
   "codex_auto_approval_gate": "PASS_PREPROD",
+  "autonomous_final_decision": "BLOCKED_EXTERNAL_CREDENTIALS",
   "checks": {
     "git_clean": true,
     "remote_synced_before_gate": true,
