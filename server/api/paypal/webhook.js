@@ -42,6 +42,25 @@ function normalizedStatus(eventType, resource) {
   return String(resource.status || eventType.replace('BILLING.SUBSCRIPTION.', '')).toLowerCase();
 }
 
+function premiumEntitlementForStatus(status, currentPeriodEnd) {
+  if (status === 'active' || status === 'activated') {
+    return { isPremium: true, premiumUntil: currentPeriodEnd || null };
+  }
+
+  if (status === 'cancelled' && currentPeriodEnd) {
+    const expiresAt = new Date(currentPeriodEnd);
+    if (!Number.isNaN(expiresAt.getTime()) && expiresAt > new Date()) {
+      return { isPremium: true, premiumUntil: currentPeriodEnd };
+    }
+  }
+
+  if (['cancelled', 'suspended', 'expired', 'payment_failed'].includes(status)) {
+    return { isPremium: false, premiumUntil: null };
+  }
+
+  return null;
+}
+
 function isUuid(value) {
   return typeof value === 'string'
     && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -171,8 +190,14 @@ export default async function handler(req, res) {
         return;
       }
 
-      if (subscriptionUserId && ['active', 'activated'].includes(status)) {
-        const profileResult = await runSupabaseStage(() => updatePremiumProfile(subscriptionUserId, subscriptionId, { subscriptionId, planCode }));
+      const entitlement = premiumEntitlementForStatus(status, nextBillingTime);
+      if (subscriptionUserId && entitlement) {
+        const profileResult = await runSupabaseStage(() => updatePremiumProfile(subscriptionUserId, subscriptionId, {
+          subscriptionId,
+          planCode,
+          isPremium: entitlement.isPremium,
+          premiumUntil: entitlement.premiumUntil,
+        }));
         if (profileResult?.softFailed) {
           safeWebhookLog(req, event, { stage: 'supabase_update', verification: 'verified', action: 'storage_unavailable', error_code: profileResult.code });
           res.status(202).json({ received: true, status: 'accepted_pending_storage', reason: profileResult.reason });

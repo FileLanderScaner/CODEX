@@ -114,6 +114,10 @@ describe('PayPal webhook handler', () => {
     }), res);
     expect(res.statusCode).toBe(200);
     expect(res.body.status).toBe('processed');
+    expect(fetch).toHaveBeenCalledTimes(4);
+    const profileBody = JSON.parse(fetch.mock.calls[3][1].body);
+    expect(profileBody.is_premium).toBe(false);
+    expect(profileBody.plan).toBe('free');
   });
 
   it('ignores PAYMENT.CAPTURE.COMPLETED when the payload has no user/order identity', async () => {

@@ -203,11 +203,19 @@ export async function updatePremiumProfile(userId, paypalOrderId, options = {}) 
     return;
   }
 
-  const premiumUntil = new Date();
-  if (options.planCode === 'premium_yearly') {
-    premiumUntil.setFullYear(premiumUntil.getFullYear() + 1);
-  } else {
-    premiumUntil.setMonth(premiumUntil.getMonth() + 1);
+  const isPremium = options.isPremium !== false;
+  let premiumUntil = options.premiumUntil ? new Date(options.premiumUntil) : new Date();
+
+  if (Number.isNaN(premiumUntil.getTime())) {
+    premiumUntil = new Date();
+  }
+
+  if (isPremium && !options.premiumUntil) {
+    if (options.planCode === 'premium_yearly') {
+      premiumUntil.setFullYear(premiumUntil.getFullYear() + 1);
+    } else {
+      premiumUntil.setMonth(premiumUntil.getMonth() + 1);
+    }
   }
 
   const response = await fetch(`${supabaseUrl}/rest/v1/profiles`, {
@@ -220,10 +228,10 @@ export async function updatePremiumProfile(userId, paypalOrderId, options = {}) 
     },
     body: JSON.stringify({
       id: userId,
-      plan: 'premium',
+      plan: isPremium ? 'premium' : 'free',
       paypal_subscription_id: options.subscriptionId || paypalOrderId || null,
-      premium_until: premiumUntil.toISOString(),
-      is_premium: true,
+      premium_until: isPremium ? premiumUntil.toISOString() : null,
+      is_premium: isPremium,
     }),
   });
 

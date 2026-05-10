@@ -3,6 +3,23 @@
 
 import { getApiUrl } from '../lib/config.js';
 
+export function normalizeSubscriptionStatus(status) {
+  return String(status || '').trim().toLowerCase();
+}
+
+export function subscriptionHasActiveEntitlement(subscription, now = new Date()) {
+  const status = normalizeSubscriptionStatus(subscription?.status);
+  if (status !== 'active') return false;
+
+  const periodEnd = subscription?.current_period_end || subscription?.expires_at || subscription?.premium_until;
+  if (!periodEnd) return true;
+
+  const expiresAt = new Date(periodEnd);
+  if (Number.isNaN(expiresAt.getTime())) return false;
+
+  return expiresAt > now;
+}
+
 /**
  * Obtener estado de suscripcion premium del usuario
  */
@@ -24,10 +41,11 @@ export async function getPremiumStatus(accessToken) {
     }
 
     const data = await response.json();
+    const subscriptions = Array.isArray(data.data) ? data.data : [];
     // Adaptar respuesta de billing/me a formato esperado
     return {
-      isPremium: data.data?.some(sub => sub.status === 'ACTIVE') || false,
-      subscriptions: data.data || [],
+      isPremium: subscriptions.some((subscription) => subscriptionHasActiveEntitlement(subscription)),
+      subscriptions,
     };
   } catch (error) {
     console.error('Error fetching premium status:', error);
