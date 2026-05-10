@@ -1,4 +1,4 @@
-﻿{
+{
   "project": "AhorroYA",
   "branch": "codex/preprod-hardening-auth-paypal",
   "commit": "commit-containing-this-report",
@@ -12,7 +12,8 @@
     "secret_scan": true,
     "npm_ci": true,
     "npm_audit_high": true,
-    "npm_audit_moderate_remaining": true,
+    "npm_audit_moderate_remaining": false,
+    "npm_audit_zero_vulnerabilities": true,
     "lint": true,
     "typecheck": true,
     "tests": true,
@@ -49,7 +50,7 @@
     "Vercel Production env values are not verified as production-ready.",
     "PayPal live credentials, webhook id, production webhook URL, signature validation and live controlled subscription are not verified.",
     "Google OAuth production client and redirect URIs are not verified.",
-    "Moderate Expo/PostCSS audit findings remain and require a safe dependency upgrade plan before production."
+    "PostCSS audit finding was resolved with a safe npm override; review the override during the next Expo major upgrade."
   ],
   "non_blocking_items": [
     "Vercel Preview is Ready and protected by expected public 401.",

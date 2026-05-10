@@ -10,9 +10,9 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 
 ## Ultimo ciclo ejecutado
 
-- Ciclo: `002`.
+- Ciclo: `003`.
 - Rama actual: `codex/preprod-hardening-auth-paypal`.
-- Commit actual al inicio del ciclo: `a31d8a5499c47c3b91257d24d22319772ecd643e`.
+- Commit actual al inicio del ciclo: `5b7868e2a8117d7ffe23e79dcc8ec6da90d0bb5e`.
 - Produccion: `NO-GO`.
 
 ## Modulos completos
@@ -31,6 +31,7 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 - Runbooks de backup/revert/Auth production gate.
 - Gate automatico Codex de preproduccion.
 - Indice canonico de documentacion de release.
+- Dependency audit sin vulnerabilidades mediante override seguro de PostCSS.
 
 ## Modulos incompletos
 
@@ -41,7 +42,7 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 - Revert/restore drill production real.
 - Supabase Auth leaked password protection verificado en Dashboard production.
 - Upgrade seguro para vulnerabilidades moderadas Expo/PostCSS.
-- Plan seguro para findings moderados Expo/PostCSS.
+- Auditoria producto/UX/growth pendiente desde codigo.
 
 ## Bloqueos externos
 
@@ -55,12 +56,12 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 ## Riesgos
 
 - Algunas docs historicas conservan estados anteriores; `docs/AHORROYA_RELEASE_DOCUMENTATION_INDEX.md` define precedencia y contexto.
-- `npm audit` mantiene findings moderados ligados a Expo/PostCSS; no se aplico `--force` por riesgo de cambio mayor/regresivo.
+- El override de PostCSS debe revisarse en el proximo upgrade mayor de Expo.
 - Vercel CLI no mostro nombres utiles de env vars en esta sesion; Production env no puede declararse listo.
 
 ## Proxima accion automatica
 
-Ejecutar Ciclo 003: plan de hardening de dependencias para findings moderados Expo/PostCSS sin usar cambios forzados.
+Ejecutar Ciclo 004: auditoria producto/UX/growth desde codigo y backlog accionable sin tocar produccion.
 
 ## Historial resumido de ciclos
 
@@ -68,3 +69,4 @@ Ejecutar Ciclo 003: plan de hardening de dependencias para findings moderados Ex
 |---:|---|---|
 | 001 | `CONTINUE_NEXT_CYCLE` | Auditoria base, checks completos, confirmacion de preproduccion y production NO-GO |
 | 002 | `CONTINUE_NEXT_CYCLE` | Indice canonico de documentacion y clasificacion de reportes historicos |
+| 003 | `CONTINUE_NEXT_CYCLE` | Hardening de dependencias; `npm audit` queda en cero vulnerabilidades sin `--force` |
