@@ -58,4 +58,17 @@ describe('validateProductionEnv', () => {
     expect(result.mode).toBe('demo_or_partial');
     expect(result.risks.join(' ')).toMatch(/LEVEL_4/);
   });
+
+  it('blocks enabled AI agents and admin panel for initial production', () => {
+    const result = validateProductionEnv({
+      ...base,
+      ENABLE_AI_AGENTS: 'true',
+      ENABLE_ADMIN_AI_PANEL: 'true',
+      ENABLE_AGENT_SCHEDULER: 'true',
+    });
+    expect(result.mode).toBe('demo_or_partial');
+    expect(result.risks.join(' ')).toMatch(/ENABLE_AI_AGENTS=true/);
+    expect(result.risks.join(' ')).toMatch(/ENABLE_ADMIN_AI_PANEL=true/);
+    expect(result.risks.join(' ')).toMatch(/ENABLE_AGENT_SCHEDULER=true/);
+  });
 });

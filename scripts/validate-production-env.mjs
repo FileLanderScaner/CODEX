@@ -91,6 +91,9 @@ function riskyValues(env) {
   const risks = [];
   if (['LEVEL_4_CONTROLLED_EXECUTION', 'LEVEL_4_HIGH_AUTONOMY'].includes(env.AI_AUTONOMY_LEVEL)) risks.push(`AI_AUTONOMY_LEVEL=${env.AI_AUTONOMY_LEVEL} is blocked for initial production.`);
   if (String(env.ENABLE_AI_LEVEL4_OVERRIDE).toLowerCase() === 'true') risks.push('ENABLE_AI_LEVEL4_OVERRIDE=true is not allowed for staging/initial production.');
+  if (String(env.ENABLE_AI_AGENTS).toLowerCase() === 'true') risks.push('ENABLE_AI_AGENTS=true is blocked for initial production.');
+  if (String(env.ENABLE_ADMIN_AI_PANEL).toLowerCase() === 'true') risks.push('ENABLE_ADMIN_AI_PANEL=true is blocked for initial production.');
+  if (String(env.ENABLE_AGENT_SCHEDULER).toLowerCase() === 'true') risks.push('ENABLE_AGENT_SCHEDULER=true is blocked for initial production.');
   if (String(env.ENABLE_ADMIN_AI_PANEL).toLowerCase() === 'true' && !hasValue(env, 'SUPABASE_SERVICE_ROLE_KEY')) risks.push('Admin AI panel enabled without Supabase server memory.');
   if (!String(env.ALLOWED_ORIGINS || '').includes('https://')) risks.push('ALLOWED_ORIGINS should include explicit HTTPS staging/production origins.');
   return risks;
@@ -105,6 +108,9 @@ export function validateProductionEnv(source = process.env) {
   const risks = riskyValues(env);
   const aiSafe = env.AI_PROVIDER === 'mock'
     && env.AI_AUTONOMY_LEVEL === 'LEVEL_0_READ_ONLY'
+    && String(env.ENABLE_AI_AGENTS).toLowerCase() !== 'true'
+    && String(env.ENABLE_ADMIN_AI_PANEL).toLowerCase() !== 'true'
+    && String(env.ENABLE_AGENT_SCHEDULER).toLowerCase() !== 'true'
     && String(env.ENABLE_AI_LEVEL4_OVERRIDE).toLowerCase() !== 'true';
   const hasSafeOrigins = hasValue(env, 'ALLOWED_ORIGINS');
   const stagingReady = publicMissing.length === 0

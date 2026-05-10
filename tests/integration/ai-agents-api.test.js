@@ -33,6 +33,8 @@ async function loadHandler(env = {}) {
     SUPABASE_URL: 'https://supabase.example.com',
     EXPO_PUBLIC_SUPABASE_ANON_KEY: 'anon-key',
     SUPABASE_SERVICE_ROLE_KEY: '',
+    UPSTASH_REDIS_REST_URL: '',
+    UPSTASH_REDIS_REST_TOKEN: '',
     ...env,
   };
   const mod = await import('../../server/api/v1/ai-agents.js');
@@ -54,6 +56,22 @@ describe('/api/v1/ai/agents', () => {
     await handler(mockReq({ action: 'list' }), res);
     expect(res.statusCode).toBe(403);
     expect(res.body.error).toBe('admin_ai_panel_disabled');
+  });
+
+  it('honors the AI kill switch before role checks', async () => {
+    const handler = await loadHandler({ AI_KILL_SWITCH: 'true', ENABLE_ADMIN_AI_PANEL: 'true' });
+    const res = mockRes();
+    await handler(mockReq({ action: 'list' }), res);
+    expect(res.statusCode).toBe(503);
+    expect(res.body.error).toBe('ai_agents_kill_switch_active');
+  });
+
+  it('keeps the AI agents endpoint disabled in production', async () => {
+    const handler = await loadHandler({ APP_ENV: 'production', ENABLE_ADMIN_AI_PANEL: 'true', ENABLE_AI_AGENTS: 'true' });
+    const res = mockRes();
+    await handler(mockReq({ action: 'list' }, { authorization: 'Bearer valid-token' }), res);
+    expect(res.statusCode).toBe(403);
+    expect(res.body.error).toBe('ai_agents_production_disabled');
   });
 
   it('lists agents for admin users without requiring persistent memory', async () => {

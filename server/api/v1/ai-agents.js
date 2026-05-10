@@ -44,6 +44,12 @@ function bodyFromGet(req) {
 export default function aiAgents(req, res) {
   return runEndpoint(req, res, ['GET', 'POST'], 'ai-agents', async (_req, _res, reqId) => {
     const env = readEnv();
+    if (env.AI_KILL_SWITCH === true) {
+      return json(res, 503, { error: 'ai_agents_kill_switch_active' }, reqId);
+    }
+    if (env.APP_ENV === 'production') {
+      return json(res, 403, { error: 'ai_agents_production_disabled' }, reqId);
+    }
     if (env.ENABLE_ADMIN_AI_PANEL !== true) {
       return json(res, 403, { error: 'admin_ai_panel_disabled' }, reqId);
     }
@@ -107,10 +113,6 @@ export default function aiAgents(req, res) {
 
     if (env.ENABLE_AI_AGENTS !== true) {
       return json(res, 403, { error: 'ai_agents_disabled' }, reqId);
-    }
-
-    if (env.APP_ENV === 'production' && body.dryRun === false) {
-      return json(res, 403, { error: 'real_execution_blocked_in_production' }, reqId);
     }
 
     if (isLevel4Permission(env.AI_AUTONOMY_LEVEL) && env.ENABLE_AI_LEVEL4_OVERRIDE !== true) {
