@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AgentOrchestrator, createAgentMemoryForEnv } from '../../../lib/ai-agents/index.js';
+import { isLevel4Permission } from '../../../lib/ai-agents/contracts.js';
 import { readEnv } from '../../../lib/env.js';
 import { json, requireRole, runEndpoint, validate } from './_utils.js';
 
@@ -112,7 +113,7 @@ export default function aiAgents(req, res) {
       return json(res, 403, { error: 'real_execution_blocked_in_production' }, reqId);
     }
 
-    if (env.AI_AUTONOMY_LEVEL === 'LEVEL_4_CONTROLLED_EXECUTION' && env.ENABLE_AI_LEVEL4_OVERRIDE !== true) {
+    if (isLevel4Permission(env.AI_AUTONOMY_LEVEL) && env.ENABLE_AI_LEVEL4_OVERRIDE !== true) {
       return json(res, 403, { error: 'level_4_blocked_by_default' }, reqId);
     }
 

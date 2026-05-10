@@ -23,13 +23,16 @@
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "test:rls": "node scripts/run-rls-tests.mjs",
-    "paypal:sandbox:create-subscription": "node scripts/create-paypal-sandbox-subscription.mjs"
+    "paypal:sandbox:create-subscription": "node scripts/create-paypal-sandbox-subscription.mjs",
+    "ai:gateway:smoke": "node --env-file=.env.vercel.local scripts/ai-gateway-smoke.mjs",
+    "ai:gateway:smoke:local": "node --env-file=.env.local scripts/ai-gateway-smoke.mjs"
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.5",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@supabase/supabase-js": "^2.104.1",
     "@vercel/analytics": "^2.0.1",
+    "ai": "^6.0.177",
     "csv-parse": "^6.2.1",
     "expo": "~53.0.10",
     "expo-status-bar": "~2.2.3",
