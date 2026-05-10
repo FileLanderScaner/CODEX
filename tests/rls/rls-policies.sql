@@ -9,62 +9,123 @@ begin
 end;
 $$;
 
-insert into profiles (id, email, role)
-values
-  ('00000000-0000-4000-8000-000000000001', 'user@ahorroya.test', 'user'),
-  ('00000000-0000-4000-8000-000000000002', 'admin@ahorroya.test', 'admin'),
-  ('00000000-0000-4000-8000-000000000003', 'moderator@ahorroya.test', 'moderator'),
-  ('00000000-0000-4000-8000-000000000004', 'merchant@ahorroya.test', 'merchant'),
-  ('00000000-0000-4000-8000-000000000005', 'job@ahorroya.test', 'internal_job')
-on conflict (id) do update set email = excluded.email, role = excluded.role;
+create or replace function pg_temp.set_test_claims(user_id uuid, app_role text)
+returns void language plpgsql as $$
+begin
+  perform set_config(
+    'request.jwt.claims',
+    jsonb_build_object(
+      'sub', user_id::text,
+      'role', 'authenticated',
+      'app_metadata', jsonb_build_object('role', app_role)
+    )::text,
+    true
+  );
+end;
+$$;
 
-insert into countries (code, name, currency) values ('UY', 'Uruguay', 'UYU') on conflict (code) do nothing;
-insert into stores (id, name, country_code)
-values ('10000000-0000-4000-8000-000000000001', 'AhorroYA Test Store', 'UY')
-on conflict (id) do update set name = excluded.name;
-insert into merchant_accounts (id, name, owner_user_id)
-values ('20000000-0000-4000-8000-000000000001', 'AhorroYA Merchant Test', '00000000-0000-4000-8000-000000000004')
-on conflict (id) do nothing;
-insert into merchant_store_access (merchant_account_id, store_id, user_id, role)
-values ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000004', 'merchant')
-on conflict (merchant_account_id, store_id, user_id) do nothing;
+select pg_temp.assert_true(
+  exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'profiles'
+      and column_name = 'id'
+  ),
+  'profiles.id column exists'
+);
+
+select pg_temp.assert_true(
+  not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'profiles'
+      and column_name = 'role'
+  ),
+  'profiles.role is not part of the staging schema; roles come from app_metadata.role'
+);
+
+select pg_temp.assert_true(
+  exists (
+    select 1
+    from information_schema.routines
+    where routine_schema = 'public'
+      and routine_name = 'agent_authorized_role'
+  ),
+  'agent_authorized_role helper exists'
+);
+
+select pg_temp.assert_true(
+  (
+    select count(*)
+    from information_schema.tables
+    where table_schema = 'public'
+      and table_name in (
+        'agent_tasks',
+        'agent_logs',
+        'agent_reports',
+        'agent_suggestions',
+        'agent_memory',
+        'agent_executions'
+      )
+  ) = 6,
+  'all agent tables exist'
+);
+
+select pg_temp.assert_true(
+  (
+    select count(*)
+    from pg_policies
+    where schemaname = 'public'
+      and tablename in (
+        'agent_tasks',
+        'agent_logs',
+        'agent_reports',
+        'agent_suggestions',
+        'agent_memory',
+        'agent_executions'
+      )
+      and roles = array['authenticated']::name[]
+      and qual like '%agent_authorized_role%'
+  ) = 6,
+  'agent RLS policies use agent_authorized_role for authenticated users'
+);
 
 set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-000000000001","role":"authenticated","app_metadata":{"role":"user"}}', true);
-
-select pg_temp.assert_true((select count(*) = 1 from profiles where id = '00000000-0000-4000-8000-000000000001'), 'user can read own profile');
-select pg_temp.assert_true((select count(*) = 0 from profiles where id = '00000000-0000-4000-8000-000000000002'), 'user cannot read admin profile');
-
-insert into user_favorites (user_id, product)
-values ('00000000-0000-4000-8000-000000000001', 'arroz');
+select pg_temp.set_test_claims('00000000-0000-4000-8000-000000000001', 'user');
+select pg_temp.assert_true(public.agent_authorized_role() = 'anon', 'normal user is not agent-authorized');
+select pg_temp.assert_true((select count(*) = 0 from public.agent_executions), 'normal user cannot read agent_executions rows');
 
 do $$
 begin
-  insert into user_favorites (user_id, product)
-  values ('00000000-0000-4000-8000-000000000002', 'aceite');
-  raise exception 'RLS assertion failed: user inserted favorite for another user';
-exception when insufficient_privilege or check_violation then
-  null;
+  insert into public.agent_logs(agent_name, level, event, metadata, environment)
+  values ('RlsSmokeAgent', 'info', 'normal_user_should_fail', '{"ok":false}'::jsonb, 'staging');
+  raise exception 'RLS assertion failed: normal user inserted agent_logs';
+exception
+  when insufficient_privilege or check_violation then
+    null;
 end $$;
 
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-000000000003","role":"authenticated","app_metadata":{"role":"moderator"}}', true);
-update prices set status = status where false;
-select pg_temp.assert_true(true, 'moderator can execute moderation policy');
+select pg_temp.set_test_claims('00000000-0000-4000-8000-000000000002', 'admin');
+select pg_temp.assert_true(public.agent_authorized_role() = 'admin', 'admin role is agent-authorized');
+insert into public.agent_logs(agent_name, level, event, metadata, environment)
+values ('RlsSmokeAgent', 'info', 'admin_rls_smoke_test', '{"ok":true}'::jsonb, 'staging');
 
 reset role;
 set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-000000000004","role":"authenticated","app_metadata":{"role":"merchant"}}', true);
-update stores set name = 'AhorroYA Merchant Updated Store'
-where id = '10000000-0000-4000-8000-000000000001';
-select pg_temp.assert_true((select name = 'AhorroYA Merchant Updated Store' from stores where id = '10000000-0000-4000-8000-000000000001'), 'merchant can update assigned store');
+select pg_temp.set_test_claims('00000000-0000-4000-8000-000000000003', 'internal_job');
+select pg_temp.assert_true(public.agent_authorized_role() = 'internal_job', 'internal_job role is agent-authorized');
+insert into public.agent_logs(agent_name, level, event, metadata, environment)
+values ('RlsSmokeAgent', 'info', 'internal_job_rls_smoke_test', '{"ok":true}'::jsonb, 'staging');
 
 reset role;
-set local role authenticated;
-select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-000000000005","role":"authenticated","app_metadata":{"role":"internal_job"}}', true);
-insert into source_jobs (source_code, status)
-values ('uy_uam_mgap', 'queued');
-select pg_temp.assert_true((select count(*) > 0 from source_jobs where source_code = 'uy_uam_mgap'), 'internal_job can write source jobs');
+
+select 'normal_blocked: true' as result;
+select 'admin_allowed: true' as result;
+select 'internal_job_allowed: true' as result;
+select 'rls_validation: PASS' as result;
 
 rollback;

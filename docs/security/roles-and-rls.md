@@ -21,3 +21,11 @@ Validacion automatica:
 - Seeds: `supabase/seed.sql` crea usuarios de prueba para `user`, `admin`, `moderator`, `merchant` e `internal_job`.
 - Tests: `npm run test:rls` ejecuta `tests/rls/rls-policies.sql` contra `SUPABASE_DB_URL`.
 - Para reset local antes de probar: `RESET_SUPABASE_DB=true npm run test:rls`.
+
+Conexion staging recomendada:
+
+- Usar `SUPABASE_DB_URL` con Session Pooler de Supabase cuando la red local no soporte IPv6 para el host directo `db.<PROJECT_REF>.supabase.co:5432`.
+- Obtener la URL desde Supabase Dashboard > Connect > Session pooler.
+- Formato esperado: `postgresql://postgres.<PROJECT_REF>:<URL_ENCODED_PASSWORD>@<POOLER_HOST>:5432/postgres?sslmode=require`.
+- Mantener `ENVIRONMENT=staging` y `SUPABASE_STAGING_PROJECT_REF=<PROJECT_REF>` en `.env.rls`.
+- No commitear `.env.rls` ni imprimir la URL. URL-encodear caracteres especiales de la password.
