@@ -10,9 +10,9 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 
 ## Ultimo ciclo ejecutado
 
-- Ciclo: `001`.
+- Ciclo: `002`.
 - Rama actual: `codex/preprod-hardening-auth-paypal`.
-- Commit actual al inicio del ciclo: `b5a14548e6dccefec3ee95870cfd2111c6478a95`.
+- Commit actual al inicio del ciclo: `a31d8a5499c47c3b91257d24d22319772ecd643e`.
 - Produccion: `NO-GO`.
 
 ## Modulos completos
@@ -30,6 +30,7 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 - Agentes IA apagados.
 - Runbooks de backup/revert/Auth production gate.
 - Gate automatico Codex de preproduccion.
+- Indice canonico de documentacion de release.
 
 ## Modulos incompletos
 
@@ -40,7 +41,7 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 - Revert/restore drill production real.
 - Supabase Auth leaked password protection verificado en Dashboard production.
 - Upgrade seguro para vulnerabilidades moderadas Expo/PostCSS.
-- Saneamiento de documentacion historica antigua.
+- Plan seguro para findings moderados Expo/PostCSS.
 
 ## Bloqueos externos
 
@@ -53,16 +54,17 @@ Preproduccion esta aprobada tecnicamente. Produccion permanece bloqueada:
 
 ## Riesgos
 
-- Algunas docs historicas conservan estados anteriores y pueden confundir si se leen fuera de contexto.
+- Algunas docs historicas conservan estados anteriores; `docs/AHORROYA_RELEASE_DOCUMENTATION_INDEX.md` define precedencia y contexto.
 - `npm audit` mantiene findings moderados ligados a Expo/PostCSS; no se aplico `--force` por riesgo de cambio mayor/regresivo.
 - Vercel CLI no mostro nombres utiles de env vars en esta sesion; Production env no puede declararse listo.
 
 ## Proxima accion automatica
 
-Ejecutar Ciclo 002: saneamiento documental de estados historicos y creacion de indice canonico de release.
+Ejecutar Ciclo 003: plan de hardening de dependencias para findings moderados Expo/PostCSS sin usar cambios forzados.
 
 ## Historial resumido de ciclos
 
 | Ciclo | Decision | Resumen |
 |---:|---|---|
 | 001 | `CONTINUE_NEXT_CYCLE` | Auditoria base, checks completos, confirmacion de preproduccion y production NO-GO |
+| 002 | `CONTINUE_NEXT_CYCLE` | Indice canonico de documentacion y clasificacion de reportes historicos |

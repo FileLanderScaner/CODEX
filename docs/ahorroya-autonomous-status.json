@@ -1,10 +1,10 @@
 {
   "project": "AhorroYA",
   "mode": "autonomous_chained_codex",
-  "current_cycle": 1,
+  "current_cycle": 2,
   "branch": "codex/preprod-hardening-auth-paypal",
-  "initial_commit": "b5a14548e6dccefec3ee95870cfd2111c6478a95",
-  "current_commit": "b5a14548e6dccefec3ee95870cfd2111c6478a95",
+  "initial_commit": "a31d8a5499c47c3b91257d24d22319772ecd643e",
+  "current_commit": "a31d8a5499c47c3b91257d24d22319772ecd643e",
   "working_tree_clean": false,
   "production_status": "NO-GO_PRODUCTION",
   "global_decision": "CONTINUE_NEXT_CYCLE",
@@ -36,7 +36,7 @@
     "PayPal live and Google OAuth production are not verified.",
     "Production env values are not verifiably ready."
   ],
-  "next_cycle_objective": "Sanear documentacion historica obsoleta y crear indice canonico de release.",
+  "next_cycle_objective": "Cerrar plan de hardening de dependencias para findings moderados Expo/PostCSS sin cambios forzados.",
   "checks": {
     "secret_scan": true,
     "lint": true,
