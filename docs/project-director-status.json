@@ -1,10 +1,10 @@
 {
   "project": "AhorroYA",
   "director_mode": true,
-  "current_phase": "FIRST_100_USERS_CONTROLLED_LAUNCH",
-  "selected_mode": "FIRST_100_USERS_CONTROLLED_LAUNCH",
-  "previous_mode": "INVESTOR_READY",
-  "next_mode": "PRODUCTION_BLOCKERS_CLOSEOUT",
+  "current_phase": "PRODUCTION_BLOCKERS_CLOSEOUT_EVIDENCE_ONLY",
+  "selected_mode": "PRODUCTION_BLOCKERS_CLOSEOUT_EVIDENCE_ONLY",
+  "previous_mode": "FIRST_100_USERS_CONTROLLED_LAUNCH",
+  "next_mode": "WAIT_FOR_EXTERNAL_PRODUCTION_EVIDENCE",
   "production_status": "NO-GO_PRODUCTION",
   "staging_status": "READY_FOR_FIRST_100_USERS",
   "growth_status": "READY",
@@ -12,6 +12,7 @@
   "security_status": "PASS_STAGING",
   "investor_status": "READY_FOR_REVIEW",
   "controlled_launch_status": "FIRST_100_USERS_CONTROLLED_LAUNCH_READY",
+  "production_blockers_closeout_status": "READY_FOR_HUMAN_CREDENTIALS_AND_APPROVAL",
   "ai_agents_status": "DISABLED",
   "blocking_items": [
     "PayPal live credentials and webhook evidence",

@@ -1,0 +1,72 @@
+{
+  "project": "AhorroYA",
+  "mode": "PRODUCTION_BLOCKERS_CLOSEOUT_EVIDENCE_ONLY",
+  "date": "2026-05-11",
+  "branch": "codex/preprod-hardening-auth-paypal",
+  "initial_commit": "ff1527f5130168d14cbac3cc30b992b6f5de14f8",
+  "final_commit": "PENDING_COMMIT_AFTER_VALIDATION",
+  "staging_status": "READY_FOR_FIRST_100_USERS",
+  "controlled_launch_status": "FIRST_100_USERS_CONTROLLED_LAUNCH_READY",
+  "production_status": "NO-GO_PRODUCTION",
+  "production_blockers_closeout_status": "READY_FOR_HUMAN_CREDENTIALS_AND_APPROVAL",
+  "blockers": {
+    "supabase_auth_leaked_password_protection": {
+      "status": "BLOCKED_HUMAN_APPROVAL",
+      "missing": "Production dashboard evidence that leaked password protection is enabled.",
+      "ready_condition": "Redacted evidence exists and security owner approves."
+    },
+    "production_sql_backup": {
+      "status": "BLOCKED_HUMAN_APPROVAL",
+      "missing": "Real production backup id/snapshot evidence and restore availability.",
+      "ready_condition": "Backup exists outside repo and restore availability is confirmed."
+    },
+    "production_revert_restore_drill": {
+      "status": "BLOCKED_HUMAN_APPROVAL",
+      "missing": "Restore or rollback drill evidence.",
+      "ready_condition": "Revert path is tested or explicitly accepted by production owner."
+    },
+    "vercel_production_envs": {
+      "status": "BLOCKED_EXTERNAL_CREDENTIALS",
+      "missing": "Secure verification of real Production env values without printing secrets.",
+      "ready_condition": "All required env names exist with correct non-placeholder values and safe public exposure."
+    },
+    "paypal_live": {
+      "status": "BLOCKED_EXTERNAL_CREDENTIALS",
+      "missing": "Live credentials, live product/plans, live webhook id, signature verification, controlled subscription evidence.",
+      "ready_condition": "Live subscription lifecycle is verified and webhook signature is trusted."
+    },
+    "google_oauth_production": {
+      "status": "BLOCKED_EXTERNAL_CREDENTIALS",
+      "missing": "Production OAuth client, exact redirect URIs, Supabase provider evidence, login smoke.",
+      "ready_condition": "Production-domain Google login succeeds with exact redirects."
+    },
+    "human_production_approval": {
+      "status": "BLOCKED_HUMAN_APPROVAL",
+      "missing": "Explicit release window, owners, rollback owner, and deploy approval.",
+      "ready_condition": "Written approval exists after every blocker is READY."
+    }
+  },
+  "checks": {
+    "git_diff_check": true,
+    "secret_scan": true,
+    "lint": true,
+    "typecheck": true,
+    "tests": true,
+    "build": true,
+    "staging_check": true,
+    "production_check_safe": true,
+    "rls": true
+  },
+  "next_mode": "WAIT_FOR_EXTERNAL_PRODUCTION_EVIDENCE",
+  "next_mode_safe_to_execute_automatically": false,
+  "safety_confirmations": {
+    "no_secrets_printed": true,
+    "env_not_committed": true,
+    "no_vercel_prod_used": true,
+    "no_vercel_promote_used": true,
+    "production_envs_not_modified": true,
+    "paypal_live_not_enabled_without_credentials": true,
+    "ai_agents_remain_disabled": true,
+    "production_migrations_not_run": true
+  }
+}
