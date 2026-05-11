@@ -1,0 +1,54 @@
+{
+  "project": "AhorroYA",
+  "mode": "FIRST_100_USERS_CONTROLLED_LAUNCH",
+  "date": "2026-05-11",
+  "branch": "codex/preprod-hardening-auth-paypal",
+  "initial_commit": "0a62d23af82f97e2ff425b2e21960b8ae9cbdf55",
+  "final_commit": "PENDING_COMMIT",
+  "staging_status": "READY_FOR_FIRST_100_USERS",
+  "production_status": "NO-GO_PRODUCTION",
+  "controlled_launch_status": "FIRST_100_USERS_CONTROLLED_LAUNCH_READY",
+  "preview": {
+    "branch_alias": "https://codex-git-codex-preprod-hardening-auth-paypal-akuma424-projects.vercel.app",
+    "resolved_deployment": "https://codex-r6hh4nksm-akuma424-projects.vercel.app",
+    "target": "preview",
+    "status": "Ready",
+    "public_http": 401,
+    "deployment_protection_expected": true
+  },
+  "tracking_events_confirmed": {
+    "app_opened": true,
+    "search_completed": true,
+    "savings_calculated": true,
+    "whatsapp_share_clicked": true,
+    "premium_cta_clicked": true
+  },
+  "checks": {
+    "secret_scan": true,
+    "lint": true,
+    "typecheck": true,
+    "tests": true,
+    "build": true,
+    "staging_check": true,
+    "production_check_safe": true,
+    "rls": true
+  },
+  "blocking_items": [
+    "Production credentials and env evidence remain external blockers.",
+    "PayPal live credentials and controlled live subscription remain external blockers.",
+    "Google OAuth production verification remains an external blocker.",
+    "Supabase Auth leaked password protection evidence remains an external blocker.",
+    "Production backup and revert evidence remain external blockers."
+  ],
+  "next_mode": "PRODUCTION_BLOCKERS_CLOSEOUT",
+  "next_mode_safe_to_execute_automatically": false,
+  "safety_confirmations": {
+    "no_secrets_printed": true,
+    "env_not_committed": true,
+    "no_vercel_prod_used": true,
+    "no_vercel_promote_used": true,
+    "production_envs_not_modified": true,
+    "paypal_live_not_enabled_without_credentials": true,
+    "ai_agents_remain_disabled": true
+  }
+}

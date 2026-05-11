@@ -6,19 +6,19 @@ Date: 2026-05-11
 
 ## Current Phase
 
-`INVESTOR_READY`
+`FIRST_100_USERS_CONTROLLED_LAUNCH`
 
 ## Selected Mode
 
-`INVESTOR_READY`
+`FIRST_100_USERS_CONTROLLED_LAUNCH`
 
 ## Previous Mode
 
-`RELEASE_GATE`
+`INVESTOR_READY`
 
 ## Why This Mode Was Selected
 
-The release gate passed for preproduction. The highest-impact safe next action was preparing a serious investor/socios/compradores package without presenting staging as production.
+The investor package was prepared. The next safe action was executing controlled first-user launch preparation on staging/preproduction.
 
 ## Status
 
@@ -29,6 +29,7 @@ The release gate passed for preproduction. The highest-impact safe next action w
 - Monetization: `PAYPAL_SANDBOX_READY`, live blocked externally
 - Security: `PASS_STAGING`
 - Investor status: `READY_FOR_REVIEW`
+- Controlled launch: `FIRST_100_USERS_CONTROLLED_LAUNCH_READY`
 - AI agents: `DISABLED`
 
 ## Blocking Items
@@ -41,23 +42,27 @@ The release gate passed for preproduction. The highest-impact safe next action w
 
 ## Next Mode
 
-`FIRST_100_USERS_CONTROLLED_LAUNCH`
+`PRODUCTION_BLOCKERS_CLOSEOUT`
 
 ## NEXT_CODEX_PROMPT
 
 ```text
-Actua como Growth Lead + QA Lead + Release Manager para AhorroYA.
+Actua como Release Manager + Security Engineer + Payments/Auth Owner para AhorroYA.
 
-Modo: FIRST_100_USERS_CONTROLLED_LAUNCH.
+Modo: PRODUCTION_BLOCKERS_CLOSEOUT.
 
 Objetivo:
-Preparar el lanzamiento controlado a primeros usuarios reales sobre staging/preproduction, con QA y tracking, sin tocar produccion.
+Cerrar bloqueos productivos reales sin inventar credenciales y sin tocar produccion hasta tener evidencia completa.
 
 Acciones:
-1. Verificar staging URL/preview actual.
-2. Ejecutar checklist real-user QA.
-3. Preparar mensajes finales para WhatsApp, Instagram y grupos barriales.
-4. Confirmar eventos clave: app_opened, search_completed, savings_calculated, whatsapp_share_clicked, premium_cta_clicked.
-5. Crear reporte de lanzamiento controlado.
-6. Mantener PRODUCTION_STATUS=NO-GO_PRODUCTION.
+1. Verificar evidencia de Supabase Auth leaked password protection.
+2. Verificar backup SQL productivo real y ubicacion segura.
+3. Verificar revert plan probado o evidencia de restore drill.
+4. Verificar Vercel Production envs reales sin imprimir valores.
+5. Verificar PayPal live client id, secret, webhook id, product/plan live y prueba controlada.
+6. Verificar Google OAuth production client y redirect URIs.
+7. Mantener PRODUCTION_STATUS=NO-GO_PRODUCTION si falta cualquier evidencia.
+
+Condicion de bloqueo:
+Detener si faltan credenciales reales, acceso externo o autorizacion productiva.
 ```

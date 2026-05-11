@@ -1,16 +1,17 @@
 {
   "project": "AhorroYA",
   "director_mode": true,
-  "current_phase": "INVESTOR_READY",
-  "selected_mode": "INVESTOR_READY",
-  "previous_mode": "RELEASE_GATE",
-  "next_mode": "FIRST_100_USERS_CONTROLLED_LAUNCH",
+  "current_phase": "FIRST_100_USERS_CONTROLLED_LAUNCH",
+  "selected_mode": "FIRST_100_USERS_CONTROLLED_LAUNCH",
+  "previous_mode": "INVESTOR_READY",
+  "next_mode": "PRODUCTION_BLOCKERS_CLOSEOUT",
   "production_status": "NO-GO_PRODUCTION",
   "staging_status": "READY_FOR_FIRST_100_USERS",
   "growth_status": "READY",
   "monetization_status": "PAYPAL_SANDBOX_READY_BLOCKED_LIVE_CREDENTIALS",
   "security_status": "PASS_STAGING",
   "investor_status": "READY_FOR_REVIEW",
+  "controlled_launch_status": "FIRST_100_USERS_CONTROLLED_LAUNCH_READY",
   "ai_agents_status": "DISABLED",
   "blocking_items": [
     "PayPal live credentials and webhook evidence",
@@ -19,5 +20,6 @@
     "Supabase Auth leaked password protection evidence",
     "production backup and revert evidence"
   ],
-  "next_prompt_generated": true
+  "next_prompt_generated": true,
+  "next_mode_safe_to_execute_automatically": false
 }
