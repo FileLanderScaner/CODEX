@@ -119,6 +119,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const currentPath = Platform.OS === 'web' ? (nav?.path || '/app') : '/app';
   const currentQuery = Platform.OS === 'web' ? (nav?.query || {}) : {};
   const trackedInboundShareRef = useRef(new Set());
+  const premiumCtaSeenRef = useRef(false);
   const searchSeqRef = useRef(0);
 
   useEffect(() => {
@@ -270,6 +271,17 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     setResults(comparison.finalResults);
   }, [allCommunityPrices, catalogPrices, localSearchPrices, searchedQuery, selectedNeighborhood]);
 
+  useEffect(() => {
+    if (isPremium || !hasPremiumTrigger || premiumCtaSeenRef.current) return;
+    premiumCtaSeenRef.current = true;
+    trackEvent('premium_cta_seen', {
+      source: 'contextual_card',
+      value_searches: valueSearches,
+      favorites: favorites.length,
+      alerts: alerts.length,
+    }).catch(() => null);
+  }, [alerts.length, favorites.length, hasPremiumTrigger, isPremium, valueSearches]);
+
   const runSearch = async (value = query, neighborhood = selectedNeighborhood) => {
     const intent = resolveSearchIntent(value);
     const nextQuery = intent.query;
@@ -298,6 +310,12 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     setLoadingCatalogs(true);
     setCatalogSources([]);
     setCatalogStatus(`${getIntentLabel(intent)} Consultando supermercados, farmacias, marketplace y delivery...`.trim());
+    await trackEvent('search_started', {
+      product: nextQuery,
+      neighborhood,
+      city: 'Montevideo',
+      attribution,
+    }).catch(() => null);
     await trackEvent('search_submitted', {
       product: nextQuery,
       neighborhood,
@@ -356,6 +374,14 @@ export default function PriceSearchScreen({ nav, activeTab }) {
       time_to_first_result_ms: firstResultMs,
       attribution,
     }).catch(() => null);
+    await trackEvent('search_completed', {
+      product: nextQuery,
+      results: comparison.finalResults.length,
+      neighborhood,
+      city: 'Montevideo',
+      time_to_first_result_ms: firstResultMs,
+      attribution,
+    }).catch(() => null);
     const bestShown = comparison.finalResults.find((item) => item.bestOffer)?.bestOffer || null;
     if (bestShown) {
       const bestGroup = comparison.finalResults.find((item) => item.bestOffer?.id === bestShown.id) || comparison.finalResults[0];
@@ -379,6 +405,18 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         store: bestShown.store,
         compared_commerces: comparison.finalResults[0]?.commerceCount || 0,
       }, bestShown.price, bestShown.currency).catch(() => null);
+      await trackEvent('cheapest_price_seen', {
+        product: bestShown.product,
+        price_id: bestShown.id,
+        price: bestShown.price,
+        store: bestShown.store,
+        compared_commerces: comparison.finalResults[0]?.commerceCount || 0,
+      }, bestShown.price, bestShown.currency).catch(() => null);
+      await trackEvent('savings_calculated', {
+        product: bestShown.product,
+        savings: Math.max(0, Math.round(Number(bestGroup?.priceDifference || 0))),
+        cheapest_store: bestShown.store,
+      }, Math.max(0, Math.round(Number(bestGroup?.priceDifference || 0))), bestShown.currency).catch(() => null);
     }
     setLoadingCatalogs(false);
 
@@ -409,6 +447,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     await saveCloudFavorite(accountUser, normalized, nextFavorites.includes(normalized)).catch(() => null);
     setFavorites(nextFavorites);
     if (nextFavorites.includes(normalized)) {
+      await trackEvent('favorite_added', { product: normalized, authenticated: Boolean(accountUser) }).catch(() => null);
       await trackEvent('add_favorite', { product: normalized, authenticated: Boolean(accountUser) }).catch(() => null);
     }
     setFeedback(nextFavorites.includes(normalized) ? 'Favorito guardado.' : 'Favorito eliminado.');
@@ -420,15 +459,25 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const handleSharePoints = async (price, channel, context = {}) => {
     const nextPoints = await addPoints(1);
     await addCloudShare({ ...price, savings: context.savings, shareUrl: context.url }, channel).catch(() => null);
-    await trackEvent(channel === 'whatsapp' ? 'click_whatsapp' : 'share', {
+    const canonicalEvent = channel === 'whatsapp' ? 'whatsapp_share_clicked' : channel === 'copy' ? 'savings_copied' : 'share';
+    await trackEvent(canonicalEvent, {
       product: price?.product || searchedQuery,
       price_id: price?.id || null,
       store: price?.store || null,
       channel,
       url: context.url || null,
     }, context.savings || null).catch(() => null);
+    if (channel === 'whatsapp') {
+      await trackEvent('click_whatsapp', {
+        product: price?.product || searchedQuery,
+        price_id: price?.id || null,
+        store: price?.store || null,
+        channel,
+        url: context.url || null,
+      }, context.savings || null).catch(() => null);
+    }
     setPoints(nextPoints);
-    setFeedback('+1 punto por compartir. Gracias por sumar a la comunidad.');
+    setFeedback(channel === 'copy' ? 'Texto de ahorro copiado. Pegalo en WhatsApp o en tu grupo.' : '+1 punto por compartir. Gracias por sumar a la comunidad.');
   };
 
   const shareDealOnWhatsApp = async (deal) => {
@@ -500,6 +549,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   };
 
   const openPremium = async () => {
+    await trackEvent('premium_cta_clicked', { source: 'home_cta' }, deals.reduce((s, d) => s + d.savings, 0)).catch(() => null);
     await trackEvent('premium_click', { source: 'home_cta' }, deals.reduce((s, d) => s + d.savings, 0)).catch(() => null);
     setShowPremium(true);
     if (Platform.OS === 'web') {
@@ -510,6 +560,11 @@ export default function PriceSearchScreen({ nav, activeTab }) {
   const openProductDetail = (item) => {
     const normalized = normalizeProduct(item?.product || item?.normalizedProduct || searchedQuery);
     if (!normalized) return;
+    trackEvent('product_viewed', {
+      product: normalized,
+      store: item?.store || item?.bestOffer?.store || null,
+      price: item?.price || item?.bestOffer?.price || null,
+    }).catch(() => null);
     if (Platform.OS === 'web') {
       nav?.navigate?.(`/app/productos/${encodeURIComponent(normalized)}`);
     }

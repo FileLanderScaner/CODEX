@@ -13,8 +13,8 @@ async function tryInsertEvent(body) {
 }
 
 function eventTable(eventName) {
-  if (['search_submitted', 'search_product'].includes(eventName)) return 'search_events';
-  if (['cheapest_price_shown', 'view_best_price', 'commerce_clicked', 'fallback_used'].includes(eventName)) return 'price_events';
+  if (['search_started', 'search_submitted', 'search_completed', 'search_product'].includes(eventName)) return 'search_events';
+  if (['cheapest_price_seen', 'cheapest_price_shown', 'view_best_price', 'savings_calculated', 'commerce_clicked', 'fallback_used'].includes(eventName)) return 'price_events';
   return null;
 }
 

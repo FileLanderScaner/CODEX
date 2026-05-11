@@ -139,7 +139,7 @@ export function buildShareText(prices) {
   const product = cheapest.displayName || formatProductName(cheapest.product);
   const productUrl = buildShareUrl(cheapest.product, { savings: difference, store: cheapest.store });
   const store = cheapest.store || 'Montevideo';
-  return `Encontre ${product} $${difference} mas barato en ${store} usando AhorroYA: ${productUrl}`;
+  return `Encontre ${product} mas barato en ${store} con AhorroYA. Ahorro estimado: $${difference}. Probalo y compara antes de comprar: ${productUrl}`;
 }
 
 export function getPriceStats(prices) {

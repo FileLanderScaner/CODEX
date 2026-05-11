@@ -1,0 +1,23 @@
+{
+  "project": "AhorroYA",
+  "director_mode": true,
+  "current_phase": "FIRST_100_USERS",
+  "selected_mode": "FIRST_100_USERS",
+  "previous_mode": "AI_AGENTS_SAFE_ARCHITECTURE",
+  "next_mode": "RELEASE_GATE",
+  "production_status": "NO-GO_PRODUCTION",
+  "staging_status": "READY_FOR_FIRST_100_USERS",
+  "growth_status": "READY",
+  "monetization_status": "READY_FOR_SANDBOX_BLOCKED_LIVE_CREDENTIALS",
+  "security_status": "PASS_STAGING",
+  "investor_status": "PARTIAL",
+  "ai_agents_status": "DISABLED",
+  "blocking_items": [
+    "PAYPAL_CLIENT_ID live",
+    "PAYPAL_CLIENT_SECRET live",
+    "PAYPAL_WEBHOOK_ID live",
+    "Google OAuth production verification",
+    "Supabase Auth leaked password protection evidence"
+  ],
+  "next_prompt_generated": true
+}

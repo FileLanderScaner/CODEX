@@ -18,6 +18,12 @@ export default function PayPalButtons({ user, accessToken, onStatus, onOpenWebCh
     setPending(true);
     try {
       onStatus?.('Creando suscripcion segura en PayPal...');
+      await trackEvent('checkout_started', {
+        provider: 'paypal',
+        checkout_type: 'subscription',
+        plan: 'premium_monthly',
+        user_id: user?.id || null,
+      }, Number(amount), config.premiumCurrency).catch(() => null);
       await trackEvent('premium_started', {
         provider: 'paypal',
         checkout_type: 'subscription',
@@ -47,6 +53,12 @@ export default function PayPalButtons({ user, accessToken, onStatus, onOpenWebCh
       onStatus?.('Redirigiendo a PayPal sandbox...');
       await Linking.openURL(approvalUrl);
     } catch (error) {
+      await trackEvent('subscription_failed', {
+        provider: 'paypal',
+        checkout_type: 'subscription',
+        plan: 'premium_monthly',
+        error: String(error?.message || 'paypal_checkout_failed').slice(0, 180),
+      }, Number(amount), config.premiumCurrency).catch(() => null);
       onStatus?.(error?.message || 'No pudimos iniciar PayPal.');
     } finally {
       setPending(false);

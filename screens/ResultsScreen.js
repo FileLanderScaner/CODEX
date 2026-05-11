@@ -82,6 +82,7 @@ export default function ResultsScreen({
     } else {
       Alert.alert('Copiar ahorro', message);
     }
+    onSharePoints(cheapest, 'copy', { savings: getSavingsOpportunity(pricedOffers), url: message.match(/https?:\/\/\S+/)?.[0] || '' });
   };
 
   if (!searchedQuery) {

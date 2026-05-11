@@ -650,9 +650,9 @@ export function montevideoGrowthContent(req, res) {
     const rows = await readMontevideoLaunchPrices();
     const deals = buildGrowthDeals(rows);
     const [searchesToday, sharesToday, whatsappClicksToday] = await Promise.all([
-      countEventsToday('search_product'),
-      countEventsToday('share'),
-      countEventsToday('click_whatsapp'),
+      countEventsToday('search_completed').then((count) => count || countEventsToday('search_product')),
+      Promise.all([countEventsToday('share'), countEventsToday('whatsapp_share_clicked')]).then(([share, whatsapp]) => share + whatsapp),
+      countEventsToday('whatsapp_share_clicked').then((count) => count || countEventsToday('click_whatsapp')),
     ]);
     json(res, 200, {
       city: 'Montevideo',
@@ -683,8 +683,8 @@ export function montevideoGrowthMetrics(req, res) {
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {});
-    const shareCount = (counts.share || 0) + (counts.click_whatsapp || 0);
-    const shareClickCount = counts.share_click || 0;
+    const shareCount = (counts.share || 0) + (counts.click_whatsapp || 0) + (counts.whatsapp_share_clicked || 0) + (counts.savings_copied || 0);
+    const shareClickCount = (counts.share_click || 0) + (counts.whatsapp_share_clicked || 0);
     const totalSavings = deals.reduce((sum, deal) => sum + Number(deal.savings || 0), 0);
 
     json(res, 200, {
@@ -694,12 +694,12 @@ export function montevideoGrowthMetrics(req, res) {
       funnel: {
         landing_views: counts.landing_view || 0,
         open_app: counts.open_app || 0,
-        searches: counts.search_product || 0,
-        best_price_views: counts.view_best_price || 0,
+        searches: (counts.search_completed || 0) + (counts.search_product || 0),
+        best_price_views: (counts.cheapest_price_seen || 0) + (counts.view_best_price || 0),
         shares: shareCount,
         share_clicks: shareClickCount,
-        whatsapp_clicks: counts.click_whatsapp || 0,
-        favorites: counts.add_favorite || 0,
+        whatsapp_clicks: (counts.whatsapp_share_clicked || 0) + (counts.click_whatsapp || 0),
+        favorites: (counts.favorite_added || 0) + (counts.add_favorite || 0),
         alerts: counts.create_alert || 0,
       },
       activation: {

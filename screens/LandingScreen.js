@@ -16,6 +16,7 @@ export default function LandingScreen({ onOpenApp }) {
   useEffect(() => {
     let alive = true;
     const startedAt = Date.now();
+    trackEvent('landing_viewed', { city: 'Montevideo', source: 'landing' }).catch(() => null);
     trackEvent('landing_view', { city: 'Montevideo', source: 'landing' }).catch(() => null);
     Promise.all([
       loadCloudPrices(),
@@ -27,7 +28,7 @@ export default function LandingScreen({ onOpenApp }) {
         setPrices(launchRows);
         setMetrics(growthMetrics);
         setStatus(`${launchRows.length} precios reales activos`);
-        trackEvent('landing_view', {
+        trackEvent('landing_viewed', {
           city: 'Montevideo',
           source: 'landing_prices_loaded',
           prices: launchRows.length,
@@ -61,8 +62,8 @@ export default function LandingScreen({ onOpenApp }) {
     <View style={styles.wrapper}>
       <View style={styles.header}>
         <Text selectable style={styles.brand}>AhorroYA</Text>
-        <Text selectable style={styles.title}>Encontra el precio mas barato en 30 segundos</Text>
-        <Text selectable style={styles.subtitle}>Montevideo, Uruguay. Disco, Tienda Inglesa, Devoto y Ta-Ta.</Text>
+        <Text selectable style={styles.title}>AhorroYA te muestra donde comprar mas barato en segundos</Text>
+        <Text selectable style={styles.subtitle}>Busca un producto, compara precios disponibles y comparte el ahorro estimado antes de salir a comprar.</Text>
         <Pressable accessibilityRole="button" onPress={handleOpenApp} style={styles.cta}>
           <Text style={styles.ctaText}>Abrir app</Text>
         </Pressable>

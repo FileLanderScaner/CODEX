@@ -1,6 +1,6 @@
 # AhorroYA Premium Feature Matrix
 
-Date: 2026-05-10
+Date: 2026-05-11
 
 ## Status
 
@@ -11,17 +11,19 @@ Date: 2026-05-10
 
 ## Feature Matrix
 
-| Feature | Free | Premium | Enforcement Source | Status |
+| Funcion | Free | Premium | Estado | Falta |
 | --- | --- | --- | --- | --- |
-| Product search | Limited by product policy | Unlimited | App feature gate | Ready for gating |
-| Price comparison | Basic | Full comparison | App feature gate | Ready for gating |
-| Savings summary | Basic current session | Historical savings | API + Premium status | Ready for gating |
-| Price alerts | Limited | Unlimited | App feature gate | Ready for gating |
-| Favorites | Limited | Unlimited | App feature gate | Ready for gating |
-| Ads | Eligible | Hidden/reduced | App feature gate | Documented |
-| Price history | Limited | Full history | App feature gate | Ready for gating |
-| Smart cart optimization | Basic | Advanced optimization | App feature gate | Ready for gating |
-| AI savings assistant | Disabled by default | Future gated feature | AI Gateway flags | Blocked until AI gate |
+| Busqueda de productos | Disponible | Busquedas ilimitadas y sugerencias priorizadas | Ready for first 100 | Definir limite comercial final para Free |
+| Comparacion de precios | Disponible | Comparacion completa por comercio/zona | Ready for first 100 | Mejorar cobertura de datos |
+| Ahorro estimado | Disponible | Resumen mensual y seguimiento historico | Partial | Dashboard mensual real |
+| Alertas de baja de precio | Limitadas/locales | Alertas ilimitadas/sincronizadas | Partial | Politica de limites y notificaciones reales |
+| Favoritos | Limitados/locales | Favoritos ilimitados/sincronizados | Partial | Politica de limite Free |
+| Historial de precios | Basico | Historial completo y tendencias | Partial | Completar UI historica por producto |
+| Carrito inteligente | Basico | Optimizacion avanzada | Partial | Medicion real de conversion |
+| Comparacion por zona | Basica | Priorizacion por barrio/zona | Partial | Geolocalizacion/sucursales reales |
+| Recomendaciones inteligentes | No disponible | Futuro con IA segura | Blocked | AI Gateway/agentes siguen apagados |
+| Ads | Puede ver anuncios | Sin anuncios si se activan ads | Documented | Activar solo si hay proveedor y politica |
+| PayPal Premium | Sandbox | Suscripcion PayPal | Sandbox ready | Credenciales live y prueba controlada |
 
 ## Premium Entitlement Source
 

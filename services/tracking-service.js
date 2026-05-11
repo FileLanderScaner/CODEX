@@ -2,6 +2,21 @@ import { getApiUrl } from '../lib/config.js';
 import { getAuthHeaders } from './account-service.js';
 
 const allowedEvents = new Set([
+  'app_opened',
+  'landing_viewed',
+  'search_started',
+  'search_completed',
+  'product_viewed',
+  'cheapest_price_seen',
+  'savings_calculated',
+  'whatsapp_share_clicked',
+  'savings_copied',
+  'favorite_added',
+  'premium_cta_seen',
+  'premium_cta_clicked',
+  'checkout_started',
+  'subscription_completed',
+  'subscription_failed',
   'search_submitted',
   'search_product',
   'cheapest_price_shown',

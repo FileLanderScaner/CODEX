@@ -7,6 +7,11 @@ import { trackEvent } from './services/tracking-service';
 
 export default function App() {
   useEffect(() => {
+    trackEvent('app_opened', {
+      platform: Platform.OS,
+      surface: 'root',
+    }).catch(() => null);
+
     trackEvent('app_loaded', {
       platform: Platform.OS,
       surface: 'root',
