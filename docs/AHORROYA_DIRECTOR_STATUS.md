@@ -4,15 +4,15 @@ Date: 2026-05-11
 
 ## Current Phase
 
-`RELEASE_GATE`
+`INVESTOR_READY`
 
 ## Selected Mode
 
-`RELEASE_GATE`
+`INVESTOR_READY`
 
 ## Reason
 
-The Prompt OS PDF was loaded and the previous First 100 Users cycle was complete. The highest-value safe action is confirming staging readiness with evidence while keeping production blocked.
+The preproduction release gate passed. The highest-value safe action was creating an investor-ready package that is commercially useful and technically honest.
 
 ## Status
 
@@ -22,6 +22,7 @@ The Prompt OS PDF was loaded and the previous First 100 Users cycle was complete
 - Growth: `READY`
 - Monetization: `READY_FOR_SANDBOX`, live blocked externally
 - Security: `PASS_STAGING`
+- Investor: `READY_FOR_REVIEW`
 - AI agents: disabled
 
 ## Blocking Items
@@ -34,8 +35,8 @@ The Prompt OS PDF was loaded and the previous First 100 Users cycle was complete
 
 ## Next Mode
 
-`INVESTOR_READY`
+`FIRST_100_USERS_CONTROLLED_LAUNCH`
 
 ## Next Prompt
 
-Prepare an investor/socios/compradores package that separates built, partial, documented, pending, and externally blocked items without presenting staging as production.
+Prepare controlled first-user launch execution on staging/preproduction without touching production.

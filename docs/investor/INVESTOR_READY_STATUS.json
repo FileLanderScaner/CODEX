@@ -1,0 +1,41 @@
+{
+  "project": "AhorroYA",
+  "mode": "INVESTOR_READY",
+  "investor_ready_package": "READY_FOR_REVIEW",
+  "production_status": "NO-GO_PRODUCTION",
+  "staging_status": "READY_FOR_FIRST_100_USERS",
+  "latest_commit": "PENDING_COMMIT",
+  "checks": {
+    "secret_scan": true,
+    "lint": true,
+    "typecheck": true,
+    "tests": true,
+    "build": true,
+    "staging_check": true,
+    "production_check_safe": true
+  },
+  "blockers": [
+    "PayPal live credentials and webhook evidence",
+    "controlled PayPal live subscription test",
+    "Google OAuth production verification",
+    "Supabase Auth leaked password protection evidence",
+    "production backup and revert evidence"
+  ],
+  "safe_to_pitch": [
+    "staging/preproduction demo",
+    "first 100 users readiness",
+    "PayPal sandbox subscription architecture",
+    "RLS/security-gated architecture",
+    "growth and monetization plan",
+    "90-day scale plan"
+  ],
+  "unsafe_claims": [
+    "production is live",
+    "PayPal live payments are active",
+    "real revenue exists",
+    "traction is proven beyond staging readiness",
+    "savings are guaranteed",
+    "prices are real-time unless source-specific evidence exists"
+  ],
+  "next_mode_recommendation": "FIRST_100_USERS_CONTROLLED_LAUNCH"
+}
