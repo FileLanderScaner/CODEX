@@ -8,16 +8,16 @@
   "production_status": "NO-GO_PRODUCTION",
   "staging_status": "READY_FOR_FIRST_100_USERS",
   "growth_status": "READY",
-  "monetization_status": "READY_FOR_SANDBOX_BLOCKED_LIVE_CREDENTIALS",
+  "monetization_status": "PAYPAL_SANDBOX_READY_BLOCKED_LIVE_CREDENTIALS",
   "security_status": "PASS_STAGING",
   "investor_status": "PARTIAL",
   "ai_agents_status": "DISABLED",
   "blocking_items": [
-    "PAYPAL_CLIENT_ID live",
-    "PAYPAL_CLIENT_SECRET live",
-    "PAYPAL_WEBHOOK_ID live",
+    "PayPal live credentials and webhook evidence",
+    "controlled PayPal live subscription test",
     "Google OAuth production verification",
-    "Supabase Auth leaked password protection evidence"
+    "Supabase Auth leaked password protection evidence",
+    "production backup and revert evidence"
   ],
   "next_prompt_generated": true
 }

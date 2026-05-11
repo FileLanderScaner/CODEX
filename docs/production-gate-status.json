@@ -1,7 +1,7 @@
 {
   "project": "AhorroYA",
   "branch": "codex/preprod-hardening-auth-paypal",
-  "commit": "commit-containing-this-report",
+  "commit": "21bbd8db58345669f1cb2a2f390f87f9abddeb4c",
   "production_status": "NO-GO_PRODUCTION",
   "codex_auto_approval_gate": "PASS_PREPROD",
   "autonomous_final_decision": "BLOCKED_EXTERNAL_CREDENTIALS",
@@ -59,5 +59,5 @@
     "RLS passes through Supabase Session Pooler.",
     "High npm audit finding in fast-xml-builder was resolved without force."
   ],
-  "last_updated": "2026-05-10"
+  "last_updated": "2026-05-11"
 }

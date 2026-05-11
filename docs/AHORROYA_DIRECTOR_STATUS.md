@@ -4,19 +4,20 @@ Date: 2026-05-11
 
 ## Current Phase
 
-`FIRST_100_USERS`
+`RELEASE_GATE`
 
 ## Selected Mode
 
-`FIRST_100_USERS`
+`RELEASE_GATE`
 
 ## Reason
 
-The highest-value safe action is preparing AhorroYA for real user validation and monetization measurement while keeping production blocked.
+The Prompt OS PDF was loaded and the previous First 100 Users cycle was complete. The highest-value safe action is confirming staging readiness with evidence while keeping production blocked.
 
 ## Status
 
 - Staging: `READY_FOR_FIRST_100_USERS`
+- Release gate: `PASS_PREPROD`
 - Production: `NO-GO_PRODUCTION`
 - Growth: `READY`
 - Monetization: `READY_FOR_SANDBOX`, live blocked externally
@@ -33,8 +34,8 @@ The highest-value safe action is preparing AhorroYA for real user validation and
 
 ## Next Mode
 
-`RELEASE_GATE`
+`INVESTOR_READY`
 
 ## Next Prompt
 
-Run a release gate focused on confirming staging readiness for real testers and keeping production blocked until external credentials and release evidence exist.
+Prepare an investor/socios/compradores package that separates built, partial, documented, pending, and externally blocked items without presenting staging as production.
