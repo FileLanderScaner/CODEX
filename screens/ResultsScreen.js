@@ -2,6 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import ProductLinks from '../components/ProductLinks';
 import Chip from '../components/ui/Chip';
+import GlowButton from '../components/ui/GlowButton';
+import PriceComparisonBadge from '../components/ui/PriceComparisonBadge';
+import SavingsCard from '../components/ui/SavingsCard';
 import SurfaceCard from '../components/ui/SurfaceCard';
 import { ui } from '../lib/ui';
 import { trackProductClick } from '../services/commerce-service';
@@ -131,17 +134,18 @@ export default function ResultsScreen({
       ) : null}
 
       {cheapest && savingsOpportunity > 0 ? (
-        <SurfaceCard style={styles.wowCard}>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text selectable style={styles.wowTitle}>Encontraste ${savingsOpportunity} de diferencia</Text>
-            <Text selectable style={styles.wowText}>
-              Mejor precio en {cheapest.store}. Si te sirve, compartilo o deja una alerta para la proxima compra.
-            </Text>
-          </View>
+        <SavingsCard
+          title={`Encontraste $${savingsOpportunity} de diferencia`}
+          subtitle={`Mejor precio en ${cheapest.store}. Si te sirve, compartilo o deja una alerta para la proxima compra.`}
+          amount={`$${savingsOpportunity}`}
+          meta="estimado"
+        />
+      ) : null}
+
+      {cheapest && savingsOpportunity > 0 ? (
+        <SurfaceCard style={styles.wowCard} elevated={false}>
           <View style={styles.wowActions}>
-            <Pressable accessibilityRole="button" onPress={handleWhatsApp} style={styles.whatsBtn}>
-              <Text style={styles.whatsBtnText}>Compartir</Text>
-            </Pressable>
+            <GlowButton onPress={handleWhatsApp} style={styles.shareAction}>WhatsApp</GlowButton>
             <Pressable accessibilityRole="button" onPress={() => onCreateAlert(String(searchedQuery))} style={styles.secondaryBtn}>
               <Text style={styles.secondaryBtnText}>Avisarme</Text>
             </Pressable>
@@ -180,8 +184,7 @@ export default function ResultsScreen({
                     <View style={styles.badgeRow}>
                       {best && hasPrice ? (
                         <>
-                          <View style={styles.badgeBest}><Text style={styles.badgeBestText}>MAS BARATO</Text></View>
-                          <Text selectable style={styles.savingsInline}>{savingsOpportunity > 0 ? `AHORRAS $${savingsOpportunity}` : 'MEJOR OFERTA'}</Text>
+                          <PriceComparisonBadge best savings={savingsOpportunity} />
                         </>
                       ) : (
                         <Text selectable style={styles.metaInline}>
@@ -467,11 +470,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   wowCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 12,
-    backgroundColor: '#ECFDF3',
-    borderColor: '#ABEFC6',
+    backgroundColor: ui.colors.surfaceGlass,
+    borderColor: '#FFFFFF',
   },
   wowTitle: {
     color: '#05603A',
@@ -485,14 +486,21 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   wowActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     alignItems: 'stretch',
+  },
+  shareAction: {
+    flex: 1,
+    minWidth: 132,
   },
   storeCard: {
     paddingVertical: 14,
   },
   bestCard: {
     borderColor: ui.colors.primary,
+    backgroundColor: '#FBFFFC',
   },
   storeTop: {
     flexDirection: 'row',
@@ -503,7 +511,7 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 14,
-    backgroundColor: '#EAF0FF',
+    backgroundColor: ui.colors.secondarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -578,7 +586,7 @@ const styles = StyleSheet.create({
   detailBtn: {
     minHeight: 46,
     paddingHorizontal: 18,
-    borderRadius: ui.radius.lg,
+    borderRadius: ui.radius.xl,
     backgroundColor: '#EAF0FF',
     alignItems: 'center',
     justifyContent: 'center',

@@ -11,8 +11,12 @@ import TopBar from '../components/ui/TopBar';
 import SearchBar from '../components/ui/SearchBar';
 import Chip from '../components/ui/Chip';
 import SurfaceCard from '../components/ui/SurfaceCard';
+import AnimatedSection from '../components/ui/AnimatedSection';
+import GlowButton from '../components/ui/GlowButton';
+import SavingsCard from '../components/ui/SavingsCard';
+import TrustBadge from '../components/ui/TrustBadge';
 import { MONTEVIDEO_SEED_PRICES } from '../data/seed-prices';
-import { ui } from '../lib/ui';
+import { gradientStyle, ui } from '../lib/ui';
 import PaywallScreen from './PaywallScreen';
 import ResultsScreen from './ResultsScreen';
 import ProductDetailScreen from './ProductDetailScreen';
@@ -646,10 +650,16 @@ export default function PriceSearchScreen({ nav, activeTab }) {
           onPressQr={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : Alert.alert('Escanear', 'Proximo paso: escaneo por codigo de barras.')}
         />
 
-        <View style={styles.hero}>
-          <Text selectable style={styles.brand}>AhorroYA</Text>
-          <Text selectable style={styles.heroSubtitle}>Busca yerba, leche o arroz y ve en segundos donde esta mas barato hoy.</Text>
-        </View>
+        <AnimatedSection>
+          <View style={styles.hero}>
+            <TrustBadge label="Comparador de ahorro" tone="safe" />
+            <Text selectable style={styles.brand}>AhorroYA</Text>
+            <Text selectable style={styles.heroSubtitle}>Busca yerba, leche o arroz y ve en segundos donde esta mas barato hoy.</Text>
+            <GlowButton onPress={() => runSearch(query || popularProducts[0] || 'yerba')}>
+              Comparar ahora
+            </GlowButton>
+          </View>
+        </AnimatedSection>
 
         <SearchBar
           value={query}
@@ -658,20 +668,22 @@ export default function PriceSearchScreen({ nav, activeTab }) {
           onPressBarcode={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : Alert.alert('Escanear', 'Proximo paso: escaneo por codigo de barras.')}
         />
 
-        <SurfaceCard style={styles.localProofCard}>
-          <View style={styles.proofMetric}>
-            <Text selectable style={styles.proofValue}>{socialProof.comparisons}</Text>
-            <Text selectable style={styles.proofLabel}>compararon hoy</Text>
-          </View>
-          <View style={styles.proofMetric}>
-            <Text selectable style={styles.proofValue}>{socialProof.savings}</Text>
-            <Text selectable style={styles.proofLabel}>ahorros detectados</Text>
-          </View>
-          <View style={styles.proofMetric}>
-            <Text selectable style={styles.proofValue}>{socialProof.shares}</Text>
-            <Text selectable style={styles.proofLabel}>shares hoy</Text>
-          </View>
-        </SurfaceCard>
+        <AnimatedSection delay={50}>
+          <SurfaceCard style={styles.localProofCard}>
+            <View style={styles.proofMetric}>
+              <Text selectable style={styles.proofValue}>{socialProof.comparisons}</Text>
+              <Text selectable style={styles.proofLabel}>compararon hoy</Text>
+            </View>
+            <View style={styles.proofMetric}>
+              <Text selectable style={styles.proofValue}>{socialProof.savings}</Text>
+              <Text selectable style={styles.proofLabel}>ahorros detectados</Text>
+            </View>
+            <View style={styles.proofMetric}>
+              <Text selectable style={styles.proofValue}>{socialProof.shares}</Text>
+              <Text selectable style={styles.proofLabel}>shares hoy</Text>
+            </View>
+          </SurfaceCard>
+        </AnimatedSection>
 
         <View style={{ gap: 10 }}>
           <Text selectable style={styles.sectionTitle}>Prueba con productos reales</Text>
@@ -694,6 +706,12 @@ export default function PriceSearchScreen({ nav, activeTab }) {
           <Text selectable style={styles.sectionTitle}>Ahorro del dia</Text>
           {topDeal ? (
             <View style={{ gap: 10 }}>
+              <SavingsCard
+                title={String(topDeal.product).replace(/\b\w/g, (c) => c.toUpperCase())}
+                subtitle={`Mejor precio en ${topDeal.cheapest?.store}. Compara antes de comprar.`}
+                amount={`$${topDeal.savings}`}
+                meta="estimado"
+              />
               <OfferOfDayCard
                 title={String(topDeal.product).replace(/\b\w/g, (c) => c.toUpperCase())}
                 price={`$${Number(topDeal.cheapest?.price || 0)}`}
@@ -701,9 +719,9 @@ export default function PriceSearchScreen({ nav, activeTab }) {
                 subtitle={`Encontraste $${topDeal.savings} de diferencia en ${topDeal.cheapest?.store}`}
                 onPress={() => runSearch(topDeal.product)}
               />
-              <Pressable accessibilityRole="button" onPress={() => shareDealOnWhatsApp(topDeal)} style={styles.whatsHomeBtn}>
-                <Text style={styles.whatsHomeBtnText}>Compartir este ahorro</Text>
-              </Pressable>
+              <GlowButton variant="secondary" onPress={() => shareDealOnWhatsApp(topDeal)}>
+                Compartir este ahorro
+              </GlowButton>
             </View>
           ) : (
             <SurfaceCard>
@@ -843,9 +861,9 @@ export default function PriceSearchScreen({ nav, activeTab }) {
             style={[styles.inputBox, styles.flexInput]}
           />
         </View>
-        <Pressable accessibilityRole="button" onPress={handleAddPrice} disabled={savingPrice} style={[styles.addButton, savingPrice && { opacity: 0.65 }]}>
-          <Text style={styles.addButtonText}>{savingPrice ? 'Guardando...' : 'Guardar precio'}</Text>
-        </Pressable>
+        <GlowButton onPress={handleAddPrice} disabled={savingPrice} loading={savingPrice}>
+          Guardar precio
+        </GlowButton>
       </SurfaceCard>
 
       {!isPremium && hasPremiumTrigger ? <PremiumCard onPress={openPremium} /> : null}
@@ -1219,7 +1237,10 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   hero: {
-    gap: 8,
+    gap: 12,
+    padding: 18,
+    borderRadius: ui.radius.xl,
+    ...gradientStyle('savings'),
   },
   brand: {
     ...ui.type.display,
@@ -1244,6 +1265,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     paddingVertical: 12,
+    backgroundColor: ui.colors.surfaceGlass,
+    borderColor: '#FFFFFF',
   },
   proofMetric: {
     flex: 1,
@@ -1313,7 +1336,7 @@ const styles = StyleSheet.create({
   primaryCta: {
     minHeight: 56,
     paddingHorizontal: 18,
-    borderRadius: ui.radius.md,
+    borderRadius: ui.radius.lg,
     backgroundColor: ui.colors.primaryInk,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1326,7 +1349,7 @@ const styles = StyleSheet.create({
   secondaryCta: {
     minHeight: 44,
     paddingHorizontal: 14,
-    borderRadius: ui.radius.md,
+    borderRadius: ui.radius.lg,
     backgroundColor: ui.colors.surfaceLow,
     borderWidth: 1,
     borderColor: ui.colors.outline,

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import BottomNav from './BottomNav';
-import { ui } from '../../lib/ui';
+import { gradientStyle, ui } from '../../lib/ui';
 import LandingScreen from '../../screens/LandingScreen';
 import PriceSearchScreen from '../../screens/PriceSearchScreen';
 import AuthScreen from '../../screens/AuthScreen';
@@ -166,13 +166,14 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: ui.colors.background,
+    ...gradientStyle('app'),
   },
   container: {
     width: '100%',
-    maxWidth: 420,
+    maxWidth: 440,
     alignSelf: 'center',
     paddingHorizontal: ui.spacing.page,
-    paddingTop: 14,
+    paddingTop: 16,
     paddingBottom: NAV_HEIGHT + 18,
     gap: 16,
   },

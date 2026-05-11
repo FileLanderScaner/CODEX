@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import AnimatedSection from '../components/ui/AnimatedSection';
+import GlowButton from '../components/ui/GlowButton';
+import SavingsCard from '../components/ui/SavingsCard';
 import SurfaceCard from '../components/ui/SurfaceCard';
-import { ui } from '../lib/ui';
+import TrustBadge from '../components/ui/TrustBadge';
+import { gradientStyle, ui } from '../lib/ui';
 import { buildShareText, filterMontevideoLaunchPrices, getPopularDeals } from '../services/price-service';
 import { loadGrowthMetrics } from '../services/growth-service';
 import { loadCloudPrices } from '../services/supabase-price-service';
@@ -60,37 +64,39 @@ export default function LandingScreen({ onOpenApp }) {
 
   return (
     <View style={styles.wrapper}>
-      <View style={styles.header}>
-        <Text selectable style={styles.brand}>AhorroYA</Text>
-        <Text selectable style={styles.title}>AhorroYA te muestra donde comprar mas barato en segundos</Text>
-        <Text selectable style={styles.subtitle}>Busca un producto, compara precios disponibles y comparte el ahorro estimado antes de salir a comprar.</Text>
-        <Pressable accessibilityRole="button" onPress={handleOpenApp} style={styles.cta}>
-          <Text style={styles.ctaText}>Abrir app</Text>
-        </Pressable>
-      </View>
-
-      <SurfaceCard style={styles.proofCard}>
-        <Text selectable style={styles.sectionTitle}>Ahorros detectados en Montevideo</Text>
-        {loading ? <ActivityIndicator /> : null}
-        <Text selectable style={styles.statusText}>{status}</Text>
-        <View style={styles.metricRow}>
-          <Text selectable style={styles.metricText}>{metrics?.funnel?.searches ?? 0} comparaciones hoy</Text>
-          <Text selectable style={styles.metricText}>{metrics?.funnel?.shares ?? 0} shares</Text>
+      <AnimatedSection>
+        <View style={styles.header}>
+          <TrustBadge label="Montevideo beta" tone="safe" />
+          <Text selectable style={styles.brand}>AhorroYA</Text>
+          <Text selectable style={styles.title}>Compra mas inteligente antes de salir al super</Text>
+          <Text selectable style={styles.subtitle}>Compara precios disponibles, ve el ahorro estimado y comparte el resultado por WhatsApp en segundos.</Text>
+          <GlowButton onPress={handleOpenApp}>Abrir app y comparar</GlowButton>
         </View>
-      </SurfaceCard>
+      </AnimatedSection>
+
+      <AnimatedSection delay={60}>
+        <SurfaceCard style={styles.proofCard}>
+          <Text selectable style={styles.sectionTitle}>Ahorros detectados en Montevideo</Text>
+          {loading ? <ActivityIndicator /> : null}
+          <Text selectable style={styles.statusText}>{status}</Text>
+          <View style={styles.metricRow}>
+            <TrustBadge label={`${metrics?.funnel?.searches ?? 0} comparaciones hoy`} />
+            <TrustBadge label={`${metrics?.funnel?.shares ?? 0} shares`} tone="safe" />
+          </View>
+        </SurfaceCard>
+      </AnimatedSection>
 
       <View style={{ gap: 12 }}>
         {deals.length ? deals.map((deal) => (
-          <SurfaceCard key={deal.product} style={styles.dealCard}>
-            <View style={{ flex: 1, gap: 4 }}>
-              <Text selectable style={styles.dealTitle}>{deal.cheapest?.displayName || deal.product}</Text>
-              <Text selectable style={styles.dealMeta}>
-                ${Number(deal.cheapest?.price || 0)} en {deal.cheapest?.store} vs ${Number(deal.expensive?.price || 0)} en {deal.expensive?.store}
-              </Text>
-              <Text selectable style={styles.shareText}>{buildShareText([deal.cheapest, deal.expensive].filter(Boolean))}</Text>
-            </View>
-            <Text selectable style={styles.savings}>${deal.savings}</Text>
-          </SurfaceCard>
+          <AnimatedSection key={deal.product} delay={90}>
+            <SavingsCard
+              title={deal.cheapest?.displayName || deal.product}
+              subtitle={`$${Number(deal.cheapest?.price || 0)} en ${deal.cheapest?.store} vs $${Number(deal.expensive?.price || 0)} en ${deal.expensive?.store}`}
+              amount={`$${deal.savings}`}
+              meta="menos"
+            />
+            <Text selectable style={styles.shareText}>{buildShareText([deal.cheapest, deal.expensive].filter(Boolean))}</Text>
+          </AnimatedSection>
         )) : (
           <SurfaceCard>
             <Text selectable style={styles.statusText}>Estamos cargando comparaciones reales para Montevideo.</Text>
@@ -106,19 +112,21 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   header: {
-    gap: 10,
-    paddingTop: 10,
+    gap: 12,
+    padding: 18,
+    borderRadius: ui.radius.xl,
+    ...gradientStyle('savings'),
   },
   brand: {
     color: ui.colors.primaryInk,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '900',
   },
   title: {
     color: ui.colors.text,
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '900',
-    lineHeight: 38,
+    lineHeight: 39,
   },
   subtitle: {
     color: '#667085',
@@ -126,22 +134,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontWeight: '700',
   },
-  cta: {
-    marginTop: 6,
-    minHeight: 54,
-    borderRadius: ui.radius.md,
-    backgroundColor: ui.colors.primaryInk,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  ctaText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '900',
-  },
   proofCard: {
     gap: 8,
+    backgroundColor: ui.colors.surfaceGlass,
+    borderColor: '#FFFFFF',
   },
   sectionTitle: {
     color: ui.colors.text,
@@ -159,35 +155,11 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
-  metricText: {
-    color: ui.colors.primaryInk,
-    fontSize: 13,
-    fontWeight: '900',
-  },
-  dealCard: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-  },
-  dealTitle: {
-    color: ui.colors.text,
-    fontSize: 16,
-    fontWeight: '900',
-  },
-  dealMeta: {
-    color: ui.colors.primaryInk,
-    fontSize: 13,
-    fontWeight: '900',
-  },
   shareText: {
     color: '#667085',
     fontSize: 13,
     lineHeight: 18,
-  },
-  savings: {
-    color: ui.colors.text,
-    fontSize: 24,
-    fontWeight: '900',
-    fontVariant: ['tabular-nums'],
+    paddingHorizontal: 12,
+    marginTop: 6,
   },
 });

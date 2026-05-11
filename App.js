@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, View, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import AppShell from './components/layout/AppShell';
-import { ui } from './lib/ui';
+import { gradientStyle, ui } from './lib/ui';
 import { trackEvent } from './services/tracking-service';
 
 export default function App() {
@@ -56,5 +56,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: ui.colors.background,
+    ...gradientStyle('app'),
   },
 });

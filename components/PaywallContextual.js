@@ -3,8 +3,10 @@
 
 import React, { useCallback } from 'react';
 import { Pressable, Text, View, StyleSheet, Modal, Linking } from 'react-native';
+import GlowButton from './ui/GlowButton';
 import SurfaceCard from './ui/SurfaceCard';
-import { ui } from '../lib/ui';
+import TrustBadge from './ui/TrustBadge';
+import { gradientStyle, ui } from '../lib/ui';
 import { getAppUrl, hasPayPalConfig } from '../lib/config';
 
 /**
@@ -55,7 +57,7 @@ export default function PaywallContextual({
           <SurfaceCard style={styles.container} elevated>
             {/* Header */}
             <View style={styles.header}>
-              <Text selectable style={styles.emoji}>💰</Text>
+              <TrustBadge label="Premium" tone="premium" />
               <Text selectable style={styles.title}>Activa Premium</Text>
               <Text selectable style={styles.subtitle}>
                 Ya ahorraste {currency} {monthlyTotal.toFixed(0)} este mes
@@ -113,12 +115,12 @@ export default function PaywallContextual({
                 <View style={styles.badgeContainer}>
                   <Text selectable style={styles.badge}>AHORRA {annualDiscount}</Text>
                 </View>
-                <Text selectable style={styles.planLabel}>Anual</Text>
+                <Text selectable style={styles.planLabelOnDark}>Anual</Text>
                 <View style={styles.priceRow}>
-                  <Text selectable style={styles.price}>{annualPrice}</Text>
-                  <Text selectable style={styles.period}>/año</Text>
+                  <Text selectable style={styles.priceOnDark}>{annualPrice}</Text>
+                  <Text selectable style={styles.periodOnDark}>/año</Text>
                 </View>
-                <Text selectable style={styles.priceNote}>
+                <Text selectable style={styles.priceNoteOnDark}>
                   {annualSavingPerMonth}/mes
                 </Text>
               </Pressable>
@@ -153,15 +155,9 @@ export default function PaywallContextual({
             )}
 
             {/* Dismiss Button */}
-            <Pressable
-              onPress={onDismiss}
-              style={({ pressed }) => [
-                styles.dismissBtn,
-                pressed && styles.dismissBtnPressed,
-              ]}
-            >
-              <Text selectable style={styles.dismissBtnText}>Seguir buscando</Text>
-            </Pressable>
+            <GlowButton variant="secondary" onPress={onDismiss}>
+              Seguir buscando
+            </GlowButton>
 
             {/* Legal Note */}
             <Text selectable style={styles.legalNote}>
@@ -177,7 +173,7 @@ export default function PaywallContextual({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(7, 20, 16, 0.58)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
@@ -189,13 +185,11 @@ const styles = StyleSheet.create({
   container: {
     gap: 16,
     paddingVertical: 24,
+    borderColor: '#FFFFFF',
   },
   header: {
     alignItems: 'center',
     gap: 8,
-  },
-  emoji: {
-    fontSize: 48,
   },
   title: {
     fontSize: 24,
@@ -241,11 +235,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   priceCardMonthly: {
-    backgroundColor: ui.colors.surfaceVariant,
+    backgroundColor: ui.colors.surfaceLow,
     borderColor: ui.colors.outline,
   },
   priceCardAnnual: {
-    backgroundColor: ui.colors.primaryInk,
+    ...gradientStyle('premium'),
     borderColor: ui.colors.primaryInk,
   },
   priceCardPressed: {
@@ -280,8 +274,10 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: ui.colors.primaryInk,
   },
-  priceCardAnnual: {
-    color: '#fff',
+  priceOnDark: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#FFFFFF',
   },
   period: {
     fontSize: 12,
@@ -293,8 +289,24 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: ui.colors.textSecondary,
   },
+  planLabelOnDark: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#DCE7F5',
+    textTransform: 'uppercase',
+  },
+  periodOnDark: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#DCE7F5',
+  },
+  priceNoteOnDark: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#DCE7F5',
+  },
   roiSection: {
-    backgroundColor: ui.colors.surfaceVariant,
+    backgroundColor: ui.colors.primarySoft,
     padding: 12,
     borderRadius: ui.radius.lg,
     gap: 4,

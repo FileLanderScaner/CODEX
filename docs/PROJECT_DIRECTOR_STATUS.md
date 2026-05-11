@@ -6,19 +6,19 @@ Date: 2026-05-11
 
 ## Current Phase
 
-`PRODUCTION_BLOCKERS_CLOSEOUT_EVIDENCE_ONLY`
+`VISUAL_SYSTEM_UPGRADE_CYCLE`
 
 ## Selected Mode
 
-`PRODUCTION_BLOCKERS_CLOSEOUT_EVIDENCE_ONLY`
+`VISUAL_SYSTEM_UPGRADE_CYCLE`
 
 ## Previous Mode
 
-`FIRST_100_USERS_CONTROLLED_LAUNCH`
+`PRODUCTION_BLOCKERS_CLOSEOUT_EVIDENCE_ONLY`
 
 ## Why This Mode Was Selected
 
-The controlled first-user launch package was prepared. The next safe action was production blocker closeout in evidence-only mode.
+Production blocker evidence gates were documented. The next safe action was upgrading the staging visual system for first-user trust and conversion.
 
 ## Status
 
@@ -31,6 +31,7 @@ The controlled first-user launch package was prepared. The next safe action was 
 - Investor status: `READY_FOR_REVIEW`
 - Controlled launch: `FIRST_100_USERS_CONTROLLED_LAUNCH_READY`
 - Production blocker closeout: `READY_FOR_HUMAN_CREDENTIALS_AND_APPROVAL`
+- Visual system: `PASS`
 - AI agents: `DISABLED`
 
 ## Blocking Items
@@ -43,28 +44,25 @@ The controlled first-user launch package was prepared. The next safe action was 
 
 ## Next Mode
 
-`WAIT_FOR_EXTERNAL_PRODUCTION_EVIDENCE`
+`VISUAL_QA_AND_CONVERSION_POLISH`
 
 ## NEXT_CODEX_PROMPT
 
 ```text
-Actua como Release Manager + Security Engineer + Payments/Auth Owner para AhorroYA.
+Actua como QA Lead + Frontend Performance Engineer + Growth Designer para AhorroYA.
 
-Modo: PRODUCTION_EVIDENCE_VERIFICATION_AFTER_HUMAN_CLOSEOUT.
+Modo: VISUAL_QA_AND_CONVERSION_POLISH.
 
 Objetivo:
-Verificar evidencias productivas ya completadas por el humano sin imprimir secretos y sin ejecutar deploy productivo hasta que todos los gates sean READY.
-
-Precondicion:
-El humano ya cargo credenciales reales en Vercel Production, configuro PayPal live, configuro Google OAuth production, obtuvo evidencia de Supabase Auth leaked password protection, ejecuto backup/revert evidence y aprobo ventana de release.
+Validar el nuevo sistema visual en mobile/desktop, revisar solapes, legibilidad, CTA visibility, estados vacios, performance web y flujo de busqueda/compartir, sin tocar produccion.
 
 Acciones:
-1. Leer `docs/production/PRODUCTION_BLOCKERS_CLOSEOUT_STATUS.json`.
-2. Verificar evidencia redaccionada aportada por humano.
-3. Ejecutar checks seguros.
-4. Mantener `PRODUCTION_STATUS=NO-GO_PRODUCTION` si falta cualquier evidencia.
-5. Solo preparar el reporte final; no ejecutar `vercel --prod` ni `vercel promote` sin instruccion humana explicita separada.
+1. Ejecutar QA visual mobile y desktop.
+2. Probar busqueda, resultados, detalle, Premium CTA y compartir.
+3. Corregir solo problemas visuales o de UX de bajo riesgo.
+4. Mantener PRODUCTION_STATUS=NO-GO_PRODUCTION.
+5. Ejecutar checks completos.
 
 Condicion de bloqueo:
-Detener si falta cualquier evidencia externa o si alguna evidencia contiene secretos.
+Detener si aparece riesgo de secreto, cambio productivo, pagos live, env Production o migracion productiva.
 ```

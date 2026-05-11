@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { ui, shadow } from '../../lib/ui';
+import { gradientStyle, ui, shadow } from '../../lib/ui';
 
 function iconFor(key) {
   switch (key) {
@@ -29,7 +29,7 @@ export default function BottomNav({ tabs, activeKey, onChange }) {
             key={tab.key}
             accessibilityRole="button"
             onPress={() => onChange(tab.key)}
-            style={[styles.item, active && styles.itemActive]}
+          style={({ pressed }) => [styles.item, active && styles.itemActive, pressed && styles.itemPressed]}
           >
             <Text style={[styles.icon, active && styles.iconActive]}>{iconFor(tab.icon)}</Text>
             <Text style={[styles.label, active && styles.labelActive]} numberOfLines={1}>
@@ -45,11 +45,11 @@ export default function BottomNav({ tabs, activeKey, onChange }) {
 const styles = StyleSheet.create({
   shell: {
     width: '100%',
-    maxWidth: 420,
-    backgroundColor: ui.colors.surface,
-    borderRadius: ui.radius.xl,
+    maxWidth: 440,
+    backgroundColor: ui.colors.surfaceGlass,
+    borderRadius: 28,
     borderWidth: 1,
-    borderColor: ui.colors.outline,
+    borderColor: '#FFFFFF',
     padding: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -64,7 +64,10 @@ const styles = StyleSheet.create({
     borderRadius: ui.radius.lg,
   },
   itemActive: {
-    backgroundColor: '#E9FBF2',
+    ...gradientStyle('primary'),
+  },
+  itemPressed: {
+    transform: [{ scale: 0.98 }],
   },
   icon: {
     color: '#98A2B3',
@@ -73,7 +76,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   iconActive: {
-    color: ui.colors.primaryInk,
+    color: '#FFFFFF',
   },
   label: {
     color: '#98A2B3',
@@ -82,6 +85,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   labelActive: {
-    color: ui.colors.primaryInk,
+    color: '#FFFFFF',
   },
 });

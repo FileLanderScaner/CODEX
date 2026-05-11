@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 import { Alert, Linking, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import GlowButton from '../components/ui/GlowButton';
 import SurfaceCard from '../components/ui/SurfaceCard';
-import { ui } from '../lib/ui';
+import TrustBadge from '../components/ui/TrustBadge';
+import { gradientStyle, ui } from '../lib/ui';
 import { buildShareText, getCheapest, getPriceStats, getSavingsOpportunity, getSavingsText } from '../services/price-service';
 
 export default function ProductDetailScreen({
@@ -59,9 +61,7 @@ export default function ProductDetailScreen({
             </Text>
             <Text selectable style={styles.subTitle}>{savingsText}</Text>
           </View>
-          <View style={styles.statusPill}>
-            <Text style={styles.statusText}>PRECIO VERIFICADO</Text>
-          </View>
+          <TrustBadge label="Precio verificado" tone="safe" />
         </View>
 
         {cheapest ? (
@@ -108,17 +108,15 @@ export default function ProductDetailScreen({
         })}
       </View>
 
-      <Pressable accessibilityRole="button" onPress={() => onCreateAlert?.(normalized)} style={styles.primaryBtn}>
-        <Text style={styles.primaryBtnText}>Crear alerta de precio</Text>
-      </Pressable>
+      <GlowButton onPress={() => onCreateAlert?.(normalized)}>
+        Crear alerta de precio
+      </GlowButton>
 
       <View style={styles.actionsRow}>
         <Pressable accessibilityRole="button" onPress={handleShare} style={styles.secondaryBtn}>
           <Text style={styles.secondaryBtnText}>Compartir ahorro</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" onPress={handleWhatsApp} style={styles.whatsBtn}>
-          <Text style={styles.whatsBtnText}>WhatsApp</Text>
-        </Pressable>
+        <GlowButton onPress={handleWhatsApp} style={styles.actionGrow}>WhatsApp</GlowButton>
         <Pressable
           accessibilityRole="button"
           onPress={() => onOpenQr?.(shareMessage)}
@@ -156,6 +154,8 @@ const styles = StyleSheet.create({
   },
   headerCard: {
     gap: 14,
+    ...gradientStyle('savings'),
+    borderColor: '#FFFFFF',
   },
   headerRow: {
     flexDirection: 'row',
@@ -235,12 +235,13 @@ const styles = StyleSheet.create({
   },
   compareRowBest: {
     borderColor: ui.colors.primary,
+    backgroundColor: '#FBFFFC',
   },
   logoCircle: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#EAF0FF',
+    backgroundColor: ui.colors.secondarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -286,6 +287,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
+  },
+  actionGrow: {
+    flex: 1,
+    minWidth: 126,
   },
   secondaryBtn: {
     minHeight: 44,
