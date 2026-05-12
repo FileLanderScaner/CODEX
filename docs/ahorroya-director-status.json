@@ -1,10 +1,10 @@
 {
   "project": "AhorroYA",
   "director_mode": true,
-  "current_phase": "VISUAL_SYSTEM_UPGRADE_CYCLE",
-  "selected_mode": "VISUAL_SYSTEM_UPGRADE_CYCLE",
-  "previous_mode": "PRODUCTION_BLOCKERS_CLOSEOUT_EVIDENCE_ONLY",
-  "next_mode": "VISUAL_QA_AND_CONVERSION_POLISH",
+  "current_phase": "VISUAL_QA_AND_CONVERSION_POLISH",
+  "selected_mode": "QA_HARDENING",
+  "previous_mode": "VISUAL_SYSTEM_UPGRADE_CYCLE",
+  "next_mode": "ACCESSIBILITY_AUDIT",
   "production_status": "NO-GO_PRODUCTION",
   "staging_status": "READY_FOR_FIRST_100_USERS",
   "growth_status": "READY",
@@ -14,6 +14,7 @@
   "controlled_launch_status": "FIRST_100_USERS_CONTROLLED_LAUNCH_READY",
   "production_blockers_closeout_status": "READY_FOR_HUMAN_CREDENTIALS_AND_APPROVAL",
   "visual_system_status": "PASS",
+  "visual_qa_conversion_status": "PASS",
   "ai_agents_status": "DISABLED",
   "blocking_items": [
     "PAYPAL_CLIENT_ID live",

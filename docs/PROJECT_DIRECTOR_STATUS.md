@@ -2,23 +2,23 @@
 
 Project: AhorroYA
 
-Date: 2026-05-11
+Date: 2026-05-12
 
 ## Current Phase
 
-`VISUAL_SYSTEM_UPGRADE_CYCLE`
+`VISUAL_QA_AND_CONVERSION_POLISH`
 
 ## Selected Mode
 
-`VISUAL_SYSTEM_UPGRADE_CYCLE`
+`QA_HARDENING`
 
 ## Previous Mode
 
-`PRODUCTION_BLOCKERS_CLOSEOUT_EVIDENCE_ONLY`
+`VISUAL_SYSTEM_UPGRADE_CYCLE`
 
 ## Why This Mode Was Selected
 
-Production blocker evidence gates were documented. The next safe action was upgrading the staging visual system for first-user trust and conversion.
+The visual system upgrade passed. The next safe action was mobile visual QA and conversion polish.
 
 ## Status
 
@@ -32,6 +32,7 @@ Production blocker evidence gates were documented. The next safe action was upgr
 - Controlled launch: `FIRST_100_USERS_CONTROLLED_LAUNCH_READY`
 - Production blocker closeout: `READY_FOR_HUMAN_CREDENTIALS_AND_APPROVAL`
 - Visual system: `PASS`
+- Visual QA and conversion polish: `PASS`
 - AI agents: `DISABLED`
 
 ## Blocking Items
@@ -44,24 +45,24 @@ Production blocker evidence gates were documented. The next safe action was upgr
 
 ## Next Mode
 
-`VISUAL_QA_AND_CONVERSION_POLISH`
+`ACCESSIBILITY_AUDIT`
 
 ## NEXT_CODEX_PROMPT
 
 ```text
-Actua como QA Lead + Frontend Performance Engineer + Growth Designer para AhorroYA.
+Actua como Accessibility Auditor + Mobile UX QA Lead para AhorroYA.
 
-Modo: VISUAL_QA_AND_CONVERSION_POLISH.
+Modo: ACCESSIBILITY_AUDIT.
 
 Objetivo:
-Validar el nuevo sistema visual en mobile/desktop, revisar solapes, legibilidad, CTA visibility, estados vacios, performance web y flujo de busqueda/compartir, sin tocar produccion.
+Auditar accesibilidad basica, labels, foco, contraste, touch targets, textos seleccionables importantes y estados vacios en mobile/web, sin tocar produccion.
 
 Acciones:
-1. Ejecutar QA visual mobile y desktop.
-2. Probar busqueda, resultados, detalle, Premium CTA y compartir.
-3. Corregir solo problemas visuales o de UX de bajo riesgo.
-4. Mantener PRODUCTION_STATUS=NO-GO_PRODUCTION.
-5. Ejecutar checks completos.
+1. Revisar componentes interactivos principales.
+2. Validar labels accesibles y CTAs.
+3. Corregir solo problemas de accesibilidad/UX de bajo riesgo.
+4. Ejecutar checks completos.
+5. Mantener PRODUCTION_STATUS=NO-GO_PRODUCTION.
 
 Condicion de bloqueo:
 Detener si aparece riesgo de secreto, cambio productivo, pagos live, env Production o migracion productiva.

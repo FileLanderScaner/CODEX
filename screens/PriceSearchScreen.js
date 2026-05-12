@@ -641,6 +641,12 @@ export default function PriceSearchScreen({ nav, activeTab }) {
     const topDeal = deals[0] || null;
     const stores = Array.from(new Set(allCommunityPrices.map((item) => item.store))).slice(0, 4);
     const featured = deals.slice(0, 3);
+    const startHomeSearch = (term = query || popularProducts[0] || 'yerba') => {
+      const nextTerm = String(term || '').trim();
+      if (nextTerm) setQuery(nextTerm);
+      runSearch(nextTerm || 'yerba');
+      nav?.goSearch?.();
+    };
 
     return (
       <View style={{ gap: 18 }}>
@@ -655,7 +661,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
             <TrustBadge label="Comparador de ahorro" tone="safe" />
             <Text selectable style={styles.brand}>AhorroYA</Text>
             <Text selectable style={styles.heroSubtitle}>Busca yerba, leche o arroz y ve en segundos donde esta mas barato hoy.</Text>
-            <GlowButton onPress={() => runSearch(query || popularProducts[0] || 'yerba')}>
+            <GlowButton onPress={() => startHomeSearch()}>
               Comparar ahora
             </GlowButton>
           </View>
@@ -664,7 +670,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
         <SearchBar
           value={query}
           onChangeText={setQuery}
-          onSubmit={() => runSearch()}
+          onSubmit={() => startHomeSearch()}
           onPressBarcode={() => Platform.OS === 'web' ? nav?.navigate?.('/app/escanear') : Alert.alert('Escanear', 'Proximo paso: escaneo por codigo de barras.')}
         />
 
@@ -690,7 +696,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
           {popularProducts.length ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
               {popularProducts.map((product) => (
-                <Chip key={product} label={`Buscar ${product}`} active={false} onPress={() => runSearch(product)} />
+                <Chip key={product} label={`Buscar ${product}`} active={false} onPress={() => startHomeSearch(product)} />
               ))}
             </ScrollView>
           ) : (
@@ -717,7 +723,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
                 price={`$${Number(topDeal.cheapest?.price || 0)}`}
                 oldPrice={`$${Number(topDeal.expensive?.price || 0)}`}
                 subtitle={`Encontraste $${topDeal.savings} de diferencia en ${topDeal.cheapest?.store}`}
-                onPress={() => runSearch(topDeal.product)}
+                onPress={() => startHomeSearch(topDeal.product)}
               />
               <GlowButton variant="secondary" onPress={() => shareDealOnWhatsApp(topDeal)}>
                 Compartir este ahorro
@@ -740,7 +746,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
           </View>
           <View style={styles.storeGrid}>
             {stores.length ? stores.map((store) => (
-              <SupermarketMiniCard key={store} name={store} distanceLabel="Montevideo" onPress={() => runSearch(query || popularProducts[0] || '')} />
+              <SupermarketMiniCard key={store} name={store} distanceLabel="Montevideo" onPress={() => startHomeSearch(query || popularProducts[0] || 'yerba')} />
             )) : (
               <SurfaceCard style={{ flex: 1 }}>
                 <Text selectable style={styles.emptyText}>Sin tiendas reales cargadas todavia.</Text>
@@ -760,7 +766,7 @@ export default function PriceSearchScreen({ nav, activeTab }) {
                 priceLabel={`$${Number(deal.cheapest?.price || 0) || 0}`}
                 badgeLabel={deal.savings > 0 ? `-${Math.min(99, Math.round((deal.savings / Math.max(deal.expensive?.price || 1, 1)) * 100))}%` : 'ESTABLE'}
                 badgeTone={deal.savings > 0 ? 'down' : 'stable'}
-                onPress={() => runSearch(deal.product)}
+                onPress={() => startHomeSearch(deal.product)}
               />
             )) : (
               <SurfaceCard>
@@ -1308,12 +1314,12 @@ const styles = StyleSheet.create({
   searchHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   backBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: ui.colors.surface,
     borderWidth: 1,
     borderColor: ui.colors.outline,

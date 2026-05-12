@@ -11,12 +11,14 @@ export default function GlowButton({
   variant = 'primary',
   style,
   textStyle,
+  accessibilityLabel,
 }) {
   const isPrimary = variant === 'primary';
   const isPremium = variant === 'premium';
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel || (typeof (children || label) === 'string' ? children || label : undefined)}
       disabled={disabled || loading}
       onPress={onPress}
       style={({ pressed }) => [

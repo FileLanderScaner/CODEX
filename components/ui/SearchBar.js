@@ -9,12 +9,14 @@ export default function SearchBar({
   onSubmit,
   onPressBarcode,
 }) {
+  const hasValue = String(value || '').trim().length > 0;
   return (
     <View style={styles.wrap}>
       <View style={styles.iconBubble}>
         <Text style={styles.icon}>S</Text>
       </View>
       <TextInput
+        accessibilityLabel="Buscar producto"
         autoCapitalize="none"
         returnKeyType="search"
         placeholder={placeholder}
@@ -24,8 +26,13 @@ export default function SearchBar({
         onSubmitEditing={onSubmit}
         style={styles.input}
       />
-      <Pressable accessibilityRole="button" onPress={onPressBarcode} style={styles.barcode}>
-        <Text style={styles.barcodeText}>|||</Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={hasValue ? 'Buscar ahora' : 'Escanear codigo'}
+        onPress={hasValue ? onSubmit : onPressBarcode}
+        style={[styles.barcode, hasValue && styles.searchAction]}
+      >
+        <Text style={[styles.barcodeText, hasValue && styles.searchActionText]}>{hasValue ? 'Ir' : '|||'}</Text>
       </Pressable>
     </View>
   );
@@ -40,7 +47,7 @@ const styles = StyleSheet.create({
     borderRadius: ui.radius.xl,
     borderWidth: 1,
     borderColor: '#FFFFFF',
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     minHeight: 58,
     ...shadow(2),
   },
@@ -63,7 +70,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   barcode: {
-    width: 34,
+    minWidth: 34,
     height: 34,
     borderRadius: ui.radius.pill,
     backgroundColor: ui.colors.primarySoft,
@@ -72,9 +79,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  searchAction: {
+    minWidth: 38,
+    backgroundColor: ui.colors.primaryInk,
+    borderColor: ui.colors.primaryInk,
+    paddingHorizontal: 8,
+  },
   barcodeText: {
     color: ui.colors.primaryInk,
     fontWeight: '900',
     fontSize: 12,
+  },
+  searchActionText: {
+    color: '#FFFFFF',
   },
 });
