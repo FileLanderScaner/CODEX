@@ -1,0 +1,46 @@
+{
+  "project": "AhorroYA",
+  "mode": "FIRST_100_USER_OUTREACH_PACK",
+  "date": "2026-05-12",
+  "branch": "codex/preprod-hardening-auth-paypal",
+  "baseline_commit": "c3b17d1eb818da8a7cc86ca5511b891fff8be8a5",
+  "final_commit": "RECORDED_IN_GIT_HISTORY",
+  "first_100_user_outreach_pack": "READY",
+  "first_100_user_test_execution_tracker": "READY",
+  "human_final_review_package": "READY",
+  "controlled_first_100_users": "GO",
+  "protected_staging_demo": "GO",
+  "public_production": "NO-GO",
+  "production_status": "NO-GO_PRODUCTION",
+  "assets": {
+    "invitation_messages": true,
+    "whatsapp_outreach_script": true,
+    "tester_onboarding_guide": true,
+    "tester_consent_and_disclosure": true,
+    "first_10_users_pilot_plan": true,
+    "feedback_collection_workflow": true
+  },
+  "checks": {
+    "secret_scan": true,
+    "diff_check": true,
+    "json_parse": true,
+    "lint": true,
+    "typecheck": true,
+    "tests": true,
+    "build": true,
+    "staging_check": true,
+    "production_check_safe": true,
+    "rls": true
+  },
+  "safety_confirmations": {
+    "no_secrets_printed": true,
+    "env_not_committed": true,
+    "no_vercel_prod_used": true,
+    "no_vercel_promote_used": true,
+    "production_envs_not_modified": true,
+    "paypal_live_not_enabled_without_credentials": true,
+    "google_oauth_production_not_activated": true,
+    "ai_agents_remain_disabled": true,
+    "production_status_remains_no_go": true
+  }
+}
