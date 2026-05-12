@@ -1,0 +1,44 @@
+{
+  "project": "AhorroYA",
+  "mode": "FIRST_100_USER_TEST_EXECUTION_TRACKER",
+  "date": "2026-05-12",
+  "branch": "codex/preprod-hardening-auth-paypal",
+  "baseline_commit": "9f5b6ed107d399ca3cb17d6643a6b2034b4748fd",
+  "final_commit": "RECORDED_IN_GIT_HISTORY",
+  "first_100_user_test_execution_tracker": "READY",
+  "staging_status": "READY_FOR_FIRST_100_USERS",
+  "controlled_first_100_users": "GO",
+  "protected_staging_demo": "GO",
+  "public_production": "NO-GO",
+  "production_status": "NO-GO_PRODUCTION",
+  "assets": {
+    "test_plan": true,
+    "feedback_form": true,
+    "interview_script": true,
+    "triage_board": true,
+    "metrics_dashboard_spec": true
+  },
+  "checks": {
+    "secret_scan": true,
+    "diff_check": true,
+    "json_parse": true,
+    "lint": true,
+    "typecheck": true,
+    "tests": true,
+    "build": true,
+    "staging_check": true,
+    "production_check_safe": true,
+    "rls": true
+  },
+  "safety_confirmations": {
+    "no_secrets_printed": true,
+    "env_not_committed": true,
+    "no_vercel_prod_used": true,
+    "no_vercel_promote_used": true,
+    "production_envs_not_modified": true,
+    "paypal_live_not_enabled_without_credentials": true,
+    "google_oauth_production_not_activated": true,
+    "ai_agents_remain_disabled": true,
+    "production_status_remains_no_go": true
+  }
+}
