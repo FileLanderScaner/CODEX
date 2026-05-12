@@ -6,19 +6,19 @@ Date: 2026-05-12
 
 ## Current Phase
 
-`VISUAL_QA_AND_CONVERSION_POLISH`
+`ACCESSIBILITY_AUDIT`
 
 ## Selected Mode
 
-`QA_HARDENING`
+`ACCESSIBILITY_AUDIT`
 
 ## Previous Mode
 
-`VISUAL_SYSTEM_UPGRADE_CYCLE`
+`VISUAL_QA_AND_CONVERSION_POLISH`
 
 ## Why This Mode Was Selected
 
-The visual system upgrade passed. The next safe action was mobile visual QA and conversion polish.
+Visual QA and conversion polish passed. The next safe action was a basic accessibility audit for key mobile/web controls.
 
 ## Status
 
@@ -33,6 +33,7 @@ The visual system upgrade passed. The next safe action was mobile visual QA and 
 - Production blocker closeout: `READY_FOR_HUMAN_CREDENTIALS_AND_APPROVAL`
 - Visual system: `PASS`
 - Visual QA and conversion polish: `PASS`
+- Accessibility audit: `PASS`
 - AI agents: `DISABLED`
 
 ## Blocking Items
@@ -45,24 +46,24 @@ The visual system upgrade passed. The next safe action was mobile visual QA and 
 
 ## Next Mode
 
-`ACCESSIBILITY_AUDIT`
+`FIRST_100_FEEDBACK_PREP`
 
 ## NEXT_CODEX_PROMPT
 
 ```text
-Actua como Accessibility Auditor + Mobile UX QA Lead para AhorroYA.
+Actua como Growth Lead + Customer Research Ops + Product Manager para AhorroYA.
 
-Modo: ACCESSIBILITY_AUDIT.
+Modo: FIRST_100_FEEDBACK_PREP.
 
 Objetivo:
-Auditar accesibilidad basica, labels, foco, contraste, touch targets, textos seleccionables importantes y estados vacios en mobile/web, sin tocar produccion.
+Preparar el paquete de feedback para primeros usuarios reales: preguntas, formulario, criterios de aprendizaje, mensajes de seguimiento y tablero de decisiones, sin tocar produccion.
 
 Acciones:
-1. Revisar componentes interactivos principales.
-2. Validar labels accesibles y CTAs.
-3. Corregir solo problemas de accesibilidad/UX de bajo riesgo.
-4. Ejecutar checks completos.
-5. Mantener PRODUCTION_STATUS=NO-GO_PRODUCTION.
+1. Crear/actualizar documentos de feedback de primeros usuarios.
+2. Definir preguntas y criterios de exito/fracaso.
+3. Preparar mensajes de seguimiento para WhatsApp.
+4. Mantener PRODUCTION_STATUS=NO-GO_PRODUCTION.
+5. Ejecutar checks seguros.
 
 Condicion de bloqueo:
 Detener si aparece riesgo de secreto, cambio productivo, pagos live, env Production o migracion productiva.

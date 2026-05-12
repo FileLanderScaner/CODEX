@@ -6,6 +6,8 @@ export default function Chip({ label, active, onPress, leading }) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected: Boolean(active) }}
       onPress={onPress}
       style={[styles.chip, active && styles.chipActive]}
     >

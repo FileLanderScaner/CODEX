@@ -28,8 +28,10 @@ export default function BottomNav({ tabs, activeKey, onChange }) {
           <Pressable
             key={tab.key}
             accessibilityRole="button"
+            accessibilityLabel={`Abrir ${tab.label}`}
+            accessibilityState={{ selected: active }}
             onPress={() => onChange(tab.key)}
-          style={({ pressed }) => [styles.item, active && styles.itemActive, pressed && styles.itemPressed]}
+            style={({ pressed }) => [styles.item, active && styles.itemActive, pressed && styles.itemPressed]}
           >
             <Text style={[styles.icon, active && styles.iconActive]}>{iconFor(tab.icon)}</Text>
             <Text style={[styles.label, active && styles.labelActive]} numberOfLines={1}>

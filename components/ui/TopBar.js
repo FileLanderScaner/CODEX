@@ -5,7 +5,12 @@ import { gradientStyle, ui, shadow } from '../../lib/ui';
 export default function TopBar({ locationLabel = 'Montevideo, UY', onPressLocation, onPressQr }) {
   return (
     <View style={styles.row}>
-      <Pressable accessibilityRole="button" onPress={onPressLocation} style={styles.location}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Cambiar ubicacion, actual ${locationLabel}`}
+        onPress={onPressLocation}
+        style={styles.location}
+      >
         <View style={styles.pin}>
           <View style={styles.pinDot} />
         </View>
@@ -14,7 +19,7 @@ export default function TopBar({ locationLabel = 'Montevideo, UY', onPressLocati
         </Text>
       </Pressable>
 
-      <Pressable accessibilityRole="button" onPress={onPressQr} style={styles.qr}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Escanear o abrir QR" onPress={onPressQr} style={styles.qr}>
         <Text style={styles.qrText}>QR</Text>
       </Pressable>
     </View>

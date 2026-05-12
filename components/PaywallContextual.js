@@ -88,6 +88,8 @@ export default function PaywallContextual({
             <View style={styles.pricingContainer}>
               {/* Monthly */}
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Elegir plan mensual Premium"
                 onPress={openWebCheckout}
                 style={({ pressed }) => [
                   styles.priceCard,
@@ -105,6 +107,8 @@ export default function PaywallContextual({
 
               {/* Annual */}
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Elegir plan anual Premium"
                 onPress={openWebCheckout}
                 style={({ pressed }) => [
                   styles.priceCard,
